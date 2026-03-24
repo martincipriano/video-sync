@@ -261,20 +261,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<script>
-(function () {
-	var tabs   = document.querySelectorAll( '.yousync-mb-tab' );
-	var panels = document.querySelectorAll( '.yousync-mb-panel' );
-	tabs.forEach( function ( tab ) {
-		tab.addEventListener( 'click', function ( e ) {
-			e.preventDefault();
-			var target = this.dataset.tab;
-			tabs.forEach( function ( t ) { t.classList.remove( 'nav-tab-active' ); } );
-			panels.forEach( function ( p ) { p.style.display = 'none'; } );
-			this.classList.add( 'nav-tab-active' );
-			document.getElementById( 'yousync-panel-' + target ).style.display = 'block';
-		} );
-	} );
-
-}() );
-</script>
