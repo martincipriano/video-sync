@@ -17,9 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 $term_id    = isset( $term_id ) ? (int) $term_id : 0;
 $source_type = isset( $source_type ) ? $source_type : 'channel';
 $enabled         = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
-$schedule        = isset( $rule['schedule'] ) ? $rule['schedule'] : 'daily';
+$schedule        = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
 $custom_schedule = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 1;
-$action          = isset( $rule['action'] ) ? $rule['action'] : '';
+$action          = isset( $rule['action'] ) ? $rule['action'] : 'videos_sync_new';
 $conditions      = isset( $rule['conditions'] ) ? $rule['conditions'] : array();
 $specific_metadata = isset( $rule['specific_metadata'] ) ? $rule['specific_metadata'] : array();
 
@@ -55,11 +55,11 @@ if ( $show_specific_metadata && $resource ) {
 $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resource . '-fields' ) : '';
 ?>
 
-<div class="ys-sync-rule" data-rule-index="<?php echo $rule_index; ?>">
+<div class="ys-sync-rule" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
 
 	<div class="ys-sync-rule-header">
 		<label class="ys-toggle">
-			<input <?php checked( $enabled, true ); ?> class="ys-rule-toggle" name="sync_rules[<?php echo $rule_index; ?>][enabled]" type="checkbox" value="1">
+			<input <?php checked( $enabled, true ); ?> class="ys-rule-toggle" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][enabled]" type="checkbox" value="1">
 			<span class="ys-toggle-slider"></span>
 		</label>
 		<button type="button" class="button ys-remove-rule">
@@ -70,53 +70,61 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 	<div class="ys-sync-rule-body">
 		<div class="ys-2-columns">
 			<div class="ys-form-group">
-				<label for="ys-sync-schedule-<?php echo $rule_index; ?>">Sync Schedule</label>
-				<select class="ys-select ys-sync-schedule" id="ys-sync-schedule-<?php echo $rule_index; ?>" name="sync_rules[<?php echo $rule_index; ?>][schedule]" required>
+				<label for="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync Schedule', 'yousync' ); ?></label>
+				<select class="ys-select ys-sync-schedule" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][schedule]" required>
 					<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => $schedule ) ); ?>
 				</select>
 			</div>
 			<div class="ys-form-group">
-				<label for="ys-custom-schedule-<?php echo $rule_index; ?>">Custom (Hours)</label>
-				<input class="ys-number ys-custom-sync-schedule" <?php echo 'custom' !== $schedule ? 'disabled' : ''; ?> id="ys-custom-schedule-<?php echo $rule_index; ?>" name="sync_rules[<?php echo $rule_index; ?>][custom_schedule]" value="<?php echo esc_attr( $custom_schedule ); ?>" min="1" placeholder="Eg. 24" type="number">
+				<label for="ys-custom-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Custom (Hours)', 'yousync' ); ?></label>
+				<input class="ys-number ys-custom-sync-schedule" <?php echo 'custom' !== $schedule ? 'disabled' : ''; ?> id="ys-custom-schedule-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][custom_schedule]" value="<?php echo esc_attr( $custom_schedule ); ?>" min="1" placeholder="<?php esc_attr_e( 'Eg. 24', 'yousync' ); ?>" type="number">
 			</div>
 		</div>
 
 		<div class="ys-form-group">
-			<label for="ys-action-<?php echo $rule_index; ?>">Action</label>
-			<select class="ys-select ys-action" id="ys-action-<?php echo $rule_index; ?>" name="sync_rules[<?php echo $rule_index; ?>][action]" required>
-				<option disabled <?php selected( $action, '' ); ?> value="">&mdash; Select action &mdash;</option>
-				<optgroup label="Channel">
-					<option data-resource="channel" value="channel_update_all" <?php selected( $action, 'channel_update_all' ); ?>>Update metadata for this channel</option>
-					<option data-resource="channel" value="channel_update_specific" <?php selected( $action, 'channel_update_specific' ); ?>>Update specific metadata for this channel</option>
+			<label for="ys-action-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Action', 'yousync' ); ?></label>
+			<select class="ys-select ys-action" id="ys-action-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][action]" required>
+				<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
+					<option data-resource="channel" disabled value="channel_update_all" <?php selected( $action, 'channel_update_all' ); ?>><?php esc_html_e( 'Update metadata for this channel (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="channel" disabled value="channel_update_specific" <?php selected( $action, 'channel_update_specific' ); ?>><?php esc_html_e( 'Update specific metadata for this channel (Pro feature)', 'yousync' ); ?></option>
 				</optgroup>
-				<optgroup label="Playlists">
-					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>>Sync new playlists</option>
-					<option data-resource="playlist" value="playlists_update_all" <?php selected( $action, 'playlists_update_all' ); ?>>Update metadata for all playlists</option>
-					<option data-resource="playlist" value="playlists_update_non_modified" <?php selected( $action, 'playlists_update_non_modified' ); ?>>Update metadata for non modified playlists</option>
-					<option data-resource="playlist" value="playlists_update_specific_all" <?php selected( $action, 'playlists_update_specific_all' ); ?>>Update specific metadata for all playlists</option>
-					<option data-resource="playlist" value="playlists_update_specific_non_modified" <?php selected( $action, 'playlists_update_specific_non_modified' ); ?>>Update specific metadata for non modified playlists</option>
+				<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
+					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
+					<option data-resource="playlist" disabled value="playlists_update_all" <?php selected( $action, 'playlists_update_all' ); ?>><?php esc_html_e( 'Update metadata for all playlists (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="playlist" disabled value="playlists_update_non_modified" <?php selected( $action, 'playlists_update_non_modified' ); ?>><?php esc_html_e( 'Update metadata for non modified playlists (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="playlist" disabled value="playlists_update_specific_all" <?php selected( $action, 'playlists_update_specific_all' ); ?>><?php esc_html_e( 'Update specific metadata for all playlists (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="playlist" disabled value="playlists_update_specific_non_modified" <?php selected( $action, 'playlists_update_specific_non_modified' ); ?>><?php esc_html_e( 'Update specific metadata for non modified playlists (Pro feature)', 'yousync' ); ?></option>
 				</optgroup>
-				<optgroup label="Videos">
-					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>>Sync new videos</option>
-					<option data-resource="video" value="videos_update_all" <?php selected( $action, 'videos_update_all' ); ?>>Update metadata for all videos</option>
-					<option data-resource="video" value="videos_update_non_modified" <?php selected( $action, 'videos_update_non_modified' ); ?>>Update metadata for non modified videos</option>
-					<option data-resource="video" value="videos_update_specific_all" <?php selected( $action, 'videos_update_specific_all' ); ?>>Update specific metadata for all videos</option>
-					<option data-resource="video" value="videos_update_specific_non_modified" <?php selected( $action, 'videos_update_specific_non_modified' ); ?>>Update specific metadata for non modified videos</option>
+				<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
+					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
+					<option data-resource="video" disabled value="videos_update_all" <?php selected( $action, 'videos_update_all' ); ?>><?php esc_html_e( 'Update metadata for all videos (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="video" disabled value="videos_update_non_modified" <?php selected( $action, 'videos_update_non_modified' ); ?>><?php esc_html_e( 'Update metadata for non modified videos (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="video" disabled value="videos_update_specific_all" <?php selected( $action, 'videos_update_specific_all' ); ?>><?php esc_html_e( 'Update specific metadata for all videos (Pro feature)', 'yousync' ); ?></option>
+					<option data-resource="video" disabled value="videos_update_specific_non_modified" <?php selected( $action, 'videos_update_specific_non_modified' ); ?>><?php esc_html_e( 'Update specific metadata for non modified videos (Pro feature)', 'yousync' ); ?></option>
 				</optgroup>
 			</select>
 		</div>
 
 		<div class="ys-form-group <?php echo $show_specific_metadata ? '' : 'ys-hidden'; ?> ys-specific-metadata-wrapper">
-			<label for="ys-specific-metadata-<?php echo $rule_index; ?>">Fields to Update</label>
-			<select class="ys-select ys-specific-metadata" id="ys-specific-metadata-<?php echo $rule_index; ?>" name="sync_rules[<?php echo $rule_index; ?>][specific_metadata][]" multiple placeholder="Select metadata to update...">
+			<label for="ys-specific-metadata-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Fields to Update', 'yousync' ); ?></label>
+			<select class="ys-select ys-specific-metadata" id="ys-specific-metadata-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][specific_metadata][]" multiple placeholder="<?php esc_attr_e( 'Select metadata to update...', 'yousync' ); ?>">
 				<?php if ( $show_specific_metadata ) echo $metadata_options_html; ?>
 			</select>
 		</div>
 
 		<fieldset class="ys-fieldset ys-conditions-wrapper">
-			<legend class="ys-mt-4"><strong>Conditions</strong> &mdash; <a class="ys-add-condition" href="#">Add condition</a></legend>
-			<p class="description ys-mb-3">Add conditions to filter which videos are synced. Videos must match <strong>all</strong> conditions (AND logic). <br> To sync videos matching <strong>any</strong> condition (OR logic), create multiple sync rules.</p>
-			<div class="ys-conditions" data-rule-index="<?php echo $rule_index; ?>" data-resource="<?php echo esc_attr( $resource ); ?>">
+			<legend class="ys-mt-4"><strong><?php esc_html_e( 'Conditions', 'yousync' ); ?></strong> &mdash; <a class="ys-add-condition" href="#" aria-disabled="true" style="pointer-events:none; opacity:0.5;"><?php esc_html_e( 'Add condition', 'yousync' ); ?></a> <span style="font-weight:normal; font-size:12px; color:#757575;"><?php esc_html_e( '(Pro feature)', 'yousync' ); ?></span></legend>
+			<p class="description ys-mb-3"><?php
+				echo wp_kses_post(
+					sprintf(
+						/* translators: 1: "all" in bold, 2: "any" in bold */
+						__( 'Add conditions to filter which items are synced. Items must match %1$s conditions (AND logic). <br> To sync items matching %2$s condition (OR logic), create multiple sync rules.', 'yousync' ),
+						'<strong>' . esc_html__( 'all', 'yousync' ) . '</strong>',
+						'<strong>' . esc_html__( 'any', 'yousync' ) . '</strong>'
+					)
+				);
+				?></p>
+			<div class="ys-conditions" data-rule-index="<?php echo esc_attr( $rule_index ); ?>" data-resource="<?php echo esc_attr( $resource ); ?>">
 				<?php
 				// Render existing conditions with pre-populated field/operator/value
 				if ( ! empty( $conditions ) && is_array( $conditions ) ) {
@@ -217,7 +225,7 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 	</div>
 	<?php endif; ?>
 
-	<p class="ys-quota-estimate description ys-mb-0"><strong>Estimated Quota:</strong> <span class="ys-quota-value"></span></p>
+	<p class="ys-quota-estimate description ys-mb-0 ys-hidden"><strong><?php esc_html_e( 'Estimated Quota:', 'yousync' ); ?></strong> <span class="ys-quota-value"></span></p>
 
 	<?php if ( ! empty( $rule_sync_errors ) ) : ?>
 	<div class="ys-rule-errors ys-mt-3" style="font-size:12px;">

@@ -9,5 +9,5 @@
   name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][value]"
   type="number"
   value="<?php echo esc_attr( $input_value ); ?>"
-  placeholder="Enter value..."
+  placeholder="<?php esc_attr_e( 'Enter value...', 'yousync' ); ?>"
 >

@@ -141,7 +141,7 @@ class Playlist {
 				<?php if ( ! empty( $playlist_thumbnail['attachment_id'] ) ) : ?>
 					<?php echo wp_get_attachment_image( (int) $playlist_thumbnail['attachment_id'], array( 320, 180 ) ); ?>
 				<?php elseif ( ! empty( $playlist_thumbnail['url'] ) ) : ?>
-					<img src="<?php echo esc_url( $playlist_thumbnail['url'] ); ?>" style="max-width:320px; height:auto;" alt="">
+					<img src="<?php echo esc_url( $playlist_thumbnail['url'] ); ?>" style="max-width:320px; height:auto;" alt="" referrerpolicy="no-referrer">
 				<?php endif; ?>
 			</td>
 		</tr>
@@ -178,6 +178,7 @@ class Playlist {
 		} ?>
 		<p class="ys-mb-3"><strong>Sync Rules</strong> &mdash; <a class="ys-add-rule" href="#" id="ys-add-rule"><?php esc_html_e( 'Add sync rule', 'yousync' ); ?></a></p>
 		<div class="ys-sync-rules" id="ys-sync-rules" data-video-count="<?php echo (int) $video_count; ?>"><?php echo $html; ?></div>
+		<p class="description ys-mb-3"><?php esc_html_e( 'Sync rules run via WP-Cron and require site traffic to trigger. For reliable scheduling, configure a server-side cron job with your host.', 'yousync' ); ?></p>
 		<?php
 	}
 
@@ -194,10 +195,10 @@ class Playlist {
 			return;
 		}
 
-		wp_enqueue_style( 'tom-select', 'https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.4.3/css/tom-select.min.css', array(), '2.4.3' );
+		wp_enqueue_style( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
 		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), filemtime( YOUSYNC_PLUGIN_DIR . 'assets/css/admin.css' ) );
 
-		wp_enqueue_script( 'tom-select', 'https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.4.3/js/tom-select.complete.min.js', array(), '2.4.3', true );
+		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
 		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), filemtime( YOUSYNC_PLUGIN_DIR . 'assets/js/admin.js' ), true );
 
 		wp_localize_script( 'yousync-admin', 'youSync', array(

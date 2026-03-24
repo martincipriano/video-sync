@@ -1,7 +1,7 @@
 <?php
-  $operator = $args['operator'];
+$operator = $args['operator'];
 ?>
-<option disabled selected value="">&mdash; Select date operator &mdash;</option>
-<option value="before" <?php selected($operator, 'before'); ?>>Before</option>
-<option value="after" <?php selected($operator, 'after'); ?>>After</option>
-<option value="on" <?php selected($operator, 'on'); ?>>On</option>
+<option disabled selected value="">&mdash; <?php esc_html_e( 'Select operator', 'yousync' ); ?> &mdash;</option>
+<option value="before" <?php selected( $operator, 'before' ); ?>><?php esc_html_e( 'Before', 'yousync' ); ?></option>
+<option value="after" <?php selected( $operator, 'after' ); ?>><?php esc_html_e( 'After', 'yousync' ); ?></option>
+<option value="on" <?php selected( $operator, 'on' ); ?>><?php esc_html_e( 'On', 'yousync' ); ?></option>

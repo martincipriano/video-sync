@@ -1,9 +1,17 @@
 <?php
 /**
  * Plugin Name: YouSync
- * Description: A plugin to sync and display YouSync videos.
+ * Plugin URI: https://github.com/martincipriano/yousync
+ * Description: Sync YouTube channels and playlists to WordPress. Import new videos as a custom post type. Free version — upgrade to YouSync Pro for recurring schedules, metadata update actions, sync conditions, and video protection.
  * Version: 1.0.0
  * Author: Martin Cipriano
+ * Author URI: https://martincipriano.com
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: yousync
+ * Domain Path: /languages
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
  *
  * @package YouSync
  */
@@ -122,6 +130,25 @@ function yousync_get_condition_field_type( $field ) {
 	return isset( $map[ $field ] ) ? $map[ $field ] : '';
 }
 
+/**
+ * Plugin activation — flag that cron events need rescheduling.
+ *
+ * Taxonomies are not registered during the activation hook, so the actual
+ * rescheduling is deferred to init priority 20 on the next page load.
+ */
+register_activation_hook( YOUSYNC_PLUGIN_FILE, function () {
+	update_option( 'yousync_reschedule_on_activation', true );
+	flush_rewrite_rules();
+} );
+
+/**
+ * Plugin deactivation — remove all scheduled sync cron events.
+ */
+register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
+	wp_unschedule_hook( 'yousync_sync_rule' );
+	flush_rewrite_rules();
+} );
+
 // Load plugin files.
 require_once plugin_dir_path( __FILE__ ) . 'includes/settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-channel.php';
@@ -156,62 +183,65 @@ add_action(
 );
 
 /**
- * Show a notice on YouSync admin pages when WP Cron may be unreliable.
+ * Reschedule all sync rules on the first page load after plugin activation.
  *
- * Hidden when DISABLE_WP_CRON is defined, which means the site owner
- * has already set up a real server-side scheduled task. Dismissible
- * per-user; dismissal is stored in user meta.
+ * Runs at priority 20 so taxonomies (registered at priority 10) are available
+ * for get_terms() lookups. Skips once-only rules — those fire immediately and
+ * should not be re-queued automatically.
  */
-add_action( 'admin_notices', function () {
-	if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
+add_action( 'init', function () {
+	if ( ! get_option( 'yousync_reschedule_on_activation' ) ) {
 		return;
 	}
 
-	if ( get_user_meta( get_current_user_id(), 'yousync_cron_notice_dismissed', true ) ) {
-		return;
-	}
+	delete_option( 'yousync_reschedule_on_activation' );
 
-	$screen = get_current_screen();
-	if ( ! $screen ) {
-		return;
-	}
+	$sources = array(
+		'channel'  => 'yousync_channel',
+		'playlist' => 'yousync_playlist',
+	);
 
-	$yousync_screens = array( 'edit-yousync_channel', 'edit-yousync_playlist' );
-	if ( ! in_array( $screen->id, $yousync_screens, true ) && false === strpos( $screen->id, 'yousync' ) ) {
-		return;
-	}
-	?>
-	<div class="notice notice-warning is-dismissible yousync-cron-notice" data-nonce="<?php echo esc_attr( wp_create_nonce( 'yousync_dismiss_cron_notice' ) ); ?>">
-		<p>
-			<strong><?php esc_html_e( 'YouSync — Sync Scheduling Notice', 'yousync' ); ?></strong><br>
-			<?php esc_html_e( 'YouSync uses WordPress\'s built-in scheduler to run your sync rules. This only works when someone visits your site, so syncs may run late or be skipped on low-traffic sites. For reliable scheduling, ask your hosting provider to set up an automatic server task (cron job) that runs every few minutes.', 'yousync' ); ?>
-		</p>
-	</div>
-	<script>
-	( function () {
-		var notice = document.querySelector( '.yousync-cron-notice' );
-		if ( ! notice ) return;
-		notice.addEventListener( 'click', function ( e ) {
-			if ( ! e.target.classList.contains( 'notice-dismiss' ) ) return;
-			fetch( ajaxurl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-				body: 'action=yousync_dismiss_cron_notice&nonce=' + notice.dataset.nonce,
-			} );
-		} );
-	} )();
-	</script>
-	<?php
-} );
+	foreach ( $sources as $source_type => $taxonomy ) {
+		$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) );
 
-/**
- * AJAX handler to persist the cron notice dismissal for the current user.
- */
-add_action( 'wp_ajax_yousync_dismiss_cron_notice', function () {
-	check_ajax_referer( 'yousync_dismiss_cron_notice', 'nonce' );
-	update_user_meta( get_current_user_id(), 'yousync_cron_notice_dismissed', 1 );
-	wp_die();
-} );
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			continue;
+		}
+
+		foreach ( $terms as $term ) {
+			$raw  = get_term_meta( $term->term_id, $taxonomy, true );
+			$data = $raw ? json_decode( $raw, true ) : array();
+
+			if ( ! is_array( $data ) || empty( $data['sync_rules'] ) ) {
+				continue;
+			}
+
+			foreach ( $data['sync_rules'] as $index => $rule ) {
+				if ( empty( $rule['enabled'] ) || 'once' === ( $rule['schedule'] ?? '' ) ) {
+					continue;
+				}
+
+				$args = array( $source_type, (int) $term->term_id, (int) $index );
+
+				if ( wp_next_scheduled( 'yousync_sync_rule', $args ) ) {
+					continue; // Already scheduled.
+				}
+
+				$schedule = $rule['schedule'] ?? 'daily';
+
+				if ( in_array( $schedule, array( 'hourly', 'daily', 'weekly' ), true ) ) {
+					$interval = $schedule;
+				} elseif ( 'monthly' === $schedule ) {
+					$interval = 'yousync_monthly';
+				} else {
+					$interval = 'yousync_every_' . (int) ( $rule['custom_schedule'] ?? 24 ) . 'h';
+				}
+
+				wp_schedule_event( time(), $interval, 'yousync_sync_rule', $args );
+			}
+		}
+	}
+}, 20 );
 
 /**
  * Register YouSync Videos custom post type and taxonomies.
@@ -326,272 +356,45 @@ add_action( 'add_meta_boxes', 'yousync_add_video_metabox' );
  * @return void
  */
 function yousync_render_video_metabox( $post ) {
-	wp_nonce_field( 'yousync_save_video_meta', 'yousync_video_meta_nonce' );
-
 	$meta = get_post_meta( $post->ID, '_yousync_video', true );
 	$data = $meta ? json_decode( $meta, true ) : array();
 	if ( ! is_array( $data ) ) {
 		$data = array();
 	}
 
-	$video_id             = $data['video_id'] ?? '';
-	$video_url            = $data['video_url'] ?? '';
-	$channel_id           = $data['channel_id'] ?? '';
-	$manual_edits         = (bool) ( $data['manual_edits'] ?? false );
-	$original_title       = $data['original_title'] ?? '';
-	$original_description = $data['original_description'] ?? '';
-	$channel_title        = $data['channel_title'] ?? '';
-	$published_date       = $data['published_date'] ?? '';
-	$duration_seconds     = $data['duration_seconds'] ?? '';
-	$view_count           = $data['view_count'] ?? '';
-	$like_count           = $data['like_count'] ?? '';
-	$comment_count        = $data['comment_count'] ?? '';
-	$sync_source_type     = $data['sync_source_type'] ?? '';
-	$last_synced          = $data['last_synced'] ?? '';
-	$sync_count           = $data['sync_count'] ?? 0;
-	$sync_errors          = is_array( $data['sync_errors'] ?? null ) ? $data['sync_errors'] : array();
-	$thumbnails           = is_array( $data['thumbnails'] ?? null ) ? $data['thumbnails'] : array();
+	$thumbnails = is_array( $data['thumbnails'] ?? null ) ? $data['thumbnails'] : array();
 
-	$thumbnail_size_labels = array(
-		'maxres'   => 'Max Res (1280×720)',
-		'standard' => 'Standard (640×480)',
-		'high'     => 'High (480×360)',
-		'medium'   => 'Medium (320×180)',
-		'default'  => 'Default (120×90)',
-	);
-	?>
-
-	<div class="yousync-metabox">
-		<nav class="nav-tab-wrapper" style="margin-bottom:0; padding-bottom:0;">
-			<a href="#" class="nav-tab nav-tab-active yousync-mb-tab" data-tab="details"><?php esc_html_e( 'Details', 'yousync' ); ?></a>
-			<a href="#" class="nav-tab yousync-mb-tab" data-tab="yt-data"><?php esc_html_e( 'YouTube Data', 'yousync' ); ?></a>
-			<?php if ( ! empty( $thumbnails ) ) : ?>
-			<a href="#" class="nav-tab yousync-mb-tab" data-tab="thumbnails"><?php esc_html_e( 'Thumbnails', 'yousync' ); ?></a>
-			<?php endif; ?>
-			<a href="#" class="nav-tab yousync-mb-tab" data-tab="sync-status"><?php esc_html_e( 'Sync Status', 'yousync' ); ?></a>
-		</nav>
-
-		<!-- Details -->
-		<div id="yousync-panel-details" class="yousync-mb-panel" style="padding-top:12px;">
-			<table class="form-table">
-				<?php if ( $video_id ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Video ID', 'yousync' ); ?></th>
-					<td><code><?php echo esc_html( $video_id ); ?></code></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $video_url ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Video URL', 'yousync' ); ?></th>
-					<td><a href="<?php echo esc_url( $video_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $video_url ); ?></a></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $channel_id ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></th>
-					<td><code><?php echo esc_html( $channel_id ); ?></code></td>
-				</tr>
-				<?php endif; ?>
-
-				<tr>
-					<th scope="row">
-						<label for="yousync_manual_edits"><?php esc_html_e( 'Protected from Sync Rules', 'yousync' ); ?></label>
-					</th>
-					<td>
-						<label>
-							<input type="checkbox" name="yousync_manual_edits" id="yousync_manual_edits" value="1" <?php checked( $manual_edits ); ?>>
-							<?php esc_html_e( 'Prevent sync rules from overwriting this video', 'yousync' ); ?>
-						</label>
-					</td>
-				</tr>
-			</table>
-		</div>
-
-		<!-- YouTube Data -->
-		<div id="yousync-panel-yt-data" class="yousync-mb-panel" style="display:none; padding-top:12px;">
-			<table class="form-table">
-				<?php if ( $original_title ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Original Title', 'yousync' ); ?></th>
-					<td><?php echo esc_html( $original_title ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $original_description ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Description', 'yousync' ); ?></th>
-					<td>
-						<p style="margin:0; white-space:pre-wrap; max-height:7em; overflow-y:auto;"><?php echo esc_html( $original_description ); ?></p>
-					</td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $channel_title ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Channel', 'yousync' ); ?></th>
-					<td><?php echo esc_html( $channel_title ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $published_date ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Published Date', 'yousync' ); ?></th>
-					<td><?php echo esc_html( $published_date ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $duration_seconds !== '' ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Duration', 'yousync' ); ?></th>
-					<td>
-						<?php
-						$hours = floor( (int) $duration_seconds / 3600 );
-						$mins  = floor( ( (int) $duration_seconds % 3600 ) / 60 );
-						$secs  = (int) $duration_seconds % 60;
-						echo esc_html(
-							$hours > 0
-								? sprintf( '%d:%02d:%02d', $hours, $mins, $secs )
-								: sprintf( '%d:%02d', $mins, $secs )
-						);
-						?>
-					</td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $view_count !== '' ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'View Count', 'yousync' ); ?></th>
-					<td><?php echo esc_html( number_format( (int) $view_count ) ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $like_count !== '' ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Like Count', 'yousync' ); ?></th>
-					<td><?php echo esc_html( number_format( (int) $like_count ) ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $comment_count !== '' ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Comment Count', 'yousync' ); ?></th>
-					<td><?php echo esc_html( number_format( (int) $comment_count ) ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( ! $original_title && ! $channel_title && $duration_seconds === '' && $view_count === '' ) : ?>
-				<tr>
-					<td colspan="2"><p style="margin:0; color:#757575;"><?php esc_html_e( 'No YouTube data available yet.', 'yousync' ); ?></p></td>
-				</tr>
-				<?php endif; ?>
-			</table>
-		</div>
-
-		<!-- Thumbnails -->
-		<?php if ( ! empty( $thumbnails ) ) : ?>
-		<div id="yousync-panel-thumbnails" class="yousync-mb-panel" style="display:none; padding-top:16px;">
-			<?php
-			$preview_thumb = \YouSync\Video_Importer::get_best_thumbnail( $thumbnails );
-			if ( $preview_thumb ) :
-			?>
-			<img src="<?php echo esc_url( $preview_thumb['url'] ); ?>" style="max-width:768px; width:100%; height:auto; display:block; margin-bottom:16px; border:1px solid #ddd;" alt="">
-			<?php endif; ?>
-
-			<table class="wp-list-table widefat fixed striped" style="max-width:768px;">
-				<thead>
-					<tr>
-						<th style="width:140px;"><?php esc_html_e( 'Size', 'yousync' ); ?></th>
-						<th><?php esc_html_e( 'URL', 'yousync' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( array( 'maxres', 'standard', 'high', 'medium', 'default' ) as $size ) : ?>
-						<?php if ( empty( $thumbnails[ $size ]['url'] ) ) : ?>
-							<?php continue; ?>
-						<?php endif; ?>
-						<tr>
-							<td><?php echo esc_html( $thumbnail_size_labels[ $size ] ); ?></td>
-							<td><input type="text" value="<?php echo esc_attr( $thumbnails[ $size ]['url'] ); ?>" readonly style="width:100%; font-family:monospace; font-size:11px;" onclick="this.select()"></td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
-		<?php endif; ?>
-
-		<!-- Sync Status -->
-		<div id="yousync-panel-sync-status" class="yousync-mb-panel" style="display:none; padding-top:12px;">
-			<table class="form-table">
-				<?php if ( $sync_source_type ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Sync Source', 'yousync' ); ?></th>
-					<td><?php echo esc_html( ucfirst( $sync_source_type ) ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $last_synced ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Last Synced', 'yousync' ); ?></th>
-					<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_synced ) ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( $sync_count ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Sync Count', 'yousync' ); ?></th>
-					<td><?php echo esc_html( $sync_count ); ?></td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( ! empty( $sync_errors ) ) : ?>
-				<tr>
-					<th scope="row"><?php esc_html_e( 'Sync Errors', 'yousync' ); ?></th>
-					<td>
-						<?php foreach ( $sync_errors as $sync_error ) : ?>
-						<p style="margin:0 0 4px; color:#d63638;">
-							<?php
-							if ( ! empty( $sync_error['timestamp'] ) ) {
-								echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $sync_error['timestamp'] ) ) . ' &mdash; ';
-							}
-							echo esc_html( $sync_error['error'] ?? '' );
-							if ( ! empty( $sync_error['code'] ) ) {
-								echo ' <code>' . esc_html( $sync_error['code'] ) . '</code>';
-							}
-							?>
-						</p>
-						<?php endforeach; ?>
-					</td>
-				</tr>
-				<?php endif; ?>
-
-				<?php if ( ! $sync_source_type && ! $last_synced && ! $sync_count && empty( $sync_errors ) ) : ?>
-				<tr>
-					<td colspan="2"><p style="margin:0; color:#757575;"><?php esc_html_e( 'This video has not been synced yet.', 'yousync' ); ?></p></td>
-				</tr>
-				<?php endif; ?>
-			</table>
-		</div>
-	</div>
-
-	<script>
-	(function () {
-		var tabs   = document.querySelectorAll( '.yousync-mb-tab' );
-		var panels = document.querySelectorAll( '.yousync-mb-panel' );
-		tabs.forEach( function ( tab ) {
-			tab.addEventListener( 'click', function ( e ) {
-				e.preventDefault();
-				var target = this.dataset.tab;
-				tabs.forEach( function ( t ) { t.classList.remove( 'nav-tab-active' ); } );
-				panels.forEach( function ( p ) { p.style.display = 'none'; } );
-				this.classList.add( 'nav-tab-active' );
-				document.getElementById( 'yousync-panel-' + target ).style.display = 'block';
-			} );
-		} );
-	}() );
-	</script>
-	<?php
+	yousync_get_template_part( 'metabox', 'video', array(
+		'nonce_action'          => 'yousync_save_video_meta',
+		'video_id'              => $data['video_id'] ?? '',
+		'video_url'             => $data['video_url'] ?? '',
+		'channel_id'            => $data['channel_id'] ?? '',
+		'manual_edits'          => (bool) ( $data['manual_edits'] ?? false ),
+		'manual_edits_disabled' => true,
+		'manual_edits_notice'   => __( '(Pro feature)', 'yousync' ),
+		'original_title'        => $data['original_title'] ?? '',
+		'original_description'  => $data['original_description'] ?? '',
+		'channel_title'         => $data['channel_title'] ?? '',
+		'published_date'        => $data['published_date'] ?? '',
+		'duration_seconds'      => $data['duration_seconds'] ?? '',
+		'view_count'            => $data['view_count'] ?? '',
+		'like_count'            => $data['like_count'] ?? '',
+		'comment_count'         => $data['comment_count'] ?? '',
+		'sync_source_type'      => $data['sync_source_type'] ?? '',
+		'last_synced'           => $data['last_synced'] ?? '',
+		'sync_count'            => $data['sync_count'] ?? 0,
+		'sync_errors'           => is_array( $data['sync_errors'] ?? null ) ? $data['sync_errors'] : array(),
+		'thumbnails'            => $thumbnails,
+		'thumbnail_size_labels' => array(
+			'maxres'   => 'Max Res (1280×720)',
+			'standard' => 'Standard (640×480)',
+			'high'     => 'High (480×360)',
+			'medium'   => 'Medium (320×180)',
+			'default'  => 'Default (120×90)',
+		),
+		'preview_thumb'         => \YouSync\Video_Importer::get_best_thumbnail( $thumbnails ),
+	) );
+	// HTML output is handled by template-parts/metabox-video.php
 }
 
 /**
@@ -816,8 +619,8 @@ function yousync_render_video_columns( string $column, int $post_id ): void {
 	if ( 'yousync_protected' === $column ) {
 		$is_protected = ! empty( $data['manual_edits'] );
 		?>
-		<label class="ys-toggle ys-protect-toggle" data-post-id="<?php echo esc_attr( $post_id ); ?>" title="<?php esc_attr_e( 'Protected from Sync Rules', 'yousync' ); ?>" style="display:flex; justify-content:flex-end;">
-			<input type="checkbox" class="ys-protect-checkbox" value="1" <?php checked( $is_protected ); ?>>
+		<label class="ys-toggle ys-protect-toggle" data-post-id="<?php echo esc_attr( $post_id ); ?>" title="<?php esc_attr_e( 'Protected from Sync Rules (Pro feature)', 'yousync' ); ?>" style="display:flex; justify-content:flex-end; opacity:0.5; pointer-events:none;" aria-label="<?php esc_attr_e( 'Pro feature', 'yousync' ); ?>">
+			<input type="checkbox" class="ys-protect-checkbox" value="1" <?php checked( $is_protected ); ?> disabled>
 			<span class="ys-toggle-slider"></span>
 		</label>
 		<?php
@@ -835,7 +638,7 @@ add_action( 'manage_yousync_videos_posts_custom_column', 'yousync_render_video_c
  */
 function yousync_enqueue_video_list_assets(): void {
 	$screen = get_current_screen();
-	if ( ! $screen || 'edit-yousync_videos' !== $screen->id ) {
+	if ( ! $screen || ! in_array( $screen->id, array( 'edit-yousync_videos', 'yousync_videos' ), true ) ) {
 		return;
 	}
 
@@ -845,6 +648,17 @@ function yousync_enqueue_video_list_assets(): void {
 		array(),
 		filemtime( YOUSYNC_PLUGIN_DIR . 'assets/css/admin.css' )
 	);
+
+	if ( 'yousync_videos' === $screen->id ) {
+		wp_enqueue_script(
+			'yousync-metabox',
+			YOUSYNC_PLUGIN_URL . 'assets/js/metabox.js',
+			array(),
+			filemtime( YOUSYNC_PLUGIN_DIR . 'assets/js/metabox.js' ),
+			true
+		);
+		return;
+	}
 
 	$nonce = wp_create_nonce( 'yousync_toggle_protection' );
 	wp_add_inline_script(
@@ -883,19 +697,7 @@ add_action( 'admin_enqueue_scripts', 'yousync_enqueue_video_list_assets' );
  */
 function yousync_ajax_toggle_protection(): void {
 	check_ajax_referer( 'yousync_toggle_protection', 'nonce' );
-
-	$post_id = (int) ( $_POST['post_id'] ?? 0 );
-
-	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
-		wp_send_json_error( 'Unauthorized' );
-	}
-
-	$raw              = get_post_meta( $post_id, '_yousync_video', true );
-	$data             = $raw ? json_decode( $raw, true ) : array();
-	$data             = is_array( $data ) ? $data : array();
-	$data['manual_edits'] = '1' === ( $_POST['protected'] ?? '0' );
-
-	update_post_meta( $post_id, '_yousync_video', wp_slash( wp_json_encode( $data ) ) );
-	wp_send_json_success();
+	// Protection toggle is a Pro feature — not available in the free version.
+	wp_send_json_error( 'Pro feature' );
 }
 add_action( 'wp_ajax_yousync_toggle_protection', 'yousync_ajax_toggle_protection' );

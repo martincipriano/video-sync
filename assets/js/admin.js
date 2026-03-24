@@ -434,6 +434,7 @@ syncRules.addEventListener('click', function(e) {
 function updateQuotaEstimate(rule) {
 	const el       = rule.querySelector('.ys-quota-value')
 	if (!el) return
+	const row = el.closest('.ys-quota-estimate')
 
 	const action       = rule.querySelector('.ys-action')?.value || ''
 	const schedule     = rule.querySelector('.ys-sync-schedule')?.value || ''
@@ -454,9 +455,11 @@ function updateQuotaEstimate(rule) {
 		perRun = 1
 	} else if (playlistsActions.includes(action)) {
 		el.textContent = '~1 unit per 50 playlists'
+		if (row) row.classList.remove('ys-hidden')
 		return
 	} else {
 		el.textContent = ''
+		if (row) row.classList.add('ys-hidden')
 		return
 	}
 
@@ -470,6 +473,7 @@ function updateQuotaEstimate(rule) {
 	}
 
 	el.textContent = text
+	if (row) row.classList.remove('ys-hidden')
 }
 
 syncRules.querySelectorAll('.ys-sync-rule').forEach(updateQuotaEstimate)

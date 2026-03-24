@@ -50,15 +50,11 @@
 }
 
 .ys-toggle input[type=checkbox]:checked + .ys-toggle-slider {
-  background-color: #2271b1;
+  background-color: #008000;
 }
 
 .ys-toggle input[type=checkbox]:checked + .ys-toggle-slider::before {
   transform: translateX(20px);
-}
-
-.ys-toggle input[type=checkbox]:focus + .ys-toggle-slider {
-  box-shadow: 0 0 0 2px #2271b1;
 }
 
 .ys-toggle-label {
@@ -538,6 +534,99 @@
 /* Protected from Sync Rules column */
 .column-yousync_protected {
   text-align: right;
+}
+
+/* Sync rule enable/disable toggle — wider with ON/OFF labels */
+.ys-sync-rule-header .ys-toggle-slider {
+  width: 48px;
+}
+
+.ys-sync-rule-header .ys-toggle-slider::after {
+  content: "OFF";
+  position: absolute;
+  left: 18px;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.3px;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+}
+
+.ys-sync-rule-header .ys-toggle input[type=checkbox]:checked + .ys-toggle-slider::before {
+  transform: translateX(28px);
+}
+
+.ys-sync-rule-header .ys-toggle input[type=checkbox]:checked + .ys-toggle-slider::after {
+  content: "ON";
+  left: 2px;
+  right: 18px;
+  text-align: center;
+}
+
+/* Video protection toggle — wider with ON/OFF labels */
+.ys-protect-toggle .ys-toggle-slider {
+  width: 48px;
+}
+
+.ys-protect-toggle .ys-toggle-slider::after {
+  content: "OFF";
+  position: absolute;
+  left: 18px;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.3px;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+}
+
+.ys-protect-toggle input[type=checkbox]:checked + .ys-toggle-slider::before {
+  transform: translateX(28px);
+}
+
+.ys-protect-toggle input[type=checkbox]:checked + .ys-toggle-slider::after {
+  content: "ON";
+  left: 2px;
+  right: 18px;
+  text-align: center;
+}
+
+/* Embed code copy row */
+.ys-copy-embed-wrap {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.ys-copy-embed-wrap input {
+  width: auto;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.ys-copy-embed-btn {
+  width: 32px;
+  height: 30px;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMWQyMzI3Ij48cGF0aCBkPSJNMzYwLTI0MHEtMzMgMC01Ni41LTIzLjVUMjgwLTMyMHYtNDgwcTAtMzMgMjMuNS01Ni41VDM2MC04ODBoMzYwcTMzIDAgNTYuNSAyMy41VDgwMC04MDB2NDgwcTAgMzMtMjMuNSA1Ni41VDcyMC0yNDBIMzYwWm0wLTgwaDM2MHYtNDgwSDM2MHY0ODBaTTIwMC04MHEtMzMgMC01Ni41LTIzLjVUMTIwLTE2MHYtNTYwaDgwdjU2MGg0NDB2ODBIMjAwWm0xNjAtMjQwdi00ODAgNDgwWiIvPjwvc3ZnPg==") !important; /* overrides WP .button background shorthand */
+  background-position: center !important;
+  background-size: 16px 16px !important;
+  background-repeat: no-repeat !important;
+}
+
+.ys-copy-embed-btn.ys-copied {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMDBhMzJhIj48cGF0aCBkPSJNMzgyLTI0MCAxNTQtNDY4bDU3LTU3IDE3MSAxNzEgMzY3LTM2NyA1NyA1Ny00MjQgNDI0WiIvPjwvc3ZnPg==") !important; /* overrides WP .button background shorthand */
 }
 
 /*# sourceMappingURL=admin.css.map */

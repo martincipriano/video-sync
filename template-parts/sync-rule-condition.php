@@ -44,10 +44,10 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
     <select
       class="ys-select ys-condition-field"
       id="sync-rules-<?php echo esc_attr( $rule_index ); ?>-conditions-<?php echo esc_attr( $condition_index ); ?>-field"
-      name="sync_rules[<?php echo $rule_index; ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][field]"
+      name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][field]"
     >
       <?php if ( $has_field_options ) : ?>
-        <?php echo $field_options_html; ?>
+        <?php echo $field_options_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
       <?php else : ?>
         <option value="" <?php selected( $field, '' ); ?>>&mdash; Select field &mdash;</option>
       <?php endif; ?>
@@ -66,7 +66,7 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       id="sync-rules-<?php echo esc_attr( $rule_index ); ?>-conditions-<?php echo esc_attr( $condition_index ); ?>-operator"
       name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][operator]"
     >
-      <?php if ( $has_operator ) echo $operator_html; ?>
+      <?php if ( $has_operator ) echo $operator_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
     </select>
   </div>
   <div class="ys-form-group ys-mb-0">
@@ -77,10 +77,10 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       Value
     </label>
     <?php if ( $has_value ) : ?>
-      <?php echo $value_html; ?>
+      <?php echo $value_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
     <?php else : ?>
       <?php
-        echo yousync_return_template_part( 'input', 'text', array(
+        echo yousync_return_template_part( 'input', 'text', array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Return value is trusted internal HTML.
           'condition_index' => $condition_index,
           'rule_index'      => $rule_index,
         ) );

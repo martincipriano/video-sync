@@ -99,6 +99,15 @@ class YouSyncSettings {
 			)
 		);
 
+		register_setting(
+			'yousync_settings_group',
+			'yousync_delete_on_uninstall',
+			array(
+				'sanitize_callback' => 'absint',
+				'default'           => 0,
+			)
+		);
+
 		add_settings_section(
 			'yousync_api_settings',
 			__( 'API Settings', 'yousync' ),
@@ -120,6 +129,21 @@ class YouSyncSettings {
 			array( $this, 'active_archive_html' ),
 			'yousync_settings',
 			'yousync_api_settings'
+		);
+
+		add_settings_section(
+			'yousync_advanced_settings',
+			__( 'Advanced', 'yousync' ),
+			null,
+			'yousync_settings'
+		);
+
+		add_settings_field(
+			'yousync_delete_on_uninstall',
+			__( 'Uninstall Data', 'yousync' ),
+			array( $this, 'delete_on_uninstall_html' ),
+			'yousync_settings',
+			'yousync_advanced_settings'
 		);
 	}
 
@@ -194,7 +218,16 @@ class YouSyncSettings {
 	 */
 	public function validate_api_key( $input ) {
 		$input    = sanitize_text_field( $input );
-		$response = wp_remote_get( "https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key={$input}" );
+		$response = wp_remote_get(
+			add_query_arg(
+				array(
+					'part' => 'id',
+					'id'   => 'dQw4w9WgXcQ',
+					'key'  => $input,
+				),
+				'https://www.googleapis.com/youtube/v3/videos'
+			)
+		);
 
 		if ( empty( $input ) ) {
 			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
@@ -223,6 +256,24 @@ class YouSyncSettings {
 		add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync' ), 'updated' );
 
 		return $input;
+	}
+
+	/**
+	 * Render delete on uninstall field HTML.
+	 *
+	 * @return void
+	 */
+	public function delete_on_uninstall_html() {
+		$checked = (bool) get_option( 'yousync_delete_on_uninstall', 0 );
+		?>
+		<label>
+			<input type="checkbox" name="yousync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
+			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync' ); ?>
+		</label>
+		<p class="description">
+			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync' ); ?>
+		</p>
+		<?php
 	}
 
 	/**

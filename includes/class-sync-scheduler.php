@@ -149,8 +149,8 @@ class Sync_Scheduler {
 			$key = "yousync_every_{$hours}h";
 			if ( ! isset( $schedules[ $key ] ) ) {
 				$schedules[ $key ] = array(
-					/* translators: %d: number of hours */
 					'interval' => $hours * HOUR_IN_SECONDS,
+					/* translators: %d: number of hours */
 					'display'  => sprintf( __( 'Every %d Hours (YouSync)', 'yousync' ), $hours ),
 				);
 			}

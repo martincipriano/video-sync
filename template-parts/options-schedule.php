@@ -1,7 +1,6 @@
-<option disabled selected value="">&mdash; Select schedule &mdash;</option>
-<option value="once" <?php selected( $selected, 'once' ); ?>>Once (immediate)</option>
-<option value="hourly" <?php selected( $selected, 'hourly' ); ?>>Hourly</option>
-<option value="daily" <?php selected( $selected, 'daily' ); ?>>Daily</option>
-<option value="weekly" <?php selected( $selected, 'weekly' ); ?>>Weekly</option>
-<option value="monthly" <?php selected( $selected, 'monthly' ); ?>>Monthly</option>
-<option value="custom" <?php selected( $selected, 'custom' ); ?>>Custom</option>
+<option value="once" <?php selected( $selected, 'once' ); ?>><?php esc_html_e( 'Once (immediate)', 'yousync' ); ?></option>
+<option value="hourly" disabled <?php selected( $selected, 'hourly' ); ?>><?php esc_html_e( 'Hourly (Pro feature)', 'yousync' ); ?></option>
+<option value="daily" disabled <?php selected( $selected, 'daily' ); ?>><?php esc_html_e( 'Daily (Pro feature)', 'yousync' ); ?></option>
+<option value="weekly" disabled <?php selected( $selected, 'weekly' ); ?>><?php esc_html_e( 'Weekly (Pro feature)', 'yousync' ); ?></option>
+<option value="monthly" disabled <?php selected( $selected, 'monthly' ); ?>><?php esc_html_e( 'Monthly (Pro feature)', 'yousync' ); ?></option>
+<option value="custom" disabled <?php selected( $selected, 'custom' ); ?>><?php esc_html_e( 'Custom (Pro feature)', 'yousync' ); ?></option>
