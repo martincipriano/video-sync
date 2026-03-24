@@ -112,7 +112,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Description', 'yousync' ); ?></th>
 				<td>
-					<p style="margin:0; white-space:pre-wrap; max-height:7em; overflow-y:auto;"><?php echo esc_html( $original_description ); ?></p>
+					<p class="ys-description-box"><?php echo esc_html( $original_description ); ?></p>
 				</td>
 			</tr>
 			<?php endif; ?>

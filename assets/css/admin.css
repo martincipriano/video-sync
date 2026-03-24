@@ -602,6 +602,17 @@
   text-align: center;
 }
 
+/* Description scrollable box */
+.ys-description-box {
+  margin: 0;
+  white-space: pre-wrap;
+  max-height: 7em;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  border-radius: 2px;
+}
+
 /* Embed code copy row */
 .ys-copy-embed-wrap {
   display: flex;

@@ -91,11 +91,11 @@ function yousync_render_logs_page(): void {
 		<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>
-					<th style="width:160px;"><?php esc_html_e( 'Time', 'yousync' ); ?></th>
+					<th style="width:180px;"><?php esc_html_e( 'Time', 'yousync' ); ?></th>
 					<th style="width:90px;"><?php esc_html_e( 'Source', 'yousync' ); ?></th>
 					<th style="width:160px;"><?php esc_html_e( 'Name', 'yousync' ); ?></th>
-					<th><?php esc_html_e( 'Message', 'yousync' ); ?></th>
-					<th style="width:120px;"><?php esc_html_e( 'Code', 'yousync' ); ?></th>
+					<th style="width:300px;"><?php esc_html_e( 'Message', 'yousync' ); ?></th>
+					<th style="width:160px;"><?php esc_html_e( 'Code', 'yousync' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
