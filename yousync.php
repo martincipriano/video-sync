@@ -274,6 +274,7 @@ function yousync_init() {
 			'publicly_queryable'  => $video_enabled,
 			'show_ui'             => true,
 			'show_in_menu'        => true,
+			'menu_icon'           => 'dashicons-video-alt3',
 			'has_archive'         => $video_has_archive,
 			'rewrite'             => $video_rewrite,
 			'supports'            => array(
