@@ -38,6 +38,10 @@ class Channel {
 	 * @return void
 	 */
 	public function register_taxonomy() {
+		$active_archives = get_option( 'yousync_active_archives', array() );
+		$enabled         = isset( $active_archives['ys-channel']['enabled'] ) && $active_archives['ys-channel']['enabled'];
+		$slug            = ! empty( $active_archives['ys-channel']['slug'] ) ? $active_archives['ys-channel']['slug'] : 'ys-channel';
+
 		$labels = array(
 			'name'                       => __( 'Channels', 'yousync' ),
 			'singular_name'              => __( 'Channel', 'yousync' ),
@@ -58,14 +62,14 @@ class Channel {
 
 		$args = array(
 			'labels'            => $labels,
-			'public'            => false,
+			'public'            => $enabled,
 			'show_ui'           => true,
 			'show_in_menu'      => 'edit.php?post_type=yousync_videos',
-			'show_in_nav_menus' => false,
+			'show_in_nav_menus' => $enabled,
 			'show_admin_column' => false,
 			'hierarchical'      => false,
-			'query_var'         => false,
-			'rewrite'           => false,
+			'query_var'         => $enabled,
+			'rewrite'           => $enabled ? array( 'slug' => $slug ) : false,
 			'capabilities'      => array(
 				'manage_terms' => 'manage_options',
 				'edit_terms'   => 'manage_options',
