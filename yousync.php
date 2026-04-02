@@ -265,6 +265,8 @@ function yousync_init() {
 			'labels'              => array(
 				'name'          => __( 'Videos', 'yousync' ),
 				'singular_name' => __( 'Video', 'yousync' ),
+				'menu_name'     => __( 'YouSync', 'yousync' ),
+				'all_items'     => __( 'Videos', 'yousync' ),
 				'add_new'       => __( 'Add New Video', 'yousync' ),
 				'add_new_item'  => __( 'Add New Video', 'yousync' ),
 			),
