@@ -22,9 +22,6 @@ class Channel {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
-		add_action( 'init', array( $this, 'register_rewrite_rules' ), 20 );
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
-		add_filter( 'template_include', array( $this, 'channel_archive_template' ) );
 		add_action( 'yousync_channel_add_form_fields', array( $this, 'add_channel_fields' ) );
 		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_channel_hero' ), 10, 2 );
 		add_action( 'yousync_channel_edit_form_fields', array( $this, 'edit_channel_fields' ), 10, 2 );
@@ -82,51 +79,6 @@ class Channel {
 		);
 
 		register_taxonomy( 'yousync_channel', 'yousync_videos', $args );
-	}
-
-	/**
-	 * Add rewrite rule for the root channel archive page.
-	 *
-	 * @return void
-	 */
-	public function register_rewrite_rules() {
-		$active_archives = get_option( 'yousync_active_archives', array() );
-		$enabled         = isset( $active_archives['ys-channel']['enabled'] ) && $active_archives['ys-channel']['enabled'];
-		$slug            = ! empty( $active_archives['ys-channel']['slug'] ) ? $active_archives['ys-channel']['slug'] : 'ys-channel';
-
-		if ( $enabled ) {
-			add_rewrite_rule( '^' . preg_quote( $slug, '/' ) . '/?$', 'index.php?yousync_channel_archive=1', 'top' );
-		}
-	}
-
-	/**
-	 * Register custom query var for channel archive.
-	 *
-	 * @param array $vars Registered query vars.
-	 * @return array
-	 */
-	public function add_query_vars( $vars ) {
-		$vars[] = 'yousync_channel_archive';
-		return $vars;
-	}
-
-	/**
-	 * Load template for root channel archive page.
-	 *
-	 * @param string $template Current template path.
-	 * @return string
-	 */
-	public function channel_archive_template( $template ) {
-		if ( ! get_query_var( 'yousync_channel_archive' ) ) {
-			return $template;
-		}
-
-		$theme_template = locate_template( 'taxonomy-yousync_channel.php' );
-		if ( $theme_template ) {
-			return $theme_template;
-		}
-
-		return YOUSYNC_PLUGIN_DIR . 'template-parts/archive-channel.php';
 	}
 
 	/**

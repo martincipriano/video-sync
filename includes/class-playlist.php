@@ -22,9 +22,6 @@ class Playlist {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
-		add_action( 'init', array( $this, 'register_rewrite_rules' ), 20 );
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
-		add_filter( 'template_include', array( $this, 'playlist_archive_template' ) );
 		add_action( 'yousync_playlist_add_form_fields', array( $this, 'add_playlist_fields' ) );
 		add_action( 'yousync_playlist_edit_form_fields', array( $this, 'edit_playlist_fields' ), 10, 2 );
 		add_action( 'created_yousync_playlist', array( $this, 'save_playlist_meta' ), 10, 2 );
@@ -81,51 +78,6 @@ class Playlist {
 		);
 
 		register_taxonomy( 'yousync_playlist', 'yousync_videos', $args );
-	}
-
-	/**
-	 * Add rewrite rule for the root playlist archive page.
-	 *
-	 * @return void
-	 */
-	public function register_rewrite_rules() {
-		$active_archives = get_option( 'yousync_active_archives', array() );
-		$enabled         = isset( $active_archives['ys-playlist']['enabled'] ) && $active_archives['ys-playlist']['enabled'];
-		$slug            = ! empty( $active_archives['ys-playlist']['slug'] ) ? $active_archives['ys-playlist']['slug'] : 'ys-playlist';
-
-		if ( $enabled ) {
-			add_rewrite_rule( '^' . preg_quote( $slug, '/' ) . '/?$', 'index.php?yousync_playlist_archive=1', 'top' );
-		}
-	}
-
-	/**
-	 * Register custom query var for playlist archive.
-	 *
-	 * @param array $vars Registered query vars.
-	 * @return array
-	 */
-	public function add_query_vars( $vars ) {
-		$vars[] = 'yousync_playlist_archive';
-		return $vars;
-	}
-
-	/**
-	 * Load template for root playlist archive page.
-	 *
-	 * @param string $template Current template path.
-	 * @return string
-	 */
-	public function playlist_archive_template( $template ) {
-		if ( ! get_query_var( 'yousync_playlist_archive' ) ) {
-			return $template;
-		}
-
-		$theme_template = locate_template( 'taxonomy-yousync_playlist.php' );
-		if ( $theme_template ) {
-			return $theme_template;
-		}
-
-		return YOUSYNC_PLUGIN_DIR . 'template-parts/archive-playlist.php';
 	}
 
 	/**
