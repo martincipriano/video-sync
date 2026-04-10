@@ -217,7 +217,13 @@ class YouSyncSettings {
 	 * @return string The validated API key.
 	 */
 	public function validate_api_key( $input ) {
-		$input    = sanitize_text_field( $input );
+		$input = sanitize_text_field( $input );
+
+		if ( empty( $input ) ) {
+			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
+			return get_option( 'yousync_api_key', '' );
+		}
+
 		$response = wp_remote_get(
 			add_query_arg(
 				array(
@@ -228,11 +234,6 @@ class YouSyncSettings {
 				'https://www.googleapis.com/youtube/v3/videos'
 			)
 		);
-
-		if ( empty( $input ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
-			return '';
-		}
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync' ) );

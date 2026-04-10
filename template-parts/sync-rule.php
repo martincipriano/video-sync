@@ -84,25 +84,22 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 		<div class="ys-form-group">
 			<label for="ys-action-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Action', 'yousync' ); ?></label>
 			<select class="ys-select ys-action" id="ys-action-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][action]" required>
-				<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
-					<option data-resource="channel" disabled value="channel_update_all" <?php selected( $action, 'channel_update_all' ); ?>><?php esc_html_e( 'Update metadata for this channel (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="channel" disabled value="channel_update_specific" <?php selected( $action, 'channel_update_specific' ); ?>><?php esc_html_e( 'Update specific metadata for this channel (Pro feature)', 'yousync' ); ?></option>
-				</optgroup>
 				<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
 					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
-					<option data-resource="playlist" disabled value="playlists_update_all" <?php selected( $action, 'playlists_update_all' ); ?>><?php esc_html_e( 'Update metadata for all playlists (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="playlist" disabled value="playlists_update_non_modified" <?php selected( $action, 'playlists_update_non_modified' ); ?>><?php esc_html_e( 'Update metadata for non modified playlists (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="playlist" disabled value="playlists_update_specific_all" <?php selected( $action, 'playlists_update_specific_all' ); ?>><?php esc_html_e( 'Update specific metadata for all playlists (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="playlist" disabled value="playlists_update_specific_non_modified" <?php selected( $action, 'playlists_update_specific_non_modified' ); ?>><?php esc_html_e( 'Update specific metadata for non modified playlists (Pro feature)', 'yousync' ); ?></option>
 				</optgroup>
 				<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
 					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
-					<option data-resource="video" disabled value="videos_update_all" <?php selected( $action, 'videos_update_all' ); ?>><?php esc_html_e( 'Update metadata for all videos (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="video" disabled value="videos_update_non_modified" <?php selected( $action, 'videos_update_non_modified' ); ?>><?php esc_html_e( 'Update metadata for non modified videos (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="video" disabled value="videos_update_specific_all" <?php selected( $action, 'videos_update_specific_all' ); ?>><?php esc_html_e( 'Update specific metadata for all videos (Pro feature)', 'yousync' ); ?></option>
-					<option data-resource="video" disabled value="videos_update_specific_non_modified" <?php selected( $action, 'videos_update_specific_non_modified' ); ?>><?php esc_html_e( 'Update specific metadata for non modified videos (Pro feature)', 'yousync' ); ?></option>
 				</optgroup>
 			</select>
+			<p class="description ys-mt-1">
+				<?php
+				printf(
+					/* translators: %s: link to YouSync Pro */
+					wp_kses( __( 'Need more actions? <a href="%s" target="_blank">Upgrade to YouSync Pro</a>', 'yousync' ), array( 'a' => array( 'href' => array(), 'target' => array() ) ) ),
+					esc_url( 'https://wpbuoy.com/plugins/yousync/' )
+				);
+				?>
+			</p>
 		</div>
 
 		<div class="ys-form-group <?php echo $show_specific_metadata ? '' : 'ys-hidden'; ?> ys-specific-metadata-wrapper">
