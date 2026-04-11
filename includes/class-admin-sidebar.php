@@ -38,6 +38,7 @@ class Admin_Sidebar {
 	public function __construct( array $screen_ids ) {
 		$this->screen_ids = $screen_ids;
 		add_filter( 'admin_body_class', array( $this, 'add_body_class' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_footer', array( $this, 'render' ) );
 	}
 
@@ -72,6 +73,23 @@ class Admin_Sidebar {
 	}
 
 	/**
+	 * Enqueue sidebar CSS on sidebar screens.
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets(): void {
+		if ( ! $this->is_sidebar_screen() ) {
+			return;
+		}
+		wp_enqueue_style(
+			'yousync-admin',
+			YOUSYNC_PLUGIN_URL . 'assets/css/admin.css',
+			array(),
+			filemtime( YOUSYNC_PLUGIN_DIR . 'assets/css/admin.css' )
+		);
+	}
+
+	/**
 	 * Render the sidebar in the admin footer.
 	 *
 	 * @return void
@@ -89,7 +107,10 @@ class Admin_Sidebar {
 new Admin_Sidebar(
 	array(
 		'yousync_videos_page_yousync_settings',
+		'yousync_videos_page_yousync_logs',
 		'edit-yousync_channel',
 		'edit-yousync_playlist',
+		'edit-video_category',
+		'edit-video_tag',
 	)
 );
