@@ -723,16 +723,16 @@ label[for^="ys-action-"] {
  * Term edit page (channel/playlist) sidebar
  */
 body.term-php #wpbody {
-  padding-right: 160px;
+  padding-right: 20px;
 }
 body.term-php .wrap {
   position: relative;
-  padding-right: 440px; /* 260px sidebar + 160px right margin + 20px gap */
+  padding-right: 300px; /* 260px sidebar + 20px right margin + 20px gap */
 }
 body.term-php .ys-term-sidebar {
   position: absolute;
-  top: 160px;
-  right: 160px;
+  top: 20px;
+  right: 20px;
   width: 260px;
 }
 @media (max-width: 782px) {
