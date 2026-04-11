@@ -727,7 +727,6 @@ body.term-php.taxonomy-yousync_playlist #wpbody-content {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 20px;
 }
 body.term-php.taxonomy-yousync_channel #wpbody-content > #screen-meta,
 body.term-php.taxonomy-yousync_channel #wpbody-content > #screen-meta-links,
@@ -749,6 +748,8 @@ body.term-php.taxonomy-yousync_playlist .ys-term-sidebar {
   flex-direction: column;
   gap: 16px;
   order: 2;
+  padding-top: 20px;
+  padding-right: 20px;
   position: sticky;
   top: 32px;
   width: 260px;
