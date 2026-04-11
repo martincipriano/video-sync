@@ -645,4 +645,66 @@ label[for^="ys-action-"] {
   background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjMDBhMzJhIj48cGF0aCBkPSJNMzgyLTI0MCAxNTQtNDY4bDU3LTU3IDE3MSAxNzEgMzY3LTM2NyA1NyA1Ny00MjQgNDI0WiIvPjwvc3ZnPg==") !important; /* overrides WP .button background shorthand */
 }
 
+/**
+ * Settings page layout
+ */
+.ys-page-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+.ys-page-content {
+  flex: 1;
+  min-width: 0;
+}
+.ys-page-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 16px;
+  position: sticky;
+  top: 32px;
+  align-self: flex-start;
+  width: 260px;
+}
+
+/**
+ * Sidebar widgets
+ */
+.ys-sidebar-widget {
+  background: #fff;
+  border: 1px solid #c3c4c7;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+.ys-sidebar-widget > * {
+  margin: 0;
+  padding: 0;
+}
+.ys-sidebar-widget ul {
+  padding-left: 1.25em;
+}
+.ys-sidebar-widget li:last-child {
+  margin-bottom: 0;
+}
+.ys-upgrade-widget .button {
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .ys-page-container {
+    flex-direction: column;
+  }
+  .ys-page-sidebar {
+    position: static;
+    width: 100%;
+    order: -1;
+  }
+}
+
 /*# sourceMappingURL=admin.css.map */
