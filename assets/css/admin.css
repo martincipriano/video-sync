@@ -722,23 +722,28 @@ label[for^="ys-action-"] {
 /**
  * Term edit page (channel/playlist) sidebar
  */
+body.term-php #wpbody {
+  padding-right: 160px;
+}
 body.term-php .wrap {
   position: relative;
-  padding-right: 280px;
+  padding-right: 440px; /* 260px sidebar + 160px right margin + 20px gap */
 }
 body.term-php .ys-term-sidebar {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 160px;
+  right: 160px;
   width: 260px;
 }
-@media (max-width: 1200px) {
+@media (max-width: 782px) {
+  body.term-php #wpbody {
+    padding-right: 0;
+  }
   body.term-php .wrap {
     padding-right: 0;
   }
   body.term-php .ys-term-sidebar {
-    position: static;
-    width: 100%;
+    display: none;
   }
 }
 
