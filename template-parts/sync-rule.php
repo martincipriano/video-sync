@@ -68,17 +68,11 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 	</div>
 
 	<div class="ys-sync-rule-body">
-		<div class="ys-2-columns">
-			<div class="ys-form-group">
-				<label for="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync Schedule', 'yousync' ); ?></label>
-				<select class="ys-select ys-sync-schedule" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][schedule]" required>
-					<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => $schedule ) ); ?>
-				</select>
-			</div>
-			<div class="ys-form-group">
-				<label for="ys-custom-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Custom (Hours)', 'yousync' ); ?></label>
-				<input class="ys-number ys-custom-sync-schedule" <?php echo 'custom' !== $schedule ? 'disabled' : ''; ?> id="ys-custom-schedule-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][custom_schedule]" value="<?php echo esc_attr( $custom_schedule ); ?>" min="1" placeholder="<?php esc_attr_e( 'Eg. 24', 'yousync' ); ?>" type="number">
-			</div>
+		<div class="ys-form-group">
+			<label for="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync Schedule', 'yousync' ); ?></label>
+			<select class="ys-select ys-sync-schedule" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][schedule]" required>
+				<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => $schedule ) ); ?>
+			</select>
 		</div>
 
 		<div class="ys-form-group">
