@@ -26,6 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3><?php esc_html_e( 'Need Help?', 'yousync' ); ?></h3>
 	<p><?php esc_html_e( 'Get support and documentation for YouSync.', 'yousync' ); ?></p>
 	<ul>
+		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/product/yousync/#faqs' ); ?>" target="_blank"><?php esc_html_e( 'FAQ', 'yousync' ); ?></a></li>
 		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank"><?php esc_html_e( 'Documentation', 'yousync' ); ?></a></li>
 		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/support/' ); ?>" target="_blank"><?php esc_html_e( 'Helpdesk', 'yousync' ); ?></a></li>
 	</ul>
