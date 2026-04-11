@@ -89,6 +89,21 @@ class Sync_Runner {
 
 		$this->current_rule_index = $rule_index;
 
+		$this->mark_syncing( $source_type, $term_id, $rule_index );
+
+		$syncing_cleared = false;
+		register_shutdown_function(
+			function () use ( $source_type, $term_id, $rule_index, &$syncing_cleared ) {
+				if ( $syncing_cleared ) {
+					return;
+				}
+				$error = error_get_last();
+				if ( $error && in_array( $error['type'], array( E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE ), true ) ) {
+					$this->clear_syncing( $source_type, $term_id, $rule_index );
+				}
+			}
+		);
+
 		$action = $rule['action'] ?? '';
 
 		try {
@@ -136,6 +151,9 @@ class Sync_Runner {
 
 		} catch ( \Exception $e ) {
 			$this->record_error( $source_type, $term_id, $e->getMessage(), 'exception' );
+		} finally {
+			$this->clear_syncing( $source_type, $term_id, $rule_index );
+			$syncing_cleared = true;
 		}
 
 		// For 'once' schedule: auto-disable the rule after it fires.
@@ -943,6 +961,61 @@ class Sync_Runner {
 		$errors[]            = $entry;
 		$rule['sync_errors'] = array_slice( $errors, -5 );
 		$rule['sync_status'] = 'failed';
+		unset( $rule );
+
+		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+	}
+
+	/**
+	 * Mark a sync rule as actively syncing.
+	 *
+	 * Sets sync_status = 'syncing' and records sync_started_at timestamp.
+	 * The timestamp is used to detect stale locks if the process is killed
+	 * at the OS level (beyond PHP's shutdown handler reach).
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID.
+	 * @param int    $rule_index  Index of the rule being executed.
+	 * @return void
+	 */
+	private function mark_syncing( string $source_type, int $term_id, int $rule_index ): void {
+		$data = $this->get_term_meta_data( $source_type, $term_id );
+		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
+			return;
+		}
+
+		$rule                    = &$data['sync_rules'][ $rule_index ];
+		$rule['sync_status']     = 'syncing';
+		$rule['sync_started_at'] = time();
+		unset( $rule );
+
+		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+	}
+
+	/**
+	 * Clear the syncing lock from a sync rule.
+	 *
+	 * Called in the finally block of run() and by the register_shutdown_function
+	 * callback on PHP fatal errors. Unsets sync_started_at and resets
+	 * sync_status to '' if it is still 'syncing' (i.e. neither record_success()
+	 * nor record_error() ran to completion).
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID.
+	 * @param int    $rule_index  Index of the rule being executed.
+	 * @return void
+	 */
+	private function clear_syncing( string $source_type, int $term_id, int $rule_index ): void {
+		$data = $this->get_term_meta_data( $source_type, $term_id );
+		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
+			return;
+		}
+
+		$rule = &$data['sync_rules'][ $rule_index ];
+		unset( $rule['sync_started_at'] );
+		if ( 'syncing' === ( $rule['sync_status'] ?? '' ) ) {
+			$rule['sync_status'] = '';
+		}
 		unset( $rule );
 
 		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );

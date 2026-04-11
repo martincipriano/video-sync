@@ -25,6 +25,11 @@ $specific_metadata = isset( $rule['specific_metadata'] ) ? $rule['specific_metad
 // Dual-mode: Use provided $index or fallback to {{INDEX}} placeholder for JavaScript
 $rule_index = isset( $index ) ? $index : '{{INDEX}}';
 
+$sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
+$is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
+	&& $sync_started_at
+	&& ( time() - $sync_started_at ) < 1800;
+
 // Determine the resource type from the action (used for field options and metadata options)
 $resource = '';
 if ( strpos( $action, 'channel' ) === 0 ) {
@@ -52,13 +57,16 @@ if ( $show_specific_metadata && $resource ) {
 
 ?>
 
-<div class="ys-sync-rule" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
+<div class="ys-sync-rule<?php echo $is_syncing ? ' ys-sync-rule--syncing' : ''; ?>" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
 
 	<div class="ys-sync-rule-header">
 		<label class="ys-toggle">
 			<input <?php checked( $enabled, true ); ?> class="ys-rule-toggle" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][enabled]" type="checkbox" value="1">
 			<span class="ys-toggle-slider"></span>
 		</label>
+		<?php if ( $is_syncing ) : ?>
+		<span class="ys-syncing-badge"><?php esc_html_e( 'Syncing...', 'yousync' ); ?></span>
+		<?php endif; ?>
 		<button type="button" class="button ys-remove-rule">
 			<?php esc_html_e( 'Remove', 'yousync' ); ?>
 		</button>
