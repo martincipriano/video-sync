@@ -377,6 +377,10 @@
 .ys-form-group {
   margin-bottom: 1rem;
 }
+label[for^="ys-sync-schedule-"],
+label[for^="ys-action-"] {
+  margin-bottom: 0.25rem;
+}
 .ys-text, .ys-number, .ys-select {
   display: block;
   width: 100%;
