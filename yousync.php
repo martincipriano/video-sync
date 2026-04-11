@@ -27,6 +27,14 @@ define( 'YOUSYNC_PLUGIN_FILE', __FILE__ );
 define( 'YOUSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
+// YouSync Pro is active — defer entirely. Pro supersedes free: same post types,
+// taxonomies, and cron hooks. Returning here prevents duplicate registrations
+// and also skips the deactivation hook, which would otherwise unschedule all
+// of Pro's sync cron events if the user deactivates the free plugin.
+if ( defined( 'YOUSYNC_PRO_VERSION' ) ) {
+	return;
+}
+
 /**
  * Load a template part into a plugin template.
  *
