@@ -241,8 +241,7 @@ class Playlist {
 					'fieldOptions'    => yousync_return_template_part( 'options', 'video-fields' ),
 					'metadataOptions' => yousync_return_template_part( 'options', 'video-metadata' ),
 				),
-				'condition' => yousync_return_template_part( 'sync-rule', 'condition' ),
-				'rule'      => yousync_return_template_part( 'sync-rule-playlist' ),
+				'rule' => yousync_return_template_part( 'sync-rule-playlist' ),
 			),
 		) );
 	}

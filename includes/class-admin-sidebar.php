@@ -82,7 +82,7 @@ class Admin_Sidebar {
 new Admin_Sidebar(
 	array(
 		'yousync_videos_page_yousync_settings',
-		'yousync_channel',
-		'yousync_playlist',
+		'edit-yousync_channel',
+		'edit-yousync_playlist',
 	)
 );

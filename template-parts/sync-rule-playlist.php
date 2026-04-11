@@ -23,7 +23,6 @@ $enabled           = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
 $schedule          = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
 $custom_schedule   = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 1;
 $action            = isset( $rule['action'] ) ? $rule['action'] : 'videos_sync_new';
-$conditions        = isset( $rule['conditions'] ) ? $rule['conditions'] : array();
 $specific_metadata = isset( $rule['specific_metadata'] ) ? $rule['specific_metadata'] : array();
 
 // Dual-mode: Use provided $index or fallback to {{INDEX}} placeholder for JavaScript
@@ -52,8 +51,6 @@ if ( $show_specific_metadata && $resource ) {
 	}
 }
 
-// Field options HTML for conditions (based on resource)
-$field_options_tpl = $resource ? yousync_return_template_part( 'options', $resource . '-fields' ) : '';
 ?>
 
 <div class="ys-sync-rule" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
@@ -83,15 +80,6 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
 				</optgroup>
 			</select>
-			<p class="description ys-mt-1">
-				<?php
-				printf(
-					/* translators: %s: link to YouSync Pro */
-					wp_kses( __( 'Need more actions? <a href="%s" target="_blank">Upgrade to YouSync Pro</a>', 'yousync' ), array( 'a' => array( 'href' => array(), 'target' => array() ) ) ),
-					esc_url( 'https://wpbuoy.com/plugins/yousync/' )
-				);
-				?>
-			</p>
 		</div>
 
 		<div class="ys-form-group <?php echo $show_specific_metadata ? '' : 'ys-hidden'; ?> ys-specific-metadata-wrapper">
@@ -100,82 +88,6 @@ $field_options_tpl = $resource ? yousync_return_template_part( 'options', $resou
 				<?php if ( $show_specific_metadata ) echo $metadata_options_html; ?>
 			</select>
 		</div>
-
-		<fieldset class="ys-fieldset ys-conditions-wrapper">
-			<legend class="ys-mt-4"><strong><?php esc_html_e( 'Conditions', 'yousync' ); ?></strong> &mdash; <a class="ys-add-condition" href="#" aria-disabled="true" style="pointer-events:none; opacity:0.5;"><?php esc_html_e( 'Add condition', 'yousync' ); ?></a> <span style="font-weight:normal; font-size:12px; color:#757575;"><?php esc_html_e( '(Pro feature)', 'yousync' ); ?></span></legend>
-			<p class="description ys-mb-3"><?php
-				echo wp_kses_post(
-					sprintf(
-						/* translators: 1: "all" in bold, 2: "any" in bold */
-						__( 'Add conditions to filter which items are synced. Items must match %1$s conditions (AND logic). <br> To sync items matching %2$s condition (OR logic), create multiple sync rules.', 'yousync' ),
-						'<strong>' . esc_html__( 'all', 'yousync' ) . '</strong>',
-						'<strong>' . esc_html__( 'any', 'yousync' ) . '</strong>'
-					)
-				);
-				?></p>
-			<div class="ys-conditions" data-rule-index="<?php echo esc_attr( $rule_index ); ?>" data-resource="<?php echo esc_attr( $resource ); ?>">
-				<?php
-				// Render existing conditions with pre-populated field/operator/value
-				if ( ! empty( $conditions ) && is_array( $conditions ) ) {
-					foreach ( $conditions as $condition_index => $condition ) {
-						$cond_field    = isset( $condition['field'] ) ? $condition['field'] : '';
-						$cond_operator = isset( $condition['operator'] ) ? $condition['operator'] : '';
-						$cond_value    = isset( $condition['value'] ) ? $condition['value'] : '';
-
-						// Build field options with saved field pre-selected
-						$cond_field_options_html = $field_options_tpl ?: null;
-						if ( $cond_field_options_html && $cond_field ) {
-							// Remove selected from the blank placeholder
-							$cond_field_options_html = str_replace(
-								'<option disabled selected value="">',
-								'<option disabled value="">',
-								$cond_field_options_html
-							);
-							// Mark the saved field as selected
-							$cond_field_options_html = str_replace(
-								'value="' . esc_attr( $cond_field ) . '"',
-								'value="' . esc_attr( $cond_field ) . '" selected',
-								$cond_field_options_html
-							);
-						}
-
-						// Build operator options and value input if a field is selected
-						$cond_operator_html = null;
-						$cond_value_html    = null;
-						if ( $cond_field ) {
-							$field_type = yousync_get_condition_field_type( $cond_field );
-							if ( $field_type ) {
-								$cond_operator_html = yousync_return_template_part(
-									'options',
-									$field_type . '-operators',
-									array( 'operator' => $cond_operator )
-								);
-								$cond_value_html = yousync_return_template_part(
-									'input',
-									$field_type,
-									array(
-										'rule_index'      => $rule_index,
-										'condition_index' => $condition_index,
-										'value'           => $cond_value,
-										'disabled'        => false,
-									)
-								);
-							}
-						}
-
-						yousync_get_template_part( 'sync-rule', 'condition', array(
-							'rule_index'         => $rule_index,
-							'condition_index'    => $condition_index,
-							'condition'          => $condition,
-							'field_options_html' => $cond_field_options_html,
-							'operator_html'      => $cond_operator_html,
-							'value_html'         => $cond_value_html,
-						) );
-					}
-				}
-				?>
-			</div>
-		</fieldset>
 
 	<?php
 	$rule_sync_status = $rule['sync_status'] ?? '';

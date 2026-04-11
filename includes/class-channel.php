@@ -296,8 +296,7 @@ class Channel {
 					'fieldOptions'    => yousync_return_template_part( 'options', 'playlist-fields' ),
 					'metadataOptions' => yousync_return_template_part( 'options', 'playlist-metadata' ),
 				),
-				'condition' => yousync_return_template_part( 'sync-rule', 'condition' ),
-				'rule'      => yousync_return_template_part( 'sync-rule' ),
+				'rule' => yousync_return_template_part( 'sync-rule' ),
 			),
 		) );
 		wp_add_inline_script(
