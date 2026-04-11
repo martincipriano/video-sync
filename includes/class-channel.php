@@ -30,6 +30,7 @@ class Channel {
 		add_action( 'edited_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );
 		add_filter( 'manage_edit-yousync_channel_columns', array( $this, 'add_channel_columns' ) );
 		add_filter( 'manage_yousync_channel_custom_column', array( $this, 'channel_column_content' ), 10, 3 );
+		add_filter( 'screen_options_show_screen', array( $this, 'hide_screen_options_on_edit' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
@@ -254,6 +255,20 @@ class Channel {
 
 	/**
 	 * Enqueue admin assets.
+	 * Hide Screen Options button on the term edit page.
+	 *
+	 * @param bool $show Whether to show Screen Options.
+	 * @return bool
+	 */
+	public function hide_screen_options_on_edit( bool $show ): bool {
+		$screen = get_current_screen();
+		if ( $screen && 'yousync_channel' === $screen->taxonomy && 'term' === $screen->base ) {
+			return false;
+		}
+		return $show;
+	}
+
+	/**
 	 *
 	 * @return void
 	 */
