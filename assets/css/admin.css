@@ -379,6 +379,7 @@
 }
 label[for^="ys-sync-schedule-"],
 label[for^="ys-action-"] {
+  display: block;
   margin-bottom: 0.25rem;
 }
 .ys-text, .ys-number, .ys-select {
