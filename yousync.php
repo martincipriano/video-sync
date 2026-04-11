@@ -641,7 +641,7 @@ add_action( 'manage_yousync_videos_posts_custom_column', 'yousync_render_video_c
  */
 function yousync_enqueue_video_list_assets(): void {
 	$screen = get_current_screen();
-	if ( ! $screen || ! in_array( $screen->id, array( 'edit-yousync_videos', 'yousync_videos' ), true ) ) {
+	if ( ! $screen || ! in_array( $screen->id, array( 'edit-yousync_videos', 'yousync_videos', 'yousync_videos_page_yousync_settings' ), true ) ) {
 		return;
 	}
 
