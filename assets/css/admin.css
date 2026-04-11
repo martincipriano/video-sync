@@ -730,6 +730,9 @@ body.term-php .wrap {
   padding-right: 300px; /* 260px sidebar + 20px right margin + 20px gap */
 }
 body.term-php .ys-term-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   position: absolute;
   top: 20px;
   right: 20px;
