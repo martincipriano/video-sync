@@ -122,7 +122,7 @@ function yousync_get_condition_field_type( $field ) {
 		'tags'                 => 'text',
 		'duration'             => 'number',
 		'published_date'       => 'date',
-		'video_category'       => 'text',
+		'yousync_category'       => 'text',
 		'view_count'           => 'number',
 		'like_count'           => 'number',
 		'comment_count'        => 'number',
@@ -286,9 +286,9 @@ function yousync_init() {
 		)
 	);
 
-	// Register video_tag taxonomy.
+	// Register yousync_tag taxonomy.
 	register_taxonomy(
-		'video_tag',
+		'yousync_tag',
 		'yousync_videos',
 		array(
 			'labels'            => array(
@@ -304,13 +304,13 @@ function yousync_init() {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			'rewrite'           => array( 'slug' => 'video-tag' ),
+			'rewrite'           => array( 'slug' => 'yousync-tag' ),
 		)
 	);
 
-	// Register video_category taxonomy.
+	// Register yousync_category taxonomy.
 	register_taxonomy(
-		'video_category',
+		'yousync_category',
 		'yousync_videos',
 		array(
 			'labels'            => array(
@@ -326,7 +326,7 @@ function yousync_init() {
 			'public'            => true,
 			'show_ui'           => true,
 			'show_admin_column' => false,
-			'rewrite'           => array( 'slug' => 'video-category' ),
+			'rewrite'           => array( 'slug' => 'yousync-category' ),
 		)
 	);
 
@@ -556,8 +556,8 @@ function yousync_reorder_submenu(): void {
 		if ( 'post-new.php?post_type=yousync_videos' === $slug ) return 1;
 		if ( str_contains( $slug, 'taxonomy=yousync_channel' ) ) return 2;
 		if ( str_contains( $slug, 'taxonomy=yousync_playlist' ) ) return 3;
-		if ( str_contains( $slug, 'taxonomy=video_category' ) ) return 4;
-		if ( str_contains( $slug, 'taxonomy=video_tag' ) ) return 5;
+		if ( str_contains( $slug, 'taxonomy=yousync_category' ) ) return 4;
+		if ( str_contains( $slug, 'taxonomy=yousync_tag' ) ) return 5;
 		if ( 'yousync_logs' === $slug ) return 6;
 		if ( 'yousync_settings' === $slug ) return 7;
 		return PHP_INT_MAX;

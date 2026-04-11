@@ -110,7 +110,7 @@ new Admin_Sidebar(
 		'yousync_videos_page_yousync_logs',
 		'edit-yousync_channel',
 		'edit-yousync_playlist',
-		'edit-video_category',
-		'edit-video_tag',
+		'edit-yousync_category',
+		'edit-yousync_tag',
 	)
 );

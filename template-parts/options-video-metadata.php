@@ -3,7 +3,7 @@
 <option value="description"><?php esc_html_e( 'Description', 'yousync' ); ?></option>
 <option value="thumbnail"><?php esc_html_e( 'Thumbnail', 'yousync' ); ?></option>
 <option value="tags"><?php esc_html_e( 'Tags', 'yousync' ); ?></option>
-<option value="video_category"><?php esc_html_e( 'Video Category', 'yousync' ); ?></option>
+<option value="yousync_category"><?php esc_html_e( 'Video Category', 'yousync' ); ?></option>
 <option value="duration"><?php esc_html_e( 'Duration', 'yousync' ); ?></option>
 <option value="published_date"><?php esc_html_e( 'Published Date', 'yousync' ); ?></option>
 <option value="view_count"><?php esc_html_e( 'View Count', 'yousync' ); ?></option>

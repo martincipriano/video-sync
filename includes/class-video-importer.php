@@ -256,7 +256,7 @@ class Video_Importer {
 					}
 					break;
 
-				case 'video_category':
+				case 'yousync_category':
 					if ( ! empty( $video_data['category_id'] ) ) {
 						$this->assign_video_category( $post_id, $video_data['category_id'] );
 					}
@@ -335,14 +335,14 @@ class Video_Importer {
 	/**
 	 * Assign video tags to a post.
 	 *
-	 * Creates terms in the video_tag taxonomy if they don't yet exist.
+	 * Creates terms in the yousync_tag taxonomy if they don't yet exist.
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param string[] $tags    Tag strings from YouTube.
 	 * @return void
 	 */
 	private function assign_video_tags( int $post_id, array $tags ): void {
-		wp_set_object_terms( $post_id, $tags, 'video_tag' );
+		wp_set_object_terms( $post_id, $tags, 'yousync_tag' );
 	}
 
 	/**
@@ -358,10 +358,10 @@ class Video_Importer {
 	private function assign_video_category( int $post_id, string $category_id ): void {
 		$term_name = self::YOUTUBE_CATEGORIES[ $category_id ] ?? "Category {$category_id}";
 
-		$term = get_term_by( 'slug', $category_id, 'video_category' );
+		$term = get_term_by( 'slug', $category_id, 'yousync_category' );
 
 		if ( ! $term ) {
-			$result = wp_insert_term( $term_name, 'video_category', array( 'slug' => $category_id ) );
+			$result = wp_insert_term( $term_name, 'yousync_category', array( 'slug' => $category_id ) );
 			if ( is_wp_error( $result ) ) {
 				return;
 			}
@@ -370,7 +370,7 @@ class Video_Importer {
 			$term_id = $term->term_id;
 		}
 
-		wp_set_object_terms( $post_id, array( $term_id ), 'video_category' );
+		wp_set_object_terms( $post_id, array( $term_id ), 'yousync_category' );
 	}
 
 	/**

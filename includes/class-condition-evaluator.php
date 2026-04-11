@@ -113,7 +113,7 @@ class Condition_Evaluator {
 				return isset( $video_data['duration_seconds'] ) ? (int) $video_data['duration_seconds'] : null;
 			case 'published_date':
 				return $video_data['published_at'] ?? null;
-			case 'video_category':
+			case 'yousync_category':
 				return $video_data['category_id'] ?? null;
 			case 'view_count':
 				return isset( $video_data['view_count'] ) ? (int) $video_data['view_count'] : null;

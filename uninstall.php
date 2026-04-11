@@ -46,7 +46,7 @@ if ( get_option( 'yousync_delete_on_uninstall' ) ) {
 	}
 
 	// --- Delete all terms for YouSync taxonomies ---
-	$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'video_tag', 'video_category' );
+	$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'yousync_tag', 'yousync_category' );
 
 	// Collect term IDs and term_taxonomy IDs for bulk deletion.
 	$placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
