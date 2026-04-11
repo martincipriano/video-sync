@@ -726,6 +726,11 @@ body.term-php.taxonomy-yousync_channel #ys-channel-hero {
   user-select: none;
 }
 
+.ys-sync-rule--syncing .ys-sync-rule-header .ys-toggle {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .ys-syncing-badge {
   align-items: center;
   animation: ys-syncing-pulse 1.5s ease-in-out infinite;

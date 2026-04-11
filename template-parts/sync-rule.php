@@ -66,10 +66,11 @@ if ( $show_specific_metadata && $resource ) {
 		</label>
 		<?php if ( $is_syncing ) : ?>
 		<span class="ys-syncing-badge"><?php esc_html_e( 'Syncing...', 'yousync' ); ?></span>
-		<?php endif; ?>
+		<?php else : ?>
 		<button type="button" class="button ys-remove-rule">
 			<?php esc_html_e( 'Remove', 'yousync' ); ?>
 		</button>
+		<?php endif; ?>
 	</div>
 
 	<div class="ys-sync-rule-body">
