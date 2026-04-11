@@ -23,7 +23,7 @@ class Channel {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 		add_action( 'yousync_channel_add_form_fields', array( $this, 'add_channel_fields' ) );
-		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_channel_hero' ), 10, 2 );
+		add_action( 'yousync_channel_edit_form', array( $this, 'render_channel_hero' ), 10, 2 );
 		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_sidebar' ), 15, 2 );
 		add_action( 'yousync_channel_edit_form_fields', array( $this, 'edit_channel_fields' ), 10, 2 );
 		add_action( 'created_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );

@@ -731,7 +731,6 @@ body.term-php.taxonomy-yousync_playlist #wpbody-content {
 }
 body.term-php.taxonomy-yousync_channel #wpbody-content > #screen-meta,
 body.term-php.taxonomy-yousync_channel #wpbody-content > #screen-meta-links,
-body.term-php.taxonomy-yousync_channel #wpbody-content > #ys-channel-hero,
 body.term-php.taxonomy-yousync_channel #wpbody-content > .clear,
 body.term-php.taxonomy-yousync_playlist #wpbody-content > #screen-meta,
 body.term-php.taxonomy-yousync_playlist #wpbody-content > #screen-meta-links,
@@ -764,6 +763,14 @@ body.term-php.taxonomy-yousync_playlist .ys-term-sidebar {
   body.term-php.taxonomy-yousync_playlist .ys-term-sidebar {
     display: none;
   }
+}
+
+body.term-php.taxonomy-yousync_channel #edittag {
+  display: flex;
+  flex-direction: column;
+}
+body.term-php.taxonomy-yousync_channel #ys-channel-hero {
+  order: -1;
 }
 
 /*# sourceMappingURL=admin.css.map */
