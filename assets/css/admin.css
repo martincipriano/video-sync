@@ -688,7 +688,7 @@ label[for^="ys-action-"] {
  * Upgrade sidebar — fixed, right-side
  */
 body.yousync-has-sidebar #wpcontent {
-  padding-right: 320px;
+  padding-right: 360px;
 }
 .ys-admin-sidebar {
   bottom: 0;
