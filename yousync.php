@@ -153,6 +153,7 @@ register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
 require_once plugin_dir_path( __FILE__ ) . 'includes/settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-channel.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-playlist.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-admin-sidebar.php';
 
 // Load sync engine.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-youtube-api.php';

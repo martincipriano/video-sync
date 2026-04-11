@@ -15,19 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php settings_errors( 'yousync_api_key' ); ?>
 
-	<div class="ys-page-container">
-		<div class="ys-page-content">
-			<form method="post" action="options.php">
-				<?php
-				settings_fields( 'yousync_settings_group' );
-				do_settings_sections( 'yousync_settings' );
-				submit_button();
-				?>
-			</form>
-		</div>
-
-		<div class="ys-page-sidebar">
-			<?php yousync_get_template_part( 'sidebar' ); ?>
-		</div>
-	</div>
+	<form method="post" action="options.php">
+		<?php
+		settings_fields( 'yousync_settings_group' );
+		do_settings_sections( 'yousync_settings' );
+		submit_button();
+		?>
+	</form>
 </div>

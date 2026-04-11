@@ -24,7 +24,6 @@ class Playlist {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 		add_action( 'yousync_playlist_add_form_fields', array( $this, 'add_playlist_fields' ) );
 		add_action( 'yousync_playlist_edit_form_fields', array( $this, 'edit_playlist_fields' ), 10, 2 );
-		add_action( 'yousync_playlist_pre_edit_form', array( $this, 'render_sidebar' ), 10, 2 );
 		add_action( 'created_yousync_playlist', array( $this, 'save_playlist_meta' ), 10, 2 );
 		add_action( 'edited_yousync_playlist', array( $this, 'save_playlist_meta' ), 10, 2 );
 		add_filter( 'manage_edit-yousync_playlist_columns', array( $this, 'add_playlist_columns' ) );
@@ -189,16 +188,6 @@ class Playlist {
 	}
 
 	/**
-	 * Render the upgrade sidebar before the edit form.
-	 *
-	 * @return void
-	 */
-	public function render_sidebar(): void {
-		echo '<div class="ys-term-sidebar">';
-		yousync_get_template_part( 'sidebar' );
-		echo '</div>';
-	}
-
 	/**
 	 * Hide Screen Options button on the term edit page.
 	 *
