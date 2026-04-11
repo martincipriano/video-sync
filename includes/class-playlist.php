@@ -24,7 +24,7 @@ class Playlist {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 		add_action( 'yousync_playlist_add_form_fields', array( $this, 'add_playlist_fields' ) );
 		add_action( 'yousync_playlist_edit_form_fields', array( $this, 'edit_playlist_fields' ), 10, 2 );
-		add_action( 'yousync_playlist_edit_form', array( $this, 'render_sidebar' ), 10, 2 );
+		add_action( 'yousync_playlist_pre_edit_form', array( $this, 'render_sidebar' ), 10, 2 );
 		add_action( 'created_yousync_playlist', array( $this, 'save_playlist_meta' ), 10, 2 );
 		add_action( 'edited_yousync_playlist', array( $this, 'save_playlist_meta' ), 10, 2 );
 		add_filter( 'manage_edit-yousync_playlist_columns', array( $this, 'add_playlist_columns' ) );
@@ -217,27 +217,6 @@ class Playlist {
 		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
 		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), filemtime( YOUSYNC_PLUGIN_DIR . 'assets/js/admin.js' ), true );
 
-		wp_add_inline_script(
-			'yousync-admin',
-			'document.addEventListener("DOMContentLoaded", function () {
-				var form = document.getElementById("edittag");
-				var sidebar = form && form.querySelector(".ys-term-sidebar");
-				if ( form && sidebar ) {
-					sidebar.parentNode.removeChild( sidebar );
-					var content = document.createElement("div");
-					content.className = "ys-page-content";
-					while ( form.firstChild ) { content.appendChild( form.firstChild ); }
-					var sidebarWrap = document.createElement("div");
-					sidebarWrap.className = "ys-page-sidebar";
-					sidebarWrap.appendChild( sidebar );
-					var container = document.createElement("div");
-					container.className = "ys-page-container";
-					container.appendChild( content );
-					container.appendChild( sidebarWrap );
-					form.appendChild( container );
-				}
-			});'
-		);
 		wp_localize_script( 'yousync-admin', 'youSync', array(
 			'operators' => array(
 				'text'   => yousync_return_template_part( 'options', 'text-operators', array( 'operator' => '' ) ),

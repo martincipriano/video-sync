@@ -718,4 +718,45 @@ label[for^="ys-action-"] {
   }
 }
 
+/**
+ * Term edit page (channel/playlist) — two-column layout
+ */
+body.term-php .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+body.term-php .wrap > h1,
+body.term-php .wrap > .notice,
+body.term-php .wrap > .updated,
+body.term-php .wrap > .error,
+body.term-php .wrap > #ys-channel-hero {
+  flex: 0 0 100%;
+}
+body.term-php .wrap > form#edittag {
+  flex: 1;
+  min-width: 0;
+  order: 1;
+}
+body.term-php .wrap > .ys-term-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  order: 2;
+  position: sticky;
+  top: 32px;
+}
+@media (max-width: 1200px) {
+  body.term-php .wrap > form#edittag,
+  body.term-php .wrap > .ys-term-sidebar {
+    flex: 0 0 100%;
+    order: 0;
+    position: static;
+    width: 100%;
+  }
+  body.term-php .wrap > .ys-term-sidebar {
+    order: -1;
+  }
+}
+
 /*# sourceMappingURL=admin.css.map */

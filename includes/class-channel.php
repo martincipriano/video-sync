@@ -25,7 +25,7 @@ class Channel {
 		add_action( 'yousync_channel_add_form_fields', array( $this, 'add_channel_fields' ) );
 		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_channel_hero' ), 10, 2 );
 		add_action( 'yousync_channel_edit_form_fields', array( $this, 'edit_channel_fields' ), 10, 2 );
-		add_action( 'yousync_channel_edit_form', array( $this, 'render_sidebar' ), 10, 2 );
+		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_sidebar' ), 15, 2 );
 		add_action( 'created_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );
 		add_action( 'edited_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );
 		add_filter( 'manage_edit-yousync_channel_columns', array( $this, 'add_channel_columns' ) );
@@ -302,23 +302,6 @@ class Channel {
 			'document.addEventListener("DOMContentLoaded", function () {
 				var hero = document.getElementById("ys-channel-hero");
 				if ( hero ) { hero.style.opacity = "1"; }
-
-				var form = document.getElementById("edittag");
-				var sidebar = form && form.querySelector(".ys-term-sidebar");
-				if ( form && sidebar ) {
-					sidebar.parentNode.removeChild( sidebar );
-					var content = document.createElement("div");
-					content.className = "ys-page-content";
-					while ( form.firstChild ) { content.appendChild( form.firstChild ); }
-					var sidebarWrap = document.createElement("div");
-					sidebarWrap.className = "ys-page-sidebar";
-					sidebarWrap.appendChild( sidebar );
-					var container = document.createElement("div");
-					container.className = "ys-page-container";
-					container.appendChild( content );
-					container.appendChild( sidebarWrap );
-					form.appendChild( container );
-				}
 			});'
 		);
 	}
