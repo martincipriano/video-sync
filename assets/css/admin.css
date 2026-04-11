@@ -722,14 +722,17 @@ label[for^="ys-action-"] {
 /**
  * Term edit page (channel/playlist) sidebar
  */
-body.term-php #wpbody {
+body.term-php.taxonomy-yousync_channel #wpbody,
+body.term-php.taxonomy-yousync_playlist #wpbody {
   padding-right: 20px;
 }
-body.term-php .wrap {
+body.term-php.taxonomy-yousync_channel .wrap,
+body.term-php.taxonomy-yousync_playlist .wrap {
   position: relative;
   padding-right: 300px; /* 260px sidebar + 20px right margin + 20px gap */
 }
-body.term-php .ys-term-sidebar {
+body.term-php.taxonomy-yousync_channel .ys-term-sidebar,
+body.term-php.taxonomy-yousync_playlist .ys-term-sidebar {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -739,13 +742,16 @@ body.term-php .ys-term-sidebar {
   width: 260px;
 }
 @media (max-width: 782px) {
-  body.term-php #wpbody {
+  body.term-php.taxonomy-yousync_channel #wpbody,
+  body.term-php.taxonomy-yousync_playlist #wpbody {
     padding-right: 0;
   }
-  body.term-php .wrap {
+  body.term-php.taxonomy-yousync_channel .wrap,
+  body.term-php.taxonomy-yousync_playlist .wrap {
     padding-right: 0;
   }
-  body.term-php .ys-term-sidebar {
+  body.term-php.taxonomy-yousync_channel .ys-term-sidebar,
+  body.term-php.taxonomy-yousync_playlist .ys-term-sidebar {
     display: none;
   }
 }
