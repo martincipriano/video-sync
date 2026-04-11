@@ -736,7 +736,6 @@ body.term-php.taxonomy-yousync_channel #ys-channel-hero {
   animation: ys-syncing-pulse 1.5s ease-in-out infinite;
   color: #1d2327;
   display: inline-flex;
-  font-weight: 600;
   gap: 6px;
   line-height: 1;
 }
