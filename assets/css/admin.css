@@ -728,7 +728,6 @@ body.term-php.taxonomy-yousync_playlist #wpbody {
 }
 body.term-php.taxonomy-yousync_channel .wrap,
 body.term-php.taxonomy-yousync_playlist .wrap {
-  position: relative;
   padding-right: 300px; /* 260px sidebar + 20px right margin + 20px gap */
 }
 body.term-php.taxonomy-yousync_channel .ys-term-sidebar,
