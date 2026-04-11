@@ -380,7 +380,7 @@
 label[for^="ys-sync-schedule-"],
 label[for^="ys-action-"] {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 }
 .ys-text, .ys-number, .ys-select {
   display: block;
