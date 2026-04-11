@@ -48,7 +48,14 @@ class Admin_Sidebar {
 	 */
 	private function is_sidebar_screen(): bool {
 		$screen = get_current_screen();
-		return $screen && in_array( $screen->id, $this->screen_ids, true );
+		if ( ! $screen ) {
+			return false;
+		}
+		// On taxonomy list pages never show the sidebar — only on term edit pages.
+		if ( 'edit-tags' === $screen->base ) {
+			return false;
+		}
+		return in_array( $screen->id, $this->screen_ids, true );
 	}
 
 	/**
