@@ -24,6 +24,7 @@ class Channel {
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 		add_action( 'yousync_channel_add_form_fields', array( $this, 'add_channel_fields' ) );
 		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_channel_hero' ), 10, 2 );
+		add_action( 'yousync_channel_pre_edit_form', array( $this, 'render_sidebar' ), 15, 2 );
 		add_action( 'yousync_channel_edit_form_fields', array( $this, 'edit_channel_fields' ), 10, 2 );
 		add_action( 'created_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );
 		add_action( 'edited_yousync_channel', array( $this, 'save_channel_meta' ), 10, 2 );
@@ -238,6 +239,17 @@ class Channel {
 		<div class="ys-sync-rules" id="ys-sync-rules" data-video-count="<?php echo (int) $video_count; ?>"><?php echo $html; ?></div>
 		<p class="description ys-mb-3"><?php esc_html_e( 'Sync rules run via WP-Cron and require site traffic to trigger. For reliable scheduling, configure a server-side cron job with your host.', 'yousync' ); ?></p>
 		<?php
+	}
+
+	/**
+	 * Render the upgrade sidebar before the edit form.
+	 *
+	 * @return void
+	 */
+	public function render_sidebar(): void {
+		echo '<div class="ys-term-sidebar">';
+		yousync_get_template_part( 'sidebar' );
+		echo '</div>';
 	}
 
 	/**

@@ -719,4 +719,27 @@ label[for^="ys-action-"] {
 }
 
 
+/**
+ * Term edit page (channel/playlist) sidebar
+ */
+body.term-php .wrap {
+  position: relative;
+  padding-right: 280px;
+}
+body.term-php .ys-term-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 260px;
+}
+@media (max-width: 1200px) {
+  body.term-php .wrap {
+    padding-right: 0;
+  }
+  body.term-php .ys-term-sidebar {
+    position: static;
+    width: 100%;
+  }
+}
+
 /*# sourceMappingURL=admin.css.map */
