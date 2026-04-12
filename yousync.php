@@ -32,6 +32,16 @@ define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // and also skips the deactivation hook, which would otherwise unschedule all
 // of Pro's sync cron events if the user deactivates the free plugin.
 if ( defined( 'YOUSYNC_PRO_VERSION' ) ) {
+	add_action( 'admin_notices', function () {
+		$deactivate_url = wp_nonce_url(
+			admin_url( 'plugins.php?action=deactivate&plugin=yousync%2Fyousync.php' ),
+			'deactivate-plugin_yousync/yousync.php'
+		);
+		echo '<div class="notice notice-info"><p>' .
+			esc_html__( 'YouSync Pro is active — the free version is dormant and can be safely deactivated.', 'yousync' ) .
+			' <a href="' . esc_url( $deactivate_url ) . '">' . esc_html__( 'Deactivate free version', 'yousync' ) . '</a>' .
+		'</p></div>';
+	} );
 	return;
 }
 
