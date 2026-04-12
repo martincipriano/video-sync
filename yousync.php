@@ -610,9 +610,9 @@ add_action( 'admin_menu', 'yousync_reorder_submenu', 999 );
  *
  * @return void
  */
-add_action( 'admin_init', function (): void {
+add_action( 'load-post-new.php', function (): void {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( 'post-new.php' === $GLOBALS['pagenow'] && isset( $_GET['post_type'] ) && 'yousync_videos' === $_GET['post_type'] ) {
+	if ( isset( $_GET['post_type'] ) && 'yousync_videos' === $_GET['post_type'] ) {
 		wp_safe_redirect( admin_url( 'edit.php?post_type=yousync_videos' ) );
 		exit;
 	}
