@@ -551,9 +551,13 @@ function yousync_admin_post_thumbnail_html( string $content, int $post_id, $thum
 add_filter( 'admin_post_thumbnail_html', 'yousync_admin_post_thumbnail_html', 10, 3 );
 
 /**
- * Reorder YouSync submenu items.
+ * Reorder YouSync submenu items and remove "Add New Video".
  *
- * Enforces the order: Videos, Add New Video, Categories, Tags, Channels, Playlists, Settings.
+ * Videos are created exclusively by the sync engine — manual creation produces
+ * posts without YouTube metadata and breaks deduplication. The "Add New" item
+ * is removed from the submenu and direct URL access is blocked via admin_init.
+ *
+ * Enforces the order: Videos, Channels, Playlists, Categories, Tags, Logs, Settings.
  *
  * Uses str_contains for taxonomy slugs because WordPress omits the &post_type=
  * suffix when a taxonomy uses a custom show_in_menu string.
@@ -571,17 +575,22 @@ function yousync_reorder_submenu(): void {
 
 	$position = static function ( string $slug ): int {
 		if ( 'edit.php?post_type=yousync_videos' === $slug ) return 0;
-		if ( 'post-new.php?post_type=yousync_videos' === $slug ) return 1;
-		if ( str_contains( $slug, 'taxonomy=yousync_channel' ) ) return 2;
-		if ( str_contains( $slug, 'taxonomy=yousync_playlist' ) ) return 3;
-		if ( str_contains( $slug, 'taxonomy=yousync_category' ) ) return 4;
-		if ( str_contains( $slug, 'taxonomy=yousync_tag' ) ) return 5;
-		if ( 'yousync_logs' === $slug ) return 6;
-		if ( 'yousync_settings' === $slug ) return 7;
+		if ( str_contains( $slug, 'taxonomy=yousync_channel' ) ) return 1;
+		if ( str_contains( $slug, 'taxonomy=yousync_playlist' ) ) return 2;
+		if ( str_contains( $slug, 'taxonomy=yousync_category' ) ) return 3;
+		if ( str_contains( $slug, 'taxonomy=yousync_tag' ) ) return 4;
+		if ( 'yousync_logs' === $slug ) return 5;
+		if ( 'yousync_settings' === $slug ) return 6;
 		return PHP_INT_MAX;
 	};
 
-	$items = array_values( $submenu[ $parent ] );
+	// Remove "Add New Video" — videos are sync-engine-only.
+	$items = array_values( array_filter(
+		$submenu[ $parent ],
+		static function ( array $item ): bool {
+			return 'post-new.php?post_type=yousync_videos' !== $item[2];
+		}
+	) );
 
 	usort( $items, static function ( array $a, array $b ) use ( $position ): int {
 		return $position( $a[2] ) - $position( $b[2] );
@@ -590,6 +599,22 @@ function yousync_reorder_submenu(): void {
 	$submenu[ $parent ] = $items;
 }
 add_action( 'admin_menu', 'yousync_reorder_submenu', 999 );
+
+/**
+ * Block direct access to the "Add New Video" screen.
+ *
+ * Redirects post-new.php?post_type=yousync_videos to the video list.
+ * Videos must be created by the sync engine to ensure valid YouTube metadata.
+ *
+ * @return void
+ */
+add_action( 'admin_init', function (): void {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( 'post-new.php' === $GLOBALS['pagenow'] && isset( $_GET['post_type'] ) && 'yousync_videos' === $_GET['post_type'] ) {
+		wp_safe_redirect( admin_url( 'edit.php?post_type=yousync_videos' ) );
+		exit;
+	}
+} );
 
 /**
  * Add thumbnail and protected columns to the yousync_videos post list.
