@@ -296,6 +296,8 @@ function yousync_init() {
 			'menu_icon'           => 'dashicons-video-alt3',
 			'has_archive'         => $video_has_archive,
 			'rewrite'             => $video_rewrite,
+			'capabilities'        => array( 'create_posts' => 'do_not_allow' ),
+			'map_meta_cap'        => true,
 			'supports'            => array(
 				'title',
 				'editor',
