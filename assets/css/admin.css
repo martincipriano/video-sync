@@ -724,6 +724,43 @@ label[for^=ys-custom-schedule-] {
 .ys-sidebar-widget li:last-child {
   margin-bottom: 0;
 }
+.ys-faq-widget details {
+  border-top: 1px solid #dcdcde;
+  padding-top: 8px;
+}
+.ys-faq-widget details:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.ys-faq-widget summary {
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  color: #1d2327;
+  list-style: none;
+  padding-right: 16px;
+  position: relative;
+}
+.ys-faq-widget summary::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-weight: 400;
+}
+.ys-faq-widget details[open] summary::after {
+  content: "−";
+}
+.ys-faq-widget details p {
+  font-size: 13px;
+  color: #646970;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+.ys-faq-widget .ys-faq-all-link {
+  font-size: 13px;
+}
+
 .ys-upgrade-widget .button {
   width: 100%;
   text-align: center;
