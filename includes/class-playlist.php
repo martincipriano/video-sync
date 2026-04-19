@@ -181,9 +181,8 @@ class Playlist {
 				'source_type' => 'playlist',
 			) );
 		} ?>
-		<p class="ys-mb-3"><strong>Sync Rules</strong> &mdash; <a class="ys-add-rule" href="#" id="ys-add-rule"><?php esc_html_e( '+ Add sync rule', 'yousync' ); ?></a></p>
+		<p class="ys-mb-3"><button type="button" class="button" id="ys-add-rule"><?php esc_html_e( '+ Add sync rule', 'yousync' ); ?></button></p>
 		<div class="ys-sync-rules" id="ys-sync-rules" data-video-count="<?php echo (int) $video_count; ?>"><?php echo $html; ?></div>
-		<p class="description ys-mb-3"><?php esc_html_e( 'Sync rules run via WP-Cron and require site traffic to trigger. For reliable scheduling, configure a server-side cron job with your host.', 'yousync' ); ?></p>
 		<?php
 	}
 
