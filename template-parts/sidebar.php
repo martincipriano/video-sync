@@ -36,6 +36,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<summary><?php esc_html_e( 'Why did my sync fail?', 'yousync' ); ?></summary>
 		<p><?php esc_html_e( 'Check the Logs page for details. Common causes: an expired or missing YouTube API key, or daily quota exhausted. Fix the cause and the next scheduled run will retry automatically.', 'yousync' ); ?></p>
 	</details>
+	<details>
+		<summary><?php esc_html_e( 'Can I use multiple sync rules?', 'yousync' ); ?></summary>
+		<p><?php esc_html_e( 'Yes. Each rule runs independently on its own schedule. Use multiple rules to combine different actions — for example, sync new videos daily and update all metadata weekly.', 'yousync' ); ?></p>
+	</details>
 	<a href="<?php echo esc_url( 'https://wpbuoy.com/product/yousync/#faqs' ); ?>" target="_blank" class="button button-secondary" style="text-align: center;"><?php esc_html_e( 'View all FAQs', 'yousync' ); ?></a>
 </div>
 
