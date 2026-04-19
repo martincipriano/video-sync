@@ -724,6 +724,11 @@ label[for^=ys-custom-schedule-] {
 .ys-sidebar-widget li:last-child {
   margin-bottom: 0;
 }
+.ys-faq-widget .button {
+  box-sizing: border-box;
+  text-align: center;
+  width: 100%;
+}
 .ys-faq-widget details {
   border-top: 1px solid #dcdcde;
   padding-top: 8px;
@@ -757,10 +762,6 @@ label[for^=ys-custom-schedule-] {
   margin-top: 8px;
   margin-bottom: 0;
 }
-.ys-faq-widget .ys-faq-all-link {
-  font-size: 13px;
-}
-
 .ys-upgrade-widget .button {
   width: 100%;
   text-align: center;
