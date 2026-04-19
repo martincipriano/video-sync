@@ -22,16 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank" class="button button-secondary"><?php esc_html_e( 'View All Features', 'yousync' ); ?></a>
 </div>
 
-<div class="ys-sidebar-widget ys-support-widget">
-	<h3><?php esc_html_e( 'Need Help?', 'yousync' ); ?></h3>
-	<p><?php esc_html_e( 'Get support and documentation for YouSync.', 'yousync' ); ?></p>
-	<ul>
-		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/product/yousync/#faqs' ); ?>" target="_blank"><?php esc_html_e( 'FAQ', 'yousync' ); ?></a></li>
-		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank"><?php esc_html_e( 'Documentation', 'yousync' ); ?></a></li>
-		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/support/' ); ?>" target="_blank"><?php esc_html_e( 'Helpdesk', 'yousync' ); ?></a></li>
-	</ul>
-</div>
-
 <div class="ys-sidebar-widget ys-faq-widget">
 	<h3><?php esc_html_e( 'FAQ', 'yousync' ); ?></h3>
 	<details>
@@ -47,4 +37,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p><?php esc_html_e( 'Check the Logs page for details. Common causes: an expired or missing YouTube API key, or daily quota exhausted. Fix the cause and the next scheduled run will retry automatically.', 'yousync' ); ?></p>
 	</details>
 	<a href="<?php echo esc_url( 'https://wpbuoy.com/product/yousync/#faqs' ); ?>" target="_blank" class="button button-secondary" style="text-align: center;"><?php esc_html_e( 'View all FAQs', 'yousync' ); ?></a>
+</div>
+
+<div class="ys-sidebar-widget ys-support-widget">
+	<h3><?php esc_html_e( 'Need Help?', 'yousync' ); ?></h3>
+	<p><?php esc_html_e( 'Get support and documentation for YouSync.', 'yousync' ); ?></p>
+	<ul>
+		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/product/yousync/#faqs' ); ?>" target="_blank"><?php esc_html_e( 'FAQ', 'yousync' ); ?></a></li>
+		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank"><?php esc_html_e( 'Documentation', 'yousync' ); ?></a></li>
+		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/support/' ); ?>" target="_blank"><?php esc_html_e( 'Helpdesk', 'yousync' ); ?></a></li>
+	</ul>
 </div>
