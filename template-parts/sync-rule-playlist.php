@@ -3,7 +3,7 @@
  * Template part for displaying Playlist sync rule.
  *
  * Mirrors sync-rule.php (Channel) in structure and attribute conventions.
- * The only difference is the action dropdown contains Playlist + Video options only.
+ * The only difference is the action dropdown contains Videos options only.
  *
  * @package YouSync
  *
@@ -17,16 +17,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$term_id     = isset( $term_id ) ? (int) $term_id : 0;
-$source_type = isset( $source_type ) ? $source_type : 'playlist';
-$enabled           = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
-$schedule          = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
-$custom_schedule   = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 1;
-$action            = isset( $rule['action'] ) ? $rule['action'] : 'videos_sync_new';
+$term_id         = isset( $term_id ) ? (int) $term_id : 0;
+$source_type     = isset( $source_type ) ? $source_type : 'playlist';
+$enabled         = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
+$schedule        = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
+$custom_schedule = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 1;
+$action          = isset( $rule['action'] ) ? $rule['action'] : 'videos_sync_new';
 $specific_metadata = isset( $rule['specific_metadata'] ) ? $rule['specific_metadata'] : array();
 
 // Dual-mode: Use provided $index or fallback to {{INDEX}} placeholder for JavaScript
 $rule_index = isset( $index ) ? $index : '{{INDEX}}';
+
+// Auto-generated rule label from action + schedule
+$_action_labels = array(
+	'videos_sync_new' => __( 'Sync new videos', 'yousync' ),
+);
+$_schedule_suffixes = array(
+	'once'    => __( 'immediately after saving', 'yousync' ),
+	'hourly'  => __( 'every hour', 'yousync' ),
+	'daily'   => __( 'every day', 'yousync' ),
+	'weekly'  => __( 'every week', 'yousync' ),
+	'monthly' => __( 'every month', 'yousync' ),
+	/* translators: %d: number of hours */
+	'custom'  => sprintf( __( 'every %d hours', 'yousync' ), $custom_schedule ),
+);
+$rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'yousync' );
+$rule_schedule_suffix = $_schedule_suffixes[ $schedule ] ?? $schedule;
 
 $sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
 $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
@@ -56,22 +72,58 @@ if ( $show_specific_metadata && $resource ) {
 	}
 }
 
+// Sync status line
+$rule_sync_status = $rule['sync_status'] ?? '';
+$rule_last_synced = (int) ( $rule['last_synced'] ?? 0 );
+$rule_sync_errors = is_array( $rule['sync_errors'] ?? null ) ? $rule['sync_errors'] : array();
+$rule_next_run    = ( $term_id && '{{INDEX}}' !== $rule_index )
+	? wp_next_scheduled( 'yousync_sync_rule', array( $source_type, $term_id, (int) $rule_index ) )
+	: false;
+
+$status_first  = '';
+$status_second = '';
+
+if ( 'success' === $rule_sync_status && $rule_last_synced ) {
+	/* translators: %s: date and time */
+	$status_first = sprintf( __( 'Synced on %s.', 'yousync' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $rule_last_synced ) );
+} elseif ( 'failed' === $rule_sync_status && $rule_last_synced ) {
+	/* translators: %s: date and time */
+	$status_first = sprintf( __( 'Sync failed on %s.', 'yousync' ), wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $rule_last_synced ) );
+} else {
+	$status_first = __( "This rule hasn't synced yet.", 'yousync' );
+}
+
+if ( $enabled && ! $is_syncing ) {
+	if ( 'once' === $schedule && ! $rule_sync_status ) {
+		$status_second = __( 'Will sync on save', 'yousync' );
+	} elseif ( 'once' !== $schedule && $rule_next_run ) {
+		/* translators: %s: human-readable time difference, e.g. "2 hours" */
+		$status_second = $rule_sync_status
+			? sprintf( __( 'Runs again in %s', 'yousync' ), human_time_diff( time(), $rule_next_run ) )
+			: sprintf( __( 'Syncing in the next %s', 'yousync' ), human_time_diff( time(), $rule_next_run ) );
+	}
+}
 ?>
 
 <div class="ys-sync-rule<?php echo $is_syncing ? ' ys-sync-rule--syncing' : ''; ?>" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
 
-	<div class="ys-sync-rule-header">
-		<label class="ys-toggle">
-			<input <?php checked( $enabled, true ); ?> class="ys-rule-toggle" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][enabled]" type="checkbox" value="1">
-			<span class="ys-toggle-slider"></span>
-		</label>
-		<?php if ( $is_syncing ) : ?>
+	<?php if ( $is_syncing ) : ?>
+	<div class="ys-syncing-overlay" aria-hidden="true">
 		<span class="ys-syncing-badge"><?php esc_html_e( 'Syncing...', 'yousync' ); ?></span>
-		<?php else : ?>
-		<button type="button" class="button ys-remove-rule">
-			<?php esc_html_e( 'Remove', 'yousync' ); ?>
-		</button>
-		<?php endif; ?>
+	</div>
+	<?php endif; ?>
+
+	<div class="ys-sync-rule-header">
+		<div class="ys-rule-info">
+			<span class="ys-rule-label"><?php echo esc_html( $rule_action_label . ' ' . $rule_schedule_suffix . '.' ); ?></span>
+			<p class="ys-rule-status"><?php echo esc_html( $status_first ); ?><?php if ( $status_second ) : ?> <span class="ys-runs-again"><?php echo esc_html( $status_second ); ?>.</span><?php endif; ?></p>
+		</div>
+		<div class="ys-rule-actions">
+			<label class="ys-toggle">
+				<input <?php checked( $enabled, true ); ?> class="ys-rule-toggle" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][enabled]" type="checkbox" value="1">
+				<span class="ys-toggle-slider"></span>
+			</label>
+		</div>
 	</div>
 
 	<div class="ys-sync-rule-body">
@@ -89,6 +141,7 @@ if ( $show_specific_metadata && $resource ) {
 					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
 				</optgroup>
 			</select>
+			<p class="ys-quota-estimate ys-hidden"></p>
 		</div>
 
 		<div class="ys-form-group <?php echo $show_specific_metadata ? '' : 'ys-hidden'; ?> ys-specific-metadata-wrapper">
@@ -97,45 +150,6 @@ if ( $show_specific_metadata && $resource ) {
 				<?php if ( $show_specific_metadata ) echo $metadata_options_html; ?>
 			</select>
 		</div>
-
-	<?php
-	$rule_sync_status = $rule['sync_status'] ?? '';
-	$rule_last_synced = (int) ( $rule['last_synced'] ?? 0 );
-	$rule_sync_errors = is_array( $rule['sync_errors'] ?? null ) ? $rule['sync_errors'] : array();
-	$rule_next_run    = ( $term_id && '{{INDEX}}' !== $rule_index )
-		? wp_next_scheduled( 'yousync_sync_rule', array( $source_type, $term_id, (int) $rule_index ) )
-		: false;
-	if ( $rule_sync_status || $rule_last_synced || $rule_next_run ) :
-		$status_colors = array(
-			'success' => '#00a32a',
-			'failed'  => '#d63638',
-		);
-	?>
-	<div class="ys-rule-history ys-mt-3">
-		<?php if ( $rule_sync_status ) : ?>
-		<p class="ys-mb-0">
-			<strong><?php esc_html_e( 'Status:', 'yousync' ); ?></strong>
-			<span style="color:<?php echo esc_attr( $status_colors[ $rule_sync_status ] ?? '#757575' ); ?>; font-weight:600;">
-				<?php echo esc_html( ucfirst( str_replace( '_', ' ', $rule_sync_status ) ) ); ?>
-			</span>
-		</p>
-		<?php endif; ?>
-		<?php if ( $rule_last_synced ) : ?>
-		<p class="ys-mb-0">
-			<strong><?php esc_html_e( 'Last Synced:', 'yousync' ); ?></strong>
-			<?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $rule_last_synced ) ); ?>
-		</p>
-		<?php endif; ?>
-		<?php if ( $rule_next_run ) : ?>
-		<p class="ys-mb-0">
-			<strong><?php esc_html_e( 'Next Run:', 'yousync' ); ?></strong>
-			<?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $rule_next_run ) ); ?>
-		</p>
-		<?php endif; ?>
-	</div>
-	<?php endif; ?>
-
-	<p class="ys-quota-estimate description ys-mb-0 ys-hidden"><strong><?php esc_html_e( 'Estimated Quota:', 'yousync' ); ?></strong> <span class="ys-quota-value"></span></p>
 
 	<?php if ( ! empty( $rule_sync_errors ) ) : ?>
 	<div class="ys-rule-errors ys-mt-3" style="font-size:12px;">
@@ -152,6 +166,15 @@ if ( $show_specific_metadata && $resource ) {
 			?>
 		</p>
 		<?php endforeach; ?>
+	</div>
+	<?php endif; ?>
+
+	<?php if ( ! $is_syncing ) : ?>
+	<div class="ys-sync-rule-footer">
+		<button type="button" class="ys-remove-rule">
+			<span class="dashicons dashicons-trash" aria-hidden="true"></span>
+			<?php esc_html_e( 'Remove rule', 'yousync' ); ?>
+		</button>
 	</div>
 	<?php endif; ?>
 

@@ -1,5 +1,32 @@
 const syncRules = document.getElementById('ys-sync-rules')
 
+const scheduleSuffixes = {
+	once:    'immediately after saving',
+	hourly:  'every hour',
+	daily:   'every day',
+	weekly:  'every week',
+	monthly: 'every month',
+}
+
+/**
+ * Update the natural language label in the rule header.
+ */
+function updateRuleLabel(rule) {
+	const label    = rule.querySelector('.ys-rule-label')
+	if (!label) return
+	const actionEl   = rule.querySelector('.ys-action')
+	const scheduleEl = rule.querySelector('.ys-sync-schedule')
+	if (!actionEl || !scheduleEl) return
+
+	const actionText = actionEl.selectedOptions[0]?.textContent?.trim() || ''
+	const schedule   = scheduleEl.value
+	const suffix     = scheduleSuffixes[schedule] ?? schedule
+
+	label.textContent = actionText + ' ' + suffix + '.'
+}
+
+syncRules.querySelectorAll('.ys-sync-rule').forEach(updateRuleLabel)
+
 /**
  * Reindex all sync rules to ensure sequential numbering (0, 1, 2...)
  */
@@ -97,18 +124,21 @@ function reindexConditions(rule) {
 }
 
 /**
- * Script to enable/disable custom sync schedule number input
+ * Script to enable/disable custom sync schedule number input and update rule label
  */
 syncRules.addEventListener('change', function(e) {
 	if (e.target.classList.contains('ys-sync-schedule')) {
 		const schedule = e.target.value
 		const rule = e.target.closest('.ys-sync-rule')
 		const customSyncSchedule = rule.querySelector('.ys-custom-sync-schedule')
-		if (schedule === 'custom') {
-			customSyncSchedule.removeAttribute('disabled')	
-		} else {
-			customSyncSchedule.setAttribute('disabled', 'disabled')
+		if (customSyncSchedule) {
+			if (schedule === 'custom') {
+				customSyncSchedule.removeAttribute('disabled')
+			} else {
+				customSyncSchedule.setAttribute('disabled', 'disabled')
+			}
 		}
+		updateRuleLabel(rule)
 	}
 })
 
@@ -169,6 +199,7 @@ syncRules.addEventListener('change', function(e) {
 		} else {
 			formGroup.classList.add('ys-hidden')
 		}
+		updateRuleLabel(e.target.closest('.ys-sync-rule'))
 	}
 })
 
@@ -404,6 +435,9 @@ addRule.addEventListener('click', e => {
   const template = youSync.syncRule.rule.replaceAll('{{INDEX}}', newIndex)
 
   syncRules.insertAdjacentHTML('beforeend', template)
+
+  const newRule = syncRules.lastElementChild
+  updateRuleLabel(newRule)
 })
 
 /**
@@ -432,21 +466,19 @@ syncRules.addEventListener('click', function(e) {
  * Calculate and display estimated YouTube API quota cost for a sync rule.
  */
 function updateQuotaEstimate(rule) {
-	const el       = rule.querySelector('.ys-quota-value')
+	const el = rule.querySelector('.ys-quota-estimate')
 	if (!el) return
-	const row = el.closest('.ys-quota-estimate')
 
-	const action       = rule.querySelector('.ys-action')?.value || ''
-	const schedule     = rule.querySelector('.ys-sync-schedule')?.value || ''
-	const customHours  = parseInt(rule.querySelector('.ys-custom-sync-schedule')?.value) || 24
-	const videoCount   = parseInt(syncRules.dataset.videoCount) || 0
+	const action      = rule.querySelector('.ys-action')?.value || ''
+	const schedule    = rule.querySelector('.ys-sync-schedule')?.value || ''
+	const customHours = parseInt(rule.querySelector('.ys-custom-sync-schedule')?.value) || 24
+	const videoCount  = parseInt(syncRules.dataset.videoCount) || 0
 
-	const videoActions    = ['videos_sync_new', 'videos_update_all', 'videos_update_non_modified', 'videos_update_specific_all', 'videos_update_specific_non_modified']
-	const cheapActions    = ['channel_update_all', 'channel_update_specific', 'playlist_update_all', 'playlist_update_specific']
+	const videoActions     = ['videos_sync_new', 'videos_update_all', 'videos_update_non_modified', 'videos_update_specific_all', 'videos_update_specific_non_modified']
+	const cheapActions     = ['channel_update_all', 'channel_update_specific', 'playlist_update_all', 'playlist_update_specific']
 	const playlistsActions = ['playlists_sync_new', 'playlists_update_all', 'playlists_update_non_modified', 'playlists_update_specific_all', 'playlists_update_specific_non_modified']
 
 	let perRun = null
-	let text   = ''
 
 	if (videoActions.includes(action)) {
 		const batches = Math.ceil(Math.max(1, videoCount) / 50)
@@ -454,26 +486,26 @@ function updateQuotaEstimate(rule) {
 	} else if (cheapActions.includes(action)) {
 		perRun = 1
 	} else if (playlistsActions.includes(action)) {
-		el.textContent = '~1 unit per 50 playlists'
-		if (row) row.classList.remove('ys-hidden')
+		el.textContent = 'Approx. 1 unit per 50 playlists'
+		el.classList.remove('ys-hidden')
 		return
 	} else {
 		el.textContent = ''
-		if (row) row.classList.add('ys-hidden')
+		el.classList.add('ys-hidden')
 		return
 	}
 
-	text = `~${perRun} unit${perRun !== 1 ? 's' : ''} per run`
+	let text = `Approx. ${perRun} unit${perRun !== 1 ? 's' : ''} per run`
 
 	const multipliers = { hourly: 24, daily: 1, weekly: 1/7, monthly: 1/30 }
-	let runsPerDay = schedule === 'custom' ? 24 / customHours : (multipliers[schedule] ?? null)
+	const runsPerDay  = schedule === 'custom' ? 24 / customHours : (multipliers[schedule] ?? null)
 
 	if (runsPerDay && runsPerDay >= 1) {
-		text += ` · ~${Math.round(perRun * runsPerDay)} units/day`
+		text += ` · Approx. ${Math.round(perRun * runsPerDay)} units/day`
 	}
 
 	el.textContent = text
-	if (row) row.classList.remove('ys-hidden')
+	el.classList.remove('ys-hidden')
 }
 
 syncRules.querySelectorAll('.ys-sync-rule').forEach(updateQuotaEstimate)

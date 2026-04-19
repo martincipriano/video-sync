@@ -586,13 +586,7 @@ function yousync_reorder_submenu(): void {
 		return PHP_INT_MAX;
 	};
 
-	// Remove "Add New Video" — videos are sync-engine-only.
-	$items = array_values( array_filter(
-		$submenu[ $parent ],
-		static function ( array $item ): bool {
-			return 'post-new.php?post_type=yousync_videos' !== $item[2];
-		}
-	) );
+	$items = array_values( $submenu[ $parent ] );
 
 	usort( $items, static function ( array $a, array $b ) use ( $position ): int {
 		return $position( $a[2] ) - $position( $b[2] );

@@ -6,13 +6,46 @@
 
 /* Sync Rules Container */
 
-
-
 .ys-sync-rule-header {
-  align-items: center;
+	align-items: flex-start;
 	display: flex;
 	justify-content: space-between;
 	margin-bottom: 1.5rem;
+}
+
+/* Rule Info (label + status stacked) */
+.ys-rule-info {
+	flex: 1;
+	min-width: 0;
+}
+
+/* Rule Label */
+.ys-rule-label {
+	display: block;
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+/* Rule Status */
+.ys-rule-status {
+	font-size: 13px;
+	color: #8c8f94;
+	margin: 4px 0 0;
+}
+
+.ys-quota-estimate {
+	color: #8c8f94;
+	font-size: 12px;
+	margin-top: 4px;
+}
+
+/* Rule Actions (right side) */
+.ys-rule-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 0 0 auto;
 }
 
 /* Toggle Switch */
@@ -72,15 +105,28 @@
 
 /* Remove Button */
 .ys-remove-rule {
-	color: #b32d2e;
-	border-color: #b32d2e;
+	align-items: center;
+	background: none;
+	border: 0;
+	color: #d63638;
+	cursor: pointer;
+	display: inline-flex;
+	font-size: 13px;
+	gap: 4px;
+	padding: 0;
+
+	&:hover,
+	&:focus {
+		color: #b32d2e;
+	}
 }
 
-.ys-remove-rule:hover,
-.ys-remove-rule:focus {
-	background: #b32d2e;
-	border-color: #b32d2e;
-	color: #fff;
+/* Sync Rule Footer */
+.ys-sync-rule-footer {
+	background: #fafafa;
+	border-top: 1px solid #ccc;
+	margin: 1.25rem -1.25rem -1.25rem;
+	padding: .75rem 1.25rem;
 }
 
 /* Rule Body */
@@ -325,13 +371,8 @@
 /* Responsive */
 @media screen and (max-width: 782px) {
 	.ys-sync-rule-header {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 10px;
-	}
-
-	.ys-remove-rule {
-		align-self: flex-end;
+		flex-wrap: wrap;
+		gap: 8px;
 	}
 
 	.ys-sync-rule-body .form-table th {
@@ -464,6 +505,7 @@
 		border-radius: 4px;
 		margin-bottom: 15px;
 		padding: 1.25rem;
+		position: relative;
 		transition: opacity .3s;
 
 		&.ys-pre-remove {
@@ -540,4 +582,19 @@
 			background-color: #E6F2E8;
 		}
 	}
+}
+
+/* Syncing overlay — centered indicator over the entire card */
+.ys-syncing-overlay {
+	align-items: center;
+	background: rgba(255, 255, 255, 0.8);
+	border-radius: 4px;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 10;
 }

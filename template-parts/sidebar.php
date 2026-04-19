@@ -31,3 +31,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<li><a href="<?php echo esc_url( 'https://wpbuoy.com/support/' ); ?>" target="_blank"><?php esc_html_e( 'Helpdesk', 'yousync' ); ?></a></li>
 	</ul>
 </div>
+
+<div class="ys-sidebar-widget ys-faq-widget">
+	<h3><?php esc_html_e( 'FAQ', 'yousync' ); ?></h3>
+	<details>
+		<summary><?php esc_html_e( "Why hasn't my sync run?", 'yousync' ); ?></summary>
+		<p><?php esc_html_e( 'YouSync schedules run via WP-Cron, which requires site traffic to trigger. If your site is low-traffic or you need reliable timing, ask your host to configure a real server-side cron job.', 'yousync' ); ?></p>
+	</details>
+	<details>
+		<summary><?php esc_html_e( 'What is YouTube API quota?', 'yousync' ); ?></summary>
+		<p><?php esc_html_e( 'Google gives each project 10,000 API units per day. YouSync shows an estimate next to each rule. If you hit the limit, syncs resume the next day. You can request a higher quota in the Google Cloud Console.', 'yousync' ); ?></p>
+	</details>
+	<details>
+		<summary><?php esc_html_e( 'Why did my sync fail?', 'yousync' ); ?></summary>
+		<p><?php esc_html_e( 'Check the Logs page for details. Common causes: an expired or missing YouTube API key, or daily quota exhausted. Fix the cause and the next scheduled run will retry automatically.', 'yousync' ); ?></p>
+	</details>
+</div>
