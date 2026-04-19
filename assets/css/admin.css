@@ -452,14 +452,6 @@ label[for^=ys-custom-schedule-] {
   margin-bottom: 1rem;
   width: 95%;
 }
-.ys-sync-rules:empty::before {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  content: "No sync rules set";
-  display: block;
-  padding: 0.5rem 1rem;
-  text-align: center;
-}
 .ys-sync-rule {
   background: #fff;
   border: 1px solid #8c8f94;

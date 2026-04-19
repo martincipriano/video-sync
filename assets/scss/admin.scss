@@ -489,14 +489,6 @@
 		margin-bottom: 1rem;
 		width: 95%;
 
-		&:empty::before {
-			border: 1px solid #ccc;
-			border-radius: 4px;
-			content: 'No sync rules set';
-			display: block;
-			padding: .5rem 1rem;
-			text-align: center;
-		}
 	}
 
 	&-sync-rule {
