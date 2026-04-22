@@ -417,6 +417,7 @@ class Channel {
 	public function add_channel_columns( $columns ) {
 		$new_columns = array(
 			'cb'          => $columns['cb'],
+			'profile'     => '',
 			'name'        => $columns['name'],
 			'channel_id'  => __( 'Channel ID', 'yousync' ),
 			'sync_rules'  => __( 'Sync Rules', 'yousync' ),
@@ -438,6 +439,22 @@ class Channel {
 	 */
 	public function channel_column_content( $content, $column_name, $term_id ) {
 		switch ( $column_name ) {
+			case 'profile':
+				$meta = get_term_meta( $term_id, 'yousync_channel', true );
+				$data = $meta ? json_decode( $meta, true ) : array();
+				$pic  = isset( $data['profile_picture'] ) && is_array( $data['profile_picture'] ) ? $data['profile_picture'] : array();
+				$src  = '';
+				if ( ! empty( $pic['attachment_id'] ) ) {
+					$img = wp_get_attachment_image_src( (int) $pic['attachment_id'], 'thumbnail' );
+					$src = $img ? $img[0] : '';
+				} elseif ( ! empty( $pic['url'] ) ) {
+					$src = $pic['url'];
+				}
+				$content = $src
+					? '<img src="' . esc_url( $src ) . '" class="ys-channel-col-avatar" width="40" height="40" alt="" referrerpolicy="no-referrer">'
+					: '<div class="ys-channel-col-avatar ys-channel-col-avatar--empty"></div>';
+				break;
+
 			case 'channel_id':
 				$meta       = get_term_meta( $term_id, 'yousync_channel', true );
 				$data       = $meta ? json_decode( $meta, true ) : array();

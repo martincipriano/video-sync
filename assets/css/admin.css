@@ -571,6 +571,21 @@ label[for^=ys-custom-schedule-] {
   }
 }
 
+/* Channel profile column */
+.column-profile {
+  width: 52px;
+}
+.ys-channel-col-avatar {
+  border-radius: 50%;
+  display: block;
+  height: 40px;
+  object-fit: cover;
+  width: 40px;
+}
+.ys-channel-col-avatar--empty {
+  background: #ddd;
+}
+
 /* Thumbnail column */
 .column-yousync_thumbnail {
   width: 100px;
