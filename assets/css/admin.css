@@ -470,6 +470,9 @@ label[for^=ys-custom-schedule-] {
   gap: .4rem;
   margin-bottom: .4rem;
 }
+.ys-conditions:empty {
+  margin-bottom: 0;
+}
 .ys-conditions:empty::before {
   border: 1px solid #ccc;
   border-radius: 4px;
