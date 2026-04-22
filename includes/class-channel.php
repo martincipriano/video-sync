@@ -298,13 +298,6 @@ class Channel {
 				'rule' => yousync_return_template_part( 'sync-rule' ),
 			),
 		) );
-		wp_add_inline_script(
-			'yousync-admin',
-			'document.addEventListener("DOMContentLoaded", function () {
-				var hero = document.getElementById("ys-channel-hero");
-				if ( hero ) { hero.style.opacity = "1"; }
-			});'
-		);
 	}
 
 	/**
