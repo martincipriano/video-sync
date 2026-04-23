@@ -68,7 +68,7 @@ function yousync_render_logs_page(): void {
 	$date_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'YouSync Error Logs', 'yousync' ); ?></h1>
+		<h1><?php esc_html_e( 'YouSync Logs', 'yousync' ); ?></h1>
 
 		<?php if ( $cleared ) : ?>
 		<div class="notice notice-success is-dismissible">
@@ -76,19 +76,22 @@ function yousync_render_logs_page(): void {
 		</div>
 		<?php endif; ?>
 
-		<?php if ( ! empty( $log ) ) : ?>
-		<div style="margin:16px 0 12px; text-align:right;">
-			<form method="post" style="margin:0;">
-				<?php wp_nonce_field( 'yousync_clear_logs', 'yousync_clear_logs_nonce' ); ?>
-				<?php submit_button( __( 'Clear All Logs', 'yousync' ), 'delete', '', false ); ?>
-			</form>
-		</div>
-		<?php endif; ?>
+		<div class="ys-logs">
+			<div class="ys-logs-header">
+				<h2><?php esc_html_e( 'Logs', 'yousync' ); ?></h2>
 
-		<?php if ( empty( $log ) ) : ?>
-		<p><?php esc_html_e( 'No errors logged.', 'yousync' ); ?></p>
-		<?php else : ?>
-		<table class="wp-list-table widefat fixed striped">
+				<?php if ( ! empty( $log ) ) : ?>
+				<form method="post" style="margin:0;">
+					<?php wp_nonce_field( 'yousync_clear_logs', 'yousync_clear_logs_nonce' ); ?>
+					<?php submit_button( __( 'Clear All Logs', 'yousync' ), 'delete', '', false ); ?>
+				</form>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( empty( $log ) ) : ?>
+			<div class="ys-logs-empty"><?php esc_html_e( 'No errors logged.', 'yousync' ); ?></div>
+			<?php else : ?>
+			<table class="wp-list-table widefat fixed striped">
 			<thead>
 				<tr>
 					<th style="width:15%;"><?php esc_html_e( 'Time', 'yousync' ); ?></th>
@@ -126,7 +129,8 @@ function yousync_render_logs_page(): void {
 				<?php endforeach; ?>
 			</tbody>
 		</table>
-		<?php endif; ?>
+			<?php endif; ?>
+		</div>
 	</div>
 	<?php
 }

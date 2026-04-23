@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<li><?php esc_html_e( 'More Sync Actions', 'yousync' ); ?></li>
 		<li><?php esc_html_e( 'Sync Conditions & Filters', 'yousync' ); ?></li>
 		<li><?php esc_html_e( 'Video Protection', 'yousync' ); ?></li>
+		<li><?php esc_html_e( 'Quota Overview', 'yousync' ); ?></li>
 	</ul>
 	<a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank" class="button button-primary"><?php esc_html_e( 'Upgrade to Pro', 'yousync' ); ?></a>
 	<a href="<?php echo esc_url( 'https://wpbuoy.com/plugins/yousync/' ); ?>" target="_blank" class="button button-secondary"><?php esc_html_e( 'View All Features', 'yousync' ); ?></a>
