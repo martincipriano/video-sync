@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Sync scheduler.
  *
@@ -296,6 +298,11 @@ class Sync_Scheduler {
 	 * @return int[] Unique hour values for custom schedules.
 	 */
 	private function collect_custom_schedule_hours(): array {
+		$cached = get_transient( 'yousync_custom_schedule_hours' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		$hours = array();
 
 		foreach ( array( 'yousync_channel', 'yousync_playlist' ) as $taxonomy ) {
@@ -323,6 +330,9 @@ class Sync_Scheduler {
 			}
 		}
 
-		return array_unique( $hours );
+		$hours = array_unique( $hours );
+		set_transient( 'yousync_custom_schedule_hours', $hours, 5 * MINUTE_IN_SECONDS );
+
+		return $hours;
 	}
 }

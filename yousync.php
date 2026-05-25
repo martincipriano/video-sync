@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Plugin Name: YouSync
- * Plugin URI: https://github.com/martincipriano/yousync
+ * Plugin URI: https://wpbuoy.com/plugins/yousync/
  * Description: Sync YouTube channels and playlists to WordPress. Import new videos as a custom post type. Free version — upgrade to YouSync Pro for recurring schedules, metadata update actions, sync conditions, and video protection.
  * Version: 1.0.0
  * Author: Martin Cipriano
@@ -12,6 +14,7 @@
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP: 7.4
+ * Tested up to: 6.9
  *
  * @package YouSync
  */
@@ -31,7 +34,7 @@ define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 // taxonomies, and cron hooks. Returning here prevents duplicate registrations
 // and also skips the deactivation hook, which would otherwise unschedule all
 // of Pro's sync cron events if the user deactivates the free plugin.
-if ( defined( 'YOUSYNC_PRO_VERSION' ) ) {
+if ( defined( 'YOUSYNC_PRO' ) ) {
 	add_action( 'admin_notices', function () {
 		$deactivate_url = wp_nonce_url(
 			admin_url( 'plugins.php?action=deactivate&plugin=yousync%2Fyousync.php' ),
@@ -689,7 +692,7 @@ function yousync_enqueue_video_list_assets(): void {
 		'yousync-admin',
 		YOUSYNC_PLUGIN_URL . 'assets/css/admin.css',
 		array(),
-		filemtime( YOUSYNC_PLUGIN_DIR . 'assets/css/admin.css' )
+		YOUSYNC_VERSION
 	);
 
 	if ( 'yousync_videos' === $screen->id ) {
@@ -697,38 +700,26 @@ function yousync_enqueue_video_list_assets(): void {
 			'yousync-metabox',
 			YOUSYNC_PLUGIN_URL . 'assets/js/metabox.js',
 			array(),
-			filemtime( YOUSYNC_PLUGIN_DIR . 'assets/js/metabox.js' ),
+			YOUSYNC_VERSION,
 			true
 		);
 		return;
 	}
 
-	$nonce = wp_create_nonce( 'yousync_toggle_protection' );
-	wp_add_inline_script(
-		'jquery',
-		'var ysProtect = ' . wp_json_encode( array( 'nonce' => $nonce ) ) . ';
-document.addEventListener( "change", function( e ) {
-	var cb = e.target;
-	if ( ! cb.classList.contains( "ys-protect-checkbox" ) ) return;
-	var label  = cb.closest( ".ys-protect-toggle" );
-	var postId = label.dataset.postId;
-	var fd     = new FormData();
-	fd.append( "action",    "yousync_toggle_protection" );
-	fd.append( "post_id",   postId );
-	fd.append( "protected", cb.checked ? "1" : "0" );
-	fd.append( "nonce",     ysProtect.nonce );
-	label.style.opacity = "0.5";
-	fetch( ajaxurl, { method: "POST", body: fd } )
-		.then( function( r ) { return r.json(); } )
-		.then( function( res ) {
-			label.style.opacity = "1";
-			if ( ! res.success ) { cb.checked = ! cb.checked; }
-		} )
-		.catch( function() {
-			label.style.opacity = "1";
-			cb.checked = ! cb.checked;
-		} );
-} );'
+	wp_enqueue_script(
+		'yousync-toggle-protection',
+		YOUSYNC_PLUGIN_URL . 'assets/js/toggle-protection.js',
+		array(),
+		YOUSYNC_VERSION,
+		true
+	);
+	wp_localize_script(
+		'yousync-toggle-protection',
+		'ysProtect',
+		array(
+			'nonce'  => wp_create_nonce( 'yousync_toggle_protection' ),
+			'action' => 'yousync_toggle_protection',
+		)
 	);
 }
 add_action( 'admin_enqueue_scripts', 'yousync_enqueue_video_list_assets' );
