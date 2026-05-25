@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 $operator = $args['operator'];
 ?>
 <option disabled selected value="">&mdash; <?php esc_html_e( 'Select operator', 'yousync' ); ?> &mdash;</option>

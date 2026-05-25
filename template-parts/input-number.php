@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
   $rule_index      = isset( $rule_index ) ? $rule_index : '{{RULE_INDEX}}';
   $condition_index = isset( $condition_index ) ? $condition_index : '{{CONDITION_INDEX}}';
   $input_value     = isset( $value ) ? $value : '';

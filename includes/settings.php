@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * YouSync Settings Class
  *
@@ -51,6 +53,22 @@ class YouSyncSettings {
 					'singular_name' => __( 'Playlist', 'yousync' ),
 				),
 				'slug'   => 'ys-playlist',
+				'type'   => 'taxonomy',
+			),
+			array(
+				'labels' => array(
+					'name'          => __( 'Tags', 'yousync' ),
+					'singular_name' => __( 'Tag', 'yousync' ),
+				),
+				'slug'   => 'ys-tag',
+				'type'   => 'taxonomy',
+			),
+			array(
+				'labels' => array(
+					'name'          => __( 'Categories', 'yousync' ),
+					'singular_name' => __( 'Category', 'yousync' ),
+				),
+				'slug'   => 'ys-category',
 				'type'   => 'taxonomy',
 			),
 		);

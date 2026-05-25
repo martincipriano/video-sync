@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Channel Taxonomy Management
  *
@@ -268,9 +270,9 @@ class Channel {
 		}
 
 		wp_enqueue_style( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
-		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), filemtime( YOUSYNC_PLUGIN_DIR . 'assets/css/admin.css' ) );
+		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), YOUSYNC_VERSION );
 		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
-		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), filemtime( YOUSYNC_PLUGIN_DIR . 'assets/js/admin.js' ), true );
+		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), YOUSYNC_VERSION, true );
 		wp_localize_script( 'yousync-admin', 'youSync', array(
 			'operators' => array(
 				'text'   => yousync_return_template_part( 'options', 'text-operators', array( 'operator' => '' ) ),

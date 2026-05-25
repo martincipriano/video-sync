@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * YouTube Data API v3 wrapper.
  *

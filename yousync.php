@@ -174,8 +174,6 @@ register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
 require_once plugin_dir_path( __FILE__ ) . 'includes/settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-channel.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-playlist.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-admin-sidebar.php';
-
 // Load sync engine.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-youtube-api.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-condition-evaluator.php';
@@ -309,7 +307,10 @@ function yousync_init() {
 		)
 	);
 
-	// Register yousync_tag taxonomy.
+	// Tag taxonomy configuration.
+	$tag_enabled = ! empty( $active_archives['ys-tag']['enabled'] );
+	$tag_slug    = ! empty( $active_archives['ys-tag']['slug'] ) ? $active_archives['ys-tag']['slug'] : 'yousync-tag';
+
 	register_taxonomy(
 		'yousync_tag',
 		'yousync_videos',
@@ -324,14 +325,18 @@ function yousync_init() {
 				'add_new_item'  => __( 'Add New Video Tag', 'yousync' ),
 			),
 			'hierarchical'      => false,
-			'public'            => true,
-			'show_ui'           => true,
+			'public'            => $tag_enabled,
+			'show_ui'           => $tag_enabled,
+			'show_in_menu'      => $tag_enabled,
 			'show_admin_column' => false,
-			'rewrite'           => array( 'slug' => 'yousync-tag' ),
+			'rewrite'           => $tag_enabled ? array( 'slug' => $tag_slug ) : false,
 		)
 	);
 
-	// Register yousync_category taxonomy.
+	// Category taxonomy configuration.
+	$cat_enabled = ! empty( $active_archives['ys-category']['enabled'] );
+	$cat_slug    = ! empty( $active_archives['ys-category']['slug'] ) ? $active_archives['ys-category']['slug'] : 'yousync-category';
+
 	register_taxonomy(
 		'yousync_category',
 		'yousync_videos',
@@ -346,10 +351,11 @@ function yousync_init() {
 				'add_new_item'  => __( 'Add New Video Category', 'yousync' ),
 			),
 			'hierarchical'      => true,
-			'public'            => true,
-			'show_ui'           => true,
+			'public'            => $cat_enabled,
+			'show_ui'           => $cat_enabled,
+			'show_in_menu'      => $cat_enabled,
 			'show_admin_column' => false,
-			'rewrite'           => array( 'slug' => 'yousync-category' ),
+			'rewrite'           => $cat_enabled ? array( 'slug' => $cat_slug ) : false,
 		)
 	);
 

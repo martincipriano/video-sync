@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Video importer.
  *
@@ -85,13 +87,17 @@ class Video_Importer {
 			return $post_id;
 		}
 
-		// 2. Assign video tags.
-		if ( ! empty( $video_data['tags'] ) ) {
+		// 2. Assign video tags (if enabled in archive settings).
+		$active_archives    = get_option( 'yousync_active_archives', array() );
+		$tags_enabled       = ! empty( $active_archives['ys-tag']['enabled'] );
+		$categories_enabled = ! empty( $active_archives['ys-category']['enabled'] );
+
+		if ( $tags_enabled && ! empty( $video_data['tags'] ) ) {
 			$this->assign_video_tags( $post_id, $video_data['tags'] );
 		}
 
-		// 3. Assign video category.
-		if ( ! empty( $video_data['category_id'] ) ) {
+		// 3. Assign video category (if enabled in archive settings).
+		if ( $categories_enabled && ! empty( $video_data['category_id'] ) ) {
 			$this->assign_video_category( $post_id, $video_data['category_id'] );
 		}
 
@@ -135,6 +141,47 @@ class Video_Importer {
 		);
 
 		return ! empty( $query->posts ) ? (int) $query->posts[0] : 0;
+	}
+
+	/**
+	 * Batch-find existing yousync_videos posts by their YouTube video IDs.
+	 *
+	 * Uses a single meta_query with 'compare' => 'IN' instead of one query per ID.
+	 *
+	 * @param string[] $video_ids YouTube video IDs.
+	 * @return array<string, int> Map of video_id => post_id for found videos.
+	 */
+	public function find_posts_by_video_ids( array $video_ids ): array {
+		if ( empty( $video_ids ) ) {
+			return array();
+		}
+
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'yousync_videos',
+				'post_status'    => array( 'publish', 'draft', 'private' ),
+				'fields'         => 'ids',
+				'posts_per_page' => count( $video_ids ),
+				'no_found_rows'  => true,
+				'meta_query'     => array(
+					array(
+						'key'     => '_yousync_video_id',
+						'value'   => $video_ids,
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+
+		$map = array();
+		foreach ( $query->posts as $post_id ) {
+			$vid = get_post_meta( (int) $post_id, '_yousync_video_id', true );
+			if ( $vid ) {
+				$map[ $vid ] = (int) $post_id;
+			}
+		}
+
+		return $map;
 	}
 
 	/**

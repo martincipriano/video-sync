@@ -703,7 +703,7 @@ label[for^=ys-custom-schedule-] {
 /**
  * Sidebar widgets
  */
-.ys-sidebar-widget {
+.wpbuoy-sidebar-widget {
   background: #fff;
   border: 1px solid #c3c4c7;
   border-radius: 4px;
@@ -712,101 +712,37 @@ label[for^=ys-custom-schedule-] {
   gap: 12px;
   padding: 20px;
 }
-.ys-sidebar-widget > * {
+.wpbuoy-sidebar-widget > * {
   margin: 0;
   padding: 0;
 }
-.ys-sidebar-widget h3 {
+.wpbuoy-sidebar-widget h3 {
   font-weight: 600;
   color: #1d2327;
 }
-.ys-sidebar-widget ul {
-  padding-left: 0;
+.wpbuoy-upgrade-widget ul {
   list-style: none;
+  margin: 0;
+  padding-left: 0;
 }
-.ys-pro-features li {
+.wpbuoy-upgrade-widget ul li {
   align-items: center;
   background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="%2300a32a"><path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>');
   background-repeat: no-repeat;
   background-size: 24px 24px;
   background-position: left top;
   display: flex;
+  font-size: 13px;
+  color: #646970;
   min-height: 24px;
   padding-left: 32px;
 }
-.ys-sidebar-widget li:last-child {
-  margin-bottom: 0;
-}
-.ys-faq-widget .button {
+.wpbuoy-upgrade-widget .button {
   box-sizing: border-box;
   text-align: center;
   width: 100%;
-}
-.ys-faq-widget details {
-  border-top: 1px solid #dcdcde;
-  padding-top: 8px;
-}
-.ys-faq-widget details:first-of-type {
-  border-top: 0;
-  padding-top: 0;
-}
-.ys-faq-widget summary {
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 13px;
-  color: #1d2327;
-  list-style: none;
-  padding-right: 16px;
-  position: relative;
-}
-.ys-faq-widget summary::after {
-  content: "+";
-  position: absolute;
-  right: 0;
-  top: 0;
-  font-weight: 400;
-}
-.ys-faq-widget details[open] summary::after {
-  content: "−";
-}
-.ys-faq-widget details p {
-  font-size: 13px;
-  color: #646970;
-  margin-top: 8px;
-  margin-bottom: 0;
-}
-.ys-upgrade-widget .button {
-  width: 100%;
-  text-align: center;
-  box-sizing: border-box;
 }
 
-/**
- * Upgrade sidebar — fixed, right-side
- */
-body.yousync-has-sidebar #wpcontent {
-  padding-right: 360px;
-}
-.ys-admin-sidebar {
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  padding: 20px 20px 20px 0;
-  position: fixed;
-  right: 0;
-  top: 32px;
-  width: 320px;
-}
-@media (max-width: 782px) {
-  body.yousync-has-sidebar #wpcontent {
-    padding-right: 0;
-  }
-  .ys-admin-sidebar {
-    display: none;
-  }
-}
 
 body.term-php.taxonomy-yousync_channel #edittag {
   display: flex;

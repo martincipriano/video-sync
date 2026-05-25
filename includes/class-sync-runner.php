@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Sync runner.
  *
@@ -233,11 +235,9 @@ class Sync_Runner {
 
 		// Already-imported videos: just assign the source term so the post is
 		// associated with this channel/playlist too (a video can belong to many).
-		foreach ( $existing_ids_here as $video_id ) {
-			$post_id = $this->importer->find_post_by_video_id( $video_id );
-			if ( $post_id ) {
-				$this->importer->assign_term( $post_id, $source_type, $term_id );
-			}
+		$existing_post_map = $this->importer->find_posts_by_video_ids( $existing_ids_here );
+		foreach ( $existing_post_map as $video_id => $post_id ) {
+			$this->importer->assign_term( $post_id, $source_type, $term_id );
 		}
 
 		if ( empty( $new_ids ) ) {
