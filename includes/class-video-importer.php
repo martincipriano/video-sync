@@ -4,10 +4,9 @@ declare(strict_types=1);
 /**
  * Video importer.
  *
- * Creates and updates yousync_videos posts from normalised YouTube video data.
- * Thumbnails are stored as YouTube CDN URLs — no sideloading, no disk usage.
- * The post_thumbnail_html filter in yousync.php serves the YouTube URL when
- * no featured image is explicitly set by the user.
+ * Creates and updates posts from normalised YouTube video data.
+ * Post type and taxonomy destinations are read from the channel config
+ * stored in wp_options — nothing is hardcoded.
  *
  * @package YouSync
  */
@@ -22,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Video_Importer
  *
- * Handles creation and updating of yousync_videos posts.
+ * Handles creation and updating of posts synced from YouTube.
  */
 class Video_Importer {
 
@@ -62,22 +61,23 @@ class Video_Importer {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Import a YouTube video as a new yousync_videos post.
+	 * Import a YouTube video as a new post.
 	 *
 	 * Assumes the caller has already confirmed the video does not exist.
 	 *
-	 * @param array  $video_data     Normalised video data from YouTube_API::get_videos_by_ids().
-	 * @param string $source_type    'channel' or 'playlist'.
-	 * @param int    $source_term_id WordPress term ID of the source channel/playlist.
+	 * @param array $video_data Normalised video data from YouTube_API::get_videos_by_ids().
+	 * @param array $config     Channel config from yousync_channel_config option.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import( array $video_data, string $source_type, int $source_term_id ): int|\WP_Error {
+	public function import( array $video_data, array $config ): int|\WP_Error {
+		$post_type = $config['destination_post_type'] ?? 'post';
+
 		// 1. Create the post.
 		$post_id = wp_insert_post(
 			array(
 				'post_title'   => sanitize_text_field( $video_data['title'] ),
 				'post_content' => wp_kses_post( $video_data['description'] ),
-				'post_type'    => 'yousync_videos',
+				'post_type'    => $post_type,
 				'post_status'  => 'publish',
 			),
 			true // Return WP_Error on failure.
@@ -87,25 +87,18 @@ class Video_Importer {
 			return $post_id;
 		}
 
-		// 2. Assign video tags (if enabled in archive settings).
-		$active_archives    = get_option( 'yousync_active_archives', array() );
-		$tags_enabled       = ! empty( $active_archives['ys-tag']['enabled'] );
-		$categories_enabled = ! empty( $active_archives['ys-category']['enabled'] );
-
-		if ( $tags_enabled && ! empty( $video_data['tags'] ) ) {
-			$this->assign_video_tags( $post_id, $video_data['tags'] );
+		// 2. Assign video tags (if a tags taxonomy is configured).
+		if ( ! empty( $config['destination_tags_taxonomy'] ) && ! empty( $video_data['tags'] ) ) {
+			$this->assign_video_tags( $post_id, $video_data['tags'], $config['destination_tags_taxonomy'] );
 		}
 
-		// 3. Assign video category (if enabled in archive settings).
-		if ( $categories_enabled && ! empty( $video_data['category_id'] ) ) {
-			$this->assign_video_category( $post_id, $video_data['category_id'] );
+		// 3. Assign YouTube video category (if a category taxonomy is configured).
+		if ( ! empty( $config['destination_category_taxonomy'] ) && ! empty( $video_data['category_id'] ) ) {
+			$this->assign_video_category( $post_id, $video_data['category_id'], $config['destination_category_taxonomy'] );
 		}
 
-		// 4. Assign the source channel or playlist term.
-		$this->assign_source_term( $post_id, $source_type, $source_term_id );
-
-		// 5. Build and save JSON meta (thumbnail URLs stored directly, no sideloading).
-		$meta = $this->build_video_meta( $video_data, $source_type, $source_term_id, array() );
+		// 4. Build and save JSON meta (thumbnail URLs stored directly, no sideloading).
+		$meta = $this->build_video_meta( $video_data, $config, array() );
 		update_post_meta( $post_id, '_yousync_video', wp_slash( wp_json_encode( $meta ) ) );
 
 		// 6. Save flat meta keys for indexed lookups and meta_query filtering.
@@ -116,17 +109,18 @@ class Video_Importer {
 	}
 
 	/**
-	 * Find an existing yousync_videos post by its YouTube video ID.
+	 * Find an existing post by its YouTube video ID.
 	 *
 	 * Uses the flat _yousync_video_id meta key (indexed) for fast lookups.
 	 *
-	 * @param string $video_id YouTube video ID.
+	 * @param string $video_id  YouTube video ID.
+	 * @param string $post_type Post type to search within.
 	 * @return int Post ID, or 0 if not found.
 	 */
-	public function find_post_by_video_id( string $video_id ): int {
+	public function find_post_by_video_id( string $video_id, string $post_type ): int {
 		$query = new \WP_Query(
 			array(
-				'post_type'      => 'yousync_videos',
+				'post_type'      => $post_type,
 				'post_status'    => array( 'publish', 'draft', 'private' ),
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
@@ -144,21 +138,22 @@ class Video_Importer {
 	}
 
 	/**
-	 * Batch-find existing yousync_videos posts by their YouTube video IDs.
+	 * Batch-find existing posts by their YouTube video IDs.
 	 *
 	 * Uses a single meta_query with 'compare' => 'IN' instead of one query per ID.
 	 *
 	 * @param string[] $video_ids YouTube video IDs.
+	 * @param string   $post_type Post type to search within.
 	 * @return array<string, int> Map of video_id => post_id for found videos.
 	 */
-	public function find_posts_by_video_ids( array $video_ids ): array {
+	public function find_posts_by_video_ids( array $video_ids, string $post_type ): array {
 		if ( empty( $video_ids ) ) {
 			return array();
 		}
 
 		$query = new \WP_Query(
 			array(
-				'post_type'      => 'yousync_videos',
+				'post_type'      => $post_type,
 				'post_status'    => array( 'publish', 'draft', 'private' ),
 				'fields'         => 'ids',
 				'posts_per_page' => count( $video_ids ),
@@ -185,7 +180,7 @@ class Video_Importer {
 	}
 
 	/**
-	 * Update an existing yousync_videos post with fresh YouTube data.
+	 * Update an existing post with fresh YouTube data.
 	 *
 	 * Modes:
 	 *   update_all                   — Update everything (title, content, meta, taxonomies).
@@ -196,10 +191,11 @@ class Video_Importer {
 	 * @param int      $post_id           Existing post ID.
 	 * @param array    $video_data        Fresh normalised video data from the API.
 	 * @param string   $mode              One of the four mode strings above.
+	 * @param array    $config            Channel config from yousync_channel_config option.
 	 * @param string[] $specific_metadata Fields to update (used in update_specific_* modes).
 	 * @return true|\WP_Error True on success.
 	 */
-	public function update( int $post_id, array $video_data, string $mode, array $specific_metadata = array() ): bool|\WP_Error {
+	public function update( int $post_id, array $video_data, string $mode, array $config, array $specific_metadata = array() ): bool|\WP_Error {
 		// Load existing meta.
 		$raw           = get_post_meta( $post_id, '_yousync_video', true );
 		$existing_meta = is_string( $raw ) ? ( json_decode( $raw, true ) ?: array() ) : array();
@@ -211,7 +207,7 @@ class Video_Importer {
 		}
 
 		if ( in_array( $mode, array( 'update_specific_all', 'update_specific_non_modified' ), true ) ) {
-			$this->apply_selective_update( $post_id, $existing_meta, $video_data, $specific_metadata );
+			$this->apply_selective_update( $post_id, $existing_meta, $video_data, $specific_metadata, $config );
 			return true;
 		}
 
@@ -224,22 +220,15 @@ class Video_Importer {
 			)
 		);
 
-		if ( ! empty( $video_data['tags'] ) ) {
-			$this->assign_video_tags( $post_id, $video_data['tags'] );
+		if ( ! empty( $config['destination_tags_taxonomy'] ) && ! empty( $video_data['tags'] ) ) {
+			$this->assign_video_tags( $post_id, $video_data['tags'], $config['destination_tags_taxonomy'] );
 		}
 
-		if ( ! empty( $video_data['category_id'] ) ) {
-			$this->assign_video_category( $post_id, $video_data['category_id'] );
+		if ( ! empty( $config['destination_category_taxonomy'] ) && ! empty( $video_data['category_id'] ) ) {
+			$this->assign_video_category( $post_id, $video_data['category_id'], $config['destination_category_taxonomy'] );
 		}
 
-		$this->assign_source_term( $post_id, $existing_meta['sync_source_type'] ?? '', (int) ( $existing_meta['sync_source_id'] ?? 0 ) );
-
-		$meta                 = $this->build_video_meta(
-			$video_data,
-			$existing_meta['sync_source_type'] ?? '',
-			(int) ( $existing_meta['sync_source_id'] ?? 0 ),
-			$existing_meta
-		);
+		$meta                 = $this->build_video_meta( $video_data, $config, $existing_meta );
 		$meta['manual_edits'] = $manual_edits;
 
 		update_post_meta( $post_id, '_yousync_video', wp_slash( wp_json_encode( $meta ) ) );
@@ -259,13 +248,15 @@ class Video_Importer {
 	 * @param array    $existing_meta     Current decoded _yousync_video meta.
 	 * @param array    $video_data        Fresh API data.
 	 * @param string[] $specific_metadata Fields to update.
+	 * @param array    $config            Channel config.
 	 * @return void
 	 */
 	private function apply_selective_update(
 		int $post_id,
 		array $existing_meta,
 		array $video_data,
-		array $specific_metadata
+		array $specific_metadata,
+		array $config
 	): void {
 		$post_update = array( 'ID' => $post_id );
 		$meta        = $existing_meta;
@@ -283,7 +274,6 @@ class Video_Importer {
 					break;
 
 				case 'thumbnail':
-					// Refresh thumbnail URLs from the latest API data (no sideloading).
 					if ( ! empty( $video_data['thumbnails'] ) ) {
 						$thumbnails = array();
 						foreach ( $video_data['thumbnails'] as $size => $thumb ) {
@@ -298,14 +288,14 @@ class Video_Importer {
 					break;
 
 				case 'tags':
-					if ( isset( $video_data['tags'] ) ) {
-						$this->assign_video_tags( $post_id, $video_data['tags'] );
+					if ( ! empty( $config['destination_tags_taxonomy'] ) && isset( $video_data['tags'] ) ) {
+						$this->assign_video_tags( $post_id, $video_data['tags'], $config['destination_tags_taxonomy'] );
 					}
 					break;
 
 				case 'yousync_category':
-					if ( ! empty( $video_data['category_id'] ) ) {
-						$this->assign_video_category( $post_id, $video_data['category_id'] );
+					if ( ! empty( $config['destination_category_taxonomy'] ) && ! empty( $video_data['category_id'] ) ) {
+						$this->assign_video_category( $post_id, $video_data['category_id'], $config['destination_category_taxonomy'] );
 					}
 					break;
 
@@ -347,68 +337,43 @@ class Video_Importer {
 	}
 
 	/**
-	 * Assign the source channel or playlist taxonomy term to a post.
-	 *
-	 * Allows videos to be queried/filtered by the channel or playlist they
-	 * were synced from using standard WordPress taxonomy queries.
-	 *
-	 * @param int    $post_id      Post ID.
-	 * @param string $source_type  'channel' or 'playlist'.
-	 * @param int    $source_term_id WordPress term ID of the source.
-	 * @return void
-	 */
-	public function assign_term( int $post_id, string $source_type, int $source_term_id ): void {
-		$this->assign_source_term( $post_id, $source_type, $source_term_id );
-	}
-
-	private function assign_source_term( int $post_id, string $source_type, int $source_term_id ): void {
-		if ( ! $source_term_id ) {
-			return;
-		}
-
-		if ( 'playlist' === $source_type ) {
-			wp_set_object_terms( $post_id, $source_term_id, 'yousync_playlist' );
-
-			// Also assign the channel that owns this playlist.
-			$channel_term_id = (int) get_term_meta( $source_term_id, 'yousync_source_channel_term_id', true );
-			if ( $channel_term_id ) {
-				wp_set_object_terms( $post_id, $channel_term_id, 'yousync_channel' );
-			}
-		} else {
-			wp_set_object_terms( $post_id, $source_term_id, 'yousync_channel' );
-		}
-	}
-
-	/**
 	 * Assign video tags to a post.
 	 *
-	 * Creates terms in the yousync_tag taxonomy if they don't yet exist.
+	 * Creates terms in the given taxonomy if they don't yet exist.
 	 *
-	 * @param int      $post_id Post ID.
-	 * @param string[] $tags    Tag strings from YouTube.
+	 * @param int      $post_id  Post ID.
+	 * @param string[] $tags     Tag strings from YouTube.
+	 * @param string   $taxonomy Taxonomy slug to assign tags in.
 	 * @return void
 	 */
-	private function assign_video_tags( int $post_id, array $tags ): void {
-		wp_set_object_terms( $post_id, $tags, 'yousync_tag' );
+	private function assign_video_tags( int $post_id, array $tags, string $taxonomy ): void {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return;
+		}
+		wp_set_object_terms( $post_id, $tags, $taxonomy );
 	}
 
 	/**
-	 * Assign a video category to a post from a YouTube category ID.
+	 * Assign a YouTube video category to a post.
 	 *
 	 * Uses the hardcoded YOUTUBE_CATEGORIES map so no extra API call is needed.
 	 * Term slug = numeric category ID; term name = human-readable label.
 	 *
 	 * @param int    $post_id     Post ID.
 	 * @param string $category_id YouTube category ID (e.g. '10' for Music).
+	 * @param string $taxonomy    Taxonomy slug to assign the category in.
 	 * @return void
 	 */
-	private function assign_video_category( int $post_id, string $category_id ): void {
-		$term_name = self::YOUTUBE_CATEGORIES[ $category_id ] ?? "Category {$category_id}";
+	private function assign_video_category( int $post_id, string $category_id, string $taxonomy ): void {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return;
+		}
 
-		$term = get_term_by( 'slug', $category_id, 'yousync_category' );
+		$term_name = self::YOUTUBE_CATEGORIES[ $category_id ] ?? "Category {$category_id}";
+		$term      = get_term_by( 'slug', $category_id, $taxonomy );
 
 		if ( ! $term ) {
-			$result = wp_insert_term( $term_name, 'yousync_category', array( 'slug' => $category_id ) );
+			$result = wp_insert_term( $term_name, $taxonomy, array( 'slug' => $category_id ) );
 			if ( is_wp_error( $result ) ) {
 				return;
 			}
@@ -417,7 +382,7 @@ class Video_Importer {
 			$term_id = $term->term_id;
 		}
 
-		wp_set_object_terms( $post_id, array( $term_id ), 'yousync_category' );
+		wp_set_object_terms( $post_id, array( $term_id ), $taxonomy, true );
 	}
 
 	/**
@@ -425,18 +390,12 @@ class Video_Importer {
 	 *
 	 * Thumbnails are stored as URL + dimensions only — no attachment IDs.
 	 *
-	 * @param array  $video_data     Normalised video data.
-	 * @param string $source_type    'channel' or 'playlist'.
-	 * @param int    $source_term_id WordPress term ID of the source.
-	 * @param array  $existing_meta  Existing meta (used to preserve fields on update).
+	 * @param array $video_data    Normalised video data.
+	 * @param array $config        Channel config.
+	 * @param array $existing_meta Existing meta (used to preserve fields on update).
 	 * @return array Complete meta array ready for wp_json_encode.
 	 */
-	private function build_video_meta(
-		array $video_data,
-		string $source_type,
-		int $source_term_id,
-		array $existing_meta
-	): array {
+	private function build_video_meta( array $video_data, array $config, array $existing_meta ): array {
 		$thumbnails = array();
 		foreach ( $video_data['thumbnails'] ?? array() as $size => $thumb ) {
 			$thumbnails[ $size ] = array(
@@ -455,8 +414,8 @@ class Video_Importer {
 			'channel_id'           => $video_data['channel_id'],
 			'channel_title'        => $video_data['channel_title'],
 			'etag'                 => $video_data['etag'],
-			'sync_source_type'     => $source_type,
-			'sync_source_id'       => $source_term_id,
+			'sync_source_type'     => 'channel',
+			'sync_source_id'       => $config['youtube_id'] ?? '',
 			'original_title'       => $video_data['title'],
 			'original_description' => $video_data['description'],
 			'published_date'       => $video_data['published_at'],

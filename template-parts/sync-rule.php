@@ -29,8 +29,8 @@ $rule_index = isset( $index ) ? $index : '{{INDEX}}';
 
 // Auto-generated rule label from action + schedule
 $_action_labels = array(
-	'playlists_sync_new' => __( 'Sync new playlists', 'yousync' ),
-	'videos_sync_new'    => __( 'Sync new videos', 'yousync' ),
+	'playlists_sync_new' => __( 'Sync new playlists from this channel', 'yousync' ),
+	'videos_sync_new'    => __( 'Sync new videos from this channel', 'yousync' ),
 );
 $_schedule_suffixes = array(
 	'once'    => __( 'immediately after saving', 'yousync' ),
@@ -140,10 +140,10 @@ if ( $enabled && ! $is_syncing ) {
 			<label for="ys-action-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Action', 'yousync' ); ?></label>
 			<select class="ys-select ys-action" id="ys-action-<?php echo esc_attr( $rule_index ); ?>" name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][action]" required>
 				<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
-					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
+					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists from this channel', 'yousync' ); ?></option>
 				</optgroup>
 				<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
-					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
+					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos from this channel', 'yousync' ); ?></option>
 				</optgroup>
 			</select>
 			<p class="ys-quota-estimate ys-hidden"></p>

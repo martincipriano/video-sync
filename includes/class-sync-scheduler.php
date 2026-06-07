@@ -64,13 +64,6 @@ class Sync_Scheduler {
 		// Register custom cron intervals (monthly, custom-N-hour).
 		add_filter( 'cron_schedules', array( $this, 'register_custom_intervals' ) );
 
-		// Reschedule events after a channel is saved.
-		add_action( 'created_yousync_channel', array( $this, 'reschedule_channel_rules' ), 20, 2 );
-		add_action( 'edited_yousync_channel', array( $this, 'reschedule_channel_rules' ), 20, 2 );
-
-		// Reschedule events after a playlist is saved.
-		add_action( 'created_yousync_playlist', array( $this, 'reschedule_playlist_rules' ), 20, 2 );
-		add_action( 'edited_yousync_playlist', array( $this, 'reschedule_playlist_rules' ), 20, 2 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -89,38 +82,6 @@ class Sync_Scheduler {
 	 */
 	public function dispatch_sync( string $source_type, int $term_id, int $rule_index ): void {
 		$this->runner->run( $source_type, $term_id, $rule_index );
-	}
-
-	// -------------------------------------------------------------------------
-	// Reschedule entry points
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Reschedule all cron events for a channel term.
-	 *
-	 * Called at priority 20 (after Channel::save_channel_meta() at priority 10).
-	 *
-	 * @param int $term_id Term ID.
-	 * @param int $tt_id   Term taxonomy ID (unused).
-	 * @return void
-	 */
-	public function reschedule_channel_rules( int $term_id, int $tt_id ): void {
-		$data = $this->get_term_meta_data( 'channel', $term_id );
-		$this->reschedule_rules_for_term( 'channel', $term_id, $data['sync_rules'] ?? array() );
-	}
-
-	/**
-	 * Reschedule all cron events for a playlist term.
-	 *
-	 * Called at priority 20 (after Playlist::save_playlist_meta() at priority 10).
-	 *
-	 * @param int $term_id Term ID.
-	 * @param int $tt_id   Term taxonomy ID (unused).
-	 * @return void
-	 */
-	public function reschedule_playlist_rules( int $term_id, int $tt_id ): void {
-		$data = $this->get_term_meta_data( 'playlist', $term_id );
-		$this->reschedule_rules_for_term( 'playlist', $term_id, $data['sync_rules'] ?? array() );
 	}
 
 	// -------------------------------------------------------------------------
@@ -271,68 +232,22 @@ class Sync_Scheduler {
 	}
 
 	/**
-	 * Read and decode term JSON meta.
+	 * Collect unique custom_schedule hour values from the channel config.
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @return array Decoded data, or empty array if missing/invalid.
-	 */
-	private function get_term_meta_data( string $source_type, int $term_id ): array {
-		$key = 'playlist' === $source_type ? 'yousync_playlist' : 'yousync_channel';
-		$raw = get_term_meta( $term_id, $key, true );
-
-		if ( ! $raw ) {
-			return array();
-		}
-
-		$data = json_decode( $raw, true );
-		return is_array( $data ) ? $data : array();
-	}
-
-	/**
-	 * Collect unique custom_schedule hour values from all channel and playlist terms.
-	 *
-	 * Used by register_custom_intervals() to pre-register every interval that
-	 * might be needed before cron_schedules is called.
+	 * Reads from yousync_channel_config (wp_options) instead of taxonomy terms.
 	 *
 	 * @return int[] Unique hour values for custom schedules.
 	 */
 	private function collect_custom_schedule_hours(): array {
-		$cached = get_transient( 'yousync_custom_schedule_hours' );
-		if ( false !== $cached ) {
-			return $cached;
-		}
+		$config = get_option( 'yousync_channel_config', array() );
+		$hours  = array();
 
-		$hours = array();
-
-		foreach ( array( 'yousync_channel', 'yousync_playlist' ) as $taxonomy ) {
-			$terms = get_terms(
-				array(
-					'taxonomy'   => $taxonomy,
-					'hide_empty' => false,
-					'fields'     => 'ids',
-				)
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				continue;
-			}
-
-			foreach ( $terms as $term_id ) {
-				$source_type = ( 'yousync_channel' === $taxonomy ) ? 'channel' : 'playlist';
-				$data        = $this->get_term_meta_data( $source_type, (int) $term_id );
-
-				foreach ( $data['sync_rules'] ?? array() as $rule ) {
-					if ( ( $rule['schedule'] ?? '' ) === 'custom' && ! empty( $rule['custom_schedule'] ) ) {
-						$hours[] = (int) $rule['custom_schedule'];
-					}
-				}
+		foreach ( $config['sync_rules'] ?? array() as $rule ) {
+			if ( ( $rule['schedule'] ?? '' ) === 'custom' && ! empty( $rule['custom_schedule'] ) ) {
+				$hours[] = (int) $rule['custom_schedule'];
 			}
 		}
 
-		$hours = array_unique( $hours );
-		set_transient( 'yousync_custom_schedule_hours', $hours, 5 * MINUTE_IN_SECONDS );
-
-		return $hours;
+		return array_unique( $hours );
 	}
 }
