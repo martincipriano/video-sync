@@ -1,22 +1,17 @@
 <?php
 declare(strict_types=1);
-
 /**
  * Sync scheduler.
  *
- * Manages WP Cron events for YouSync sync rules. Hooks into the
- * created/edited taxonomy actions (priority 20, after the meta save at 10)
- * to reschedule events whenever a channel or playlist is saved.
+ * Manages WP Cron events for YouSync sync rules.
  *
- * All events use the single static hook 'yousync_sync_rule' with args
- * [ $source_type, $term_id, $rule_index ]. A single add_action registered
- * in the constructor ensures the listener is always available on every page
- * load — including front-end requests that trigger WP Cron.
+ * Option-based channel events use the 'yousync_channel_config_sync_rule' hook
+ * with args [ $ch_index, $rule_index ].
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
-namespace YouSync;
+namespace YouSyncPro;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,9 +26,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Scheduler {
 
 	/**
-	 * Static cron hook name used for all sync rule events.
+	 * Cron hook name used for option-based channel sync rules (Channels Page).
+	 * Args: [ $ch_index, $rule_index ] — no term ID needed.
 	 */
-	private const CRON_HOOK = 'yousync_sync_rule';
+	private const CRON_HOOK_CONFIG = 'yousync_channel_config_sync_rule';
 
 	/**
 	 * Sync runner instance.
@@ -43,13 +39,6 @@ class Sync_Scheduler {
 	private Sync_Runner $runner;
 
 	/**
-	 * Maximum rule index to scan when unscheduling.
-	 *
-	 * A term will never realistically have more rules than this.
-	 */
-	private const MAX_RULE_INDEX = 100;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param Sync_Runner $runner Sync runner to call when a cron event fires.
@@ -57,20 +46,14 @@ class Sync_Scheduler {
 	public function __construct( Sync_Runner $runner ) {
 		$this->runner = $runner;
 
-		// Always register the cron listener so WP Cron can dispatch events
-		// on any page load, not just when a term is being saved.
-		add_action( self::CRON_HOOK, array( $this, 'dispatch_sync' ), 10, 3 );
+		// Listener for option-based channel sync rules (Channels Page).
+		add_action( self::CRON_HOOK_CONFIG, array( $this, 'dispatch_config_sync' ), 10, 2 );
 
 		// Register custom cron intervals (monthly, custom-N-hour).
 		add_filter( 'cron_schedules', array( $this, 'register_custom_intervals' ) );
 
-		// Reschedule events after a channel is saved.
-		add_action( 'created_yousync_channel', array( $this, 'reschedule_channel_rules' ), 20, 2 );
-		add_action( 'edited_yousync_channel', array( $this, 'reschedule_channel_rules' ), 20, 2 );
-
-		// Reschedule events after a playlist is saved.
-		add_action( 'created_yousync_playlist', array( $this, 'reschedule_playlist_rules' ), 20, 2 );
-		add_action( 'edited_yousync_playlist', array( $this, 'reschedule_playlist_rules' ), 20, 2 );
+		// Reschedule option-based channel events when the Channels Page is saved.
+		add_action( 'yousync_reschedule_option_channels', array( $this, 'reschedule_option_channels' ), 10, 1 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -78,17 +61,16 @@ class Sync_Scheduler {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Dispatch a sync rule when the cron event fires.
+	 * Dispatch a sync rule for an option-based channel when the cron event fires.
 	 *
-	 * Called by WP Cron via the 'yousync_sync_rule' hook.
+	 * Called by WP Cron via the 'yousync_channel_config_sync_rule' hook.
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param int    $rule_index  Rule index.
+	 * @param int $ch_index   Channel index in yousync_channel_config.
+	 * @param int $rule_index Rule index within that channel's sync_rules.
 	 * @return void
 	 */
-	public function dispatch_sync( string $source_type, int $term_id, int $rule_index ): void {
-		$this->runner->run( $source_type, $term_id, $rule_index );
+	public function dispatch_config_sync( int $ch_index, int $rule_index ): void {
+		$this->runner->run_config_channel( $ch_index, $rule_index );
 	}
 
 	// -------------------------------------------------------------------------
@@ -96,31 +78,68 @@ class Sync_Scheduler {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Reschedule all cron events for a channel term.
+	 * Reschedule cron events for all option-based channels.
 	 *
-	 * Called at priority 20 (after Channel::save_channel_meta() at priority 10).
+	 * Called via the 'yousync_reschedule_option_channels' action, which is
+	 * fired by Channels_Page::save_channels() after updating the option.
 	 *
-	 * @param int $term_id Term ID.
-	 * @param int $tt_id   Term taxonomy ID (unused).
+	 * Uses the CRON_HOOK_CONFIG hook with args [ $ch_index, $rule_index ]
+	 * to avoid any term ID conflicts with the taxonomy-based system.
+	 *
+	 * @param array $channels Normalised array of channel config arrays.
 	 * @return void
 	 */
-	public function reschedule_channel_rules( int $term_id, int $tt_id ): void {
-		$data = $this->get_term_meta_data( 'channel', $term_id );
-		$this->reschedule_rules_for_term( 'channel', $term_id, $data['sync_rules'] ?? array() );
-	}
+	public function reschedule_option_channels( array $channels ): void {
+		// Capture existing scheduled events before clearing.
+		$existing_events = array();
+		foreach ( $channels as $ch_index => $channel ) {
+			foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
+				$args  = array( (int) $ch_index, (int) $rule_index );
+				$event = wp_get_scheduled_event( self::CRON_HOOK_CONFIG, $args );
+				if ( $event ) {
+					$existing_events[ (int) $ch_index ][ (int) $rule_index ] = $event;
+				}
+			}
+		}
 
-	/**
-	 * Reschedule all cron events for a playlist term.
-	 *
-	 * Called at priority 20 (after Playlist::save_playlist_meta() at priority 10).
-	 *
-	 * @param int $term_id Term ID.
-	 * @param int $tt_id   Term taxonomy ID (unused).
-	 * @return void
-	 */
-	public function reschedule_playlist_rules( int $term_id, int $tt_id ): void {
-		$data = $this->get_term_meta_data( 'playlist', $term_id );
-		$this->reschedule_rules_for_term( 'playlist', $term_id, $data['sync_rules'] ?? array() );
+		// Clear all existing option-channel events.
+		$this->unschedule_all_option_rules();
+
+		// Schedule new events. Track which rules fire immediately so we can
+		// pre-mark them as syncing before the redirect — the overlay is
+		// server-rendered and needs sync_status = 'syncing' in stored data.
+		$immediate = array();
+		foreach ( $channels as $ch_index => $channel ) {
+			foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
+				if ( empty( $rule['enabled'] ) ) {
+					continue;
+				}
+				$existing  = $existing_events[ (int) $ch_index ][ (int) $rule_index ] ?? null;
+				$fires_now = $this->schedule_option_rule( (int) $ch_index, (int) $rule_index, $rule, $existing );
+				if ( $fires_now ) {
+					$immediate[] = array( (int) $ch_index, (int) $rule_index );
+				}
+			}
+		}
+
+		if ( ! empty( $immediate ) ) {
+			// Read the option as-is to preserve the flat vs indexed format that
+			// save_channels() chose — do not overwrite the whole structure.
+			$config  = get_option( 'yousync_channel_config', array() );
+			$is_flat = is_array( $config ) && isset( $config['youtube_id'] );
+
+			foreach ( $immediate as [ $ch_idx, $rule_idx ] ) {
+				if ( $is_flat && 0 === $ch_idx ) {
+					$config['sync_rules'][ $rule_idx ]['sync_status']     = 'syncing';
+					$config['sync_rules'][ $rule_idx ]['sync_started_at'] = time();
+				} elseif ( ! $is_flat && isset( $config[ $ch_idx ] ) ) {
+					$config[ $ch_idx ]['sync_rules'][ $rule_idx ]['sync_status']     = 'syncing';
+					$config[ $ch_idx ]['sync_rules'][ $rule_idx ]['sync_started_at'] = time();
+				}
+			}
+
+			update_option( 'yousync_channel_config', $config );
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -130,9 +149,9 @@ class Sync_Scheduler {
 	/**
 	 * Register custom WP Cron intervals required by YouSync rules.
 	 *
-	 * Always registers 'yousync_monthly' (30 days). Also scans all channel
-	 * and playlist terms to collect unique 'custom' schedule values and
-	 * registers 'yousync_every_{N}h' intervals for each.
+	 * Always registers 'yousync_monthly' (30 days). Also scans option-based
+	 * channels to collect unique 'custom' schedule values and registers
+	 * 'yousync_every_{N}h' intervals for each.
 	 *
 	 * @param array $schedules Existing cron schedules.
 	 * @return array Modified schedules.
@@ -141,10 +160,10 @@ class Sync_Scheduler {
 		// Monthly (30 days) — not built into WordPress.
 		$schedules['yousync_monthly'] = array(
 			'interval' => 30 * DAY_IN_SECONDS,
-			'display'  => __( 'Once a Month (YouSync)', 'yousync' ),
+			'display'  => __( 'Once a Month (YouSync)', 'yousync-pro'),
 		);
 
-		// Collect unique custom_schedule values from all term metas.
+		// Collect unique custom_schedule values from option-based channels.
 		$custom_hours = $this->collect_custom_schedule_hours();
 
 		foreach ( $custom_hours as $hours ) {
@@ -153,92 +172,12 @@ class Sync_Scheduler {
 				$schedules[ $key ] = array(
 					'interval' => $hours * HOUR_IN_SECONDS,
 					/* translators: %d: number of hours */
-					'display'  => sprintf( __( 'Every %d Hours (YouSync)', 'yousync' ), $hours ),
+					'display'  => sprintf( __( 'Every %d Hours (YouSync)', 'yousync-pro'), $hours ),
 				);
 			}
 		}
 
 		return $schedules;
-	}
-
-	// -------------------------------------------------------------------------
-	// Core scheduling logic
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Reschedule all cron events for a term's rules.
-	 *
-	 * 1. Clears all existing YouSync cron events for this term.
-	 * 2. Schedules a new event for each enabled rule.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param array  $rules       Sync rules array from term meta.
-	 * @return void
-	 */
-	private function reschedule_rules_for_term( string $source_type, int $term_id, array $rules ): void {
-		// Clear every existing cron event for this term across all rule indices.
-		$this->unschedule_all_rules_for_term( $source_type, $term_id );
-
-		foreach ( $rules as $index => $rule ) {
-			if ( empty( $rule['enabled'] ) ) {
-				continue; // Skip disabled rules.
-			}
-
-			$this->schedule_rule( $source_type, $term_id, (int) $index, $rule );
-		}
-	}
-
-	/**
-	 * Unschedule all existing cron events for a term.
-	 *
-	 * Iterates indices 0..MAX_RULE_INDEX and unschedules any queued event
-	 * matching the static hook + args combination for this term.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @return void
-	 */
-	private function unschedule_all_rules_for_term( string $source_type, int $term_id ): void {
-		for ( $i = 0; $i < self::MAX_RULE_INDEX; $i++ ) {
-			$args      = array( $source_type, $term_id, $i );
-			$timestamp = wp_next_scheduled( self::CRON_HOOK, $args );
-
-			if ( $timestamp ) {
-				wp_unschedule_event( $timestamp, self::CRON_HOOK, $args );
-			}
-		}
-	}
-
-	/**
-	 * Schedule a single cron event for a rule.
-	 *
-	 * Uses the static 'yousync_sync_rule' hook with [ source_type, term_id,
-	 * rule_index ] as args. Skips scheduling if an event for this args
-	 * combination is already queued.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param int    $rule_index  Rule index.
-	 * @param array  $rule        Rule data array.
-	 * @return void
-	 */
-	private function schedule_rule( string $source_type, int $term_id, int $rule_index, array $rule ): void {
-		$args     = array( $source_type, $term_id, $rule_index );
-		$schedule = $rule['schedule'] ?? 'daily';
-
-		// Already scheduled — don't add another event.
-		if ( wp_next_scheduled( self::CRON_HOOK, $args ) ) {
-			return;
-		}
-
-		if ( 'once' === $schedule ) {
-			wp_schedule_single_event( time(), self::CRON_HOOK, $args );
-			return;
-		}
-
-		$interval = $this->wp_interval( $schedule, (int) ( $rule['custom_schedule'] ?? 24 ) );
-		wp_schedule_event( time(), $interval, self::CRON_HOOK, $args );
 	}
 
 	// -------------------------------------------------------------------------
@@ -271,26 +210,7 @@ class Sync_Scheduler {
 	}
 
 	/**
-	 * Read and decode term JSON meta.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @return array Decoded data, or empty array if missing/invalid.
-	 */
-	private function get_term_meta_data( string $source_type, int $term_id ): array {
-		$key = 'playlist' === $source_type ? 'yousync_playlist' : 'yousync_channel';
-		$raw = get_term_meta( $term_id, $key, true );
-
-		if ( ! $raw ) {
-			return array();
-		}
-
-		$data = json_decode( $raw, true );
-		return is_array( $data ) ? $data : array();
-	}
-
-	/**
-	 * Collect unique custom_schedule hour values from all channel and playlist terms.
+	 * Collect unique custom_schedule hour values from all option-based channels.
 	 *
 	 * Used by register_custom_intervals() to pre-register every interval that
 	 * might be needed before cron_schedules is called.
@@ -298,41 +218,87 @@ class Sync_Scheduler {
 	 * @return int[] Unique hour values for custom schedules.
 	 */
 	private function collect_custom_schedule_hours(): array {
-		$cached = get_transient( 'yousync_custom_schedule_hours' );
-		if ( false !== $cached ) {
-			return $cached;
-		}
-
 		$hours = array();
 
-		foreach ( array( 'yousync_channel', 'yousync_playlist' ) as $taxonomy ) {
-			$terms = get_terms(
-				array(
-					'taxonomy'   => $taxonomy,
-					'hide_empty' => false,
-					'fields'     => 'ids',
-				)
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+		$option_channels = yousync_pro_normalize_channels( get_option( 'yousync_channel_config', array() ) );
+		foreach ( $option_channels as $channel ) {
+			if ( ! is_array( $channel ) ) {
 				continue;
 			}
-
-			foreach ( $terms as $term_id ) {
-				$source_type = ( 'yousync_channel' === $taxonomy ) ? 'channel' : 'playlist';
-				$data        = $this->get_term_meta_data( $source_type, (int) $term_id );
-
-				foreach ( $data['sync_rules'] ?? array() as $rule ) {
-					if ( ( $rule['schedule'] ?? '' ) === 'custom' && ! empty( $rule['custom_schedule'] ) ) {
-						$hours[] = (int) $rule['custom_schedule'];
-					}
+			foreach ( $channel['sync_rules'] ?? array() as $rule ) {
+				if ( ( $rule['schedule'] ?? '' ) === 'custom' && ! empty( $rule['custom_schedule'] ) ) {
+					$hours[] = (int) $rule['custom_schedule'];
 				}
 			}
 		}
 
-		$hours = array_unique( $hours );
-		set_transient( 'yousync_custom_schedule_hours', $hours, 5 * MINUTE_IN_SECONDS );
+		return array_unique( $hours );
+	}
 
-		return $hours;
+	/**
+	 * Unschedule every existing yousync_channel_config_sync_rule event.
+	 *
+	 * Sweeps the live cron array and removes all events for this hook, whatever
+	 * their [ ch_index, rule_index ] args. This supports an unlimited number of
+	 * channels (Pro) and also clears orphaned events left behind when a channel
+	 * or rule was deleted — neither of which a fixed index bound could cover.
+	 *
+	 * @return void
+	 */
+	private function unschedule_all_option_rules(): void {
+		$crons = _get_cron_array();
+		if ( empty( $crons ) ) {
+			return;
+		}
+
+		foreach ( $crons as $timestamp => $hooks ) {
+			if ( ! isset( $hooks[ self::CRON_HOOK_CONFIG ] ) ) {
+				continue;
+			}
+			foreach ( $hooks[ self::CRON_HOOK_CONFIG ] as $event ) {
+				wp_unschedule_event( $timestamp, self::CRON_HOOK_CONFIG, $event['args'] );
+			}
+		}
+	}
+
+	/**
+	 * Schedule a single cron event for an option-based channel rule.
+	 *
+	 * Uses CRON_HOOK_CONFIG with [ $ch_index, $rule_index ] args.
+	 *
+	 * @param int         $ch_index      Channel index.
+	 * @param int         $rule_index    Rule index.
+	 * @param array       $rule          Rule data array.
+	 * @param object|null $existing_event Previously scheduled event, or null.
+	 * @return void
+	 */
+	private function schedule_option_rule( int $ch_index, int $rule_index, array $rule, ?object $existing_event = null ): bool {
+		$args     = array( $ch_index, $rule_index );
+		$schedule = $rule['schedule'] ?? 'daily';
+
+		if ( 'once' === $schedule ) {
+			wp_schedule_single_event( time(), self::CRON_HOOK_CONFIG, $args );
+			return true;
+		}
+
+		// Enforce scheduled_sync license gate — downgrade to once if unlicensed.
+		if ( ! yousync_pro_license()->is_feature_available( 'scheduled_sync' ) ) {
+			wp_schedule_single_event( time(), self::CRON_HOOK_CONFIG, $args );
+			return true;
+		}
+
+		$interval = $this->wp_interval( $schedule, (int) ( $rule['custom_schedule'] ?? 24 ) );
+
+		if ( $existing_event && $existing_event->schedule === $interval ) {
+			$start = $existing_event->timestamp;
+		} elseif ( $existing_event ) {
+			$schedules = wp_get_schedules();
+			$start     = time() + ( $schedules[ $interval ]['interval'] ?? DAY_IN_SECONDS );
+		} else {
+			$start = time();
+		}
+
+		wp_schedule_event( $start, $interval, self::CRON_HOOK_CONFIG, $args );
+		return false;
 	}
 }

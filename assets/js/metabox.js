@@ -1,38 +1,78 @@
 /**
- * Video metabox — tab switching.
+ * Post metabox — vertical tab switching.
  */
-const tabs   = document.querySelectorAll( '.yousync-mb-tab' )
-const panels = document.querySelectorAll( '.yousync-mb-panel' )
+;(function () {
+	function activateTab(box, tab) {
+		box.querySelectorAll('.ys-channel-tab-btn').forEach(function (b) {
+			var on = b.dataset.tab === tab
+			b.classList.toggle('ys-channel-tab-btn--active', on)
+			b.setAttribute('aria-selected', String(on))
+		})
+		box.querySelectorAll('.ys-channel-tab-panel').forEach(function (p) {
+			p.classList.toggle('ys-hidden', p.dataset.panel !== tab)
+		})
+	}
 
-tabs.forEach( function ( tab ) {
-	tab.addEventListener( 'click', function ( e ) {
-		e.preventDefault()
-		const target = this.dataset.tab
-		tabs.forEach( function ( t ) { t.classList.remove( 'nav-tab-active' ) } )
-		panels.forEach( function ( p ) { p.style.display = 'none' } )
-		this.classList.add( 'nav-tab-active' )
-		document.getElementById( 'yousync-panel-' + target ).style.display = 'block'
-	} )
-} )
+	document.querySelectorAll('.yousync-metabox').forEach(function (box) {
+		var first = box.querySelector('.ys-channel-tab-btn')
+		if (first) activateTab(box, first.dataset.tab)
+	})
+
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest('.ys-channel-tab-btn')
+		if (!btn) return
+		var box = btn.closest('.yousync-metabox')
+		if (!box) return
+		activateTab(box, btn.dataset.tab)
+	})
+})()
 
 /**
- * Video metabox — copy embed code button.
+ * Metabox — copy to clipboard and toast notification.
  */
-const copyBtn = document.querySelector( '.ys-copy-embed-btn' )
+;(function () {
 
-if ( copyBtn ) {
-	copyBtn.addEventListener( 'click', function () {
-		const btn   = this
-		const input = this.previousElementSibling
+	var toastEl    = null
+	var toastTimer = null
 
-		navigator.clipboard.writeText( input.value ).catch( function () {
-			input.select()
-			document.execCommand( 'copy' )
-		} )
+	function showToast() {
+		if (!toastEl) {
+			toastEl = document.createElement('div')
+			toastEl.id = 'ys-copy-toast'
+			toastEl.textContent = '✓  Copied!'
+			document.body.appendChild(toastEl)
+		}
+		toastEl.classList.add('ys-copy-toast--visible')
+		clearTimeout(toastTimer)
+		toastTimer = setTimeout(function () {
+			toastEl.classList.remove('ys-copy-toast--visible')
+		}, 1500)
+	}
 
-		btn.classList.add( 'ys-copied' )
-		setTimeout( function () {
-			btn.classList.remove( 'ys-copied' )
-		}, 1500 )
-	} )
-}
+	function copyToClipboard(text) {
+		navigator.clipboard.writeText(text).catch(function () {
+			var ta = document.createElement('textarea')
+			ta.value = text
+			ta.style.position = 'fixed'
+			ta.style.opacity  = '0'
+			document.body.appendChild(ta)
+			ta.select()
+			document.execCommand('copy')
+			document.body.removeChild(ta)
+		})
+		showToast()
+	}
+
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest('.ys-copy-sc-btn')
+		if (btn) {
+			copyToClipboard(btn.dataset.shortcode || '')
+			return
+		}
+
+		var field = e.target.closest('.ys-mb-input, .ys-mb-textarea')
+		if (field && !field.disabled) {
+			copyToClipboard(field.value)
+		}
+	})
+})()

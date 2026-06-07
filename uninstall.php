@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 /**
  * YouSync Uninstall
  *
@@ -9,7 +8,7 @@ declare(strict_types=1);
  * Only removes content (videos, channels, playlists) when the
  * "Remove all YouSync data on uninstall" setting is enabled.
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
 // Security check — WordPress sets this constant before calling uninstall.php.
@@ -27,7 +26,7 @@ wp_unschedule_hook( 'yousync_sync_rule' );
 // -------------------------------------------------------------------------
 // Always: remove dismissed-notice user meta.
 // -------------------------------------------------------------------------
-$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'yousync_cron_notice_dismissed' ) );
+$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'yousync_pro_cron_notice_dismissed' ) );
 
 // -------------------------------------------------------------------------
 // Conditionally: remove all plugin content if the user opted in.
@@ -121,7 +120,7 @@ $options = array(
 	'yousync_api_key',
 	'yousync_active_archives',
 	'yousync_delete_on_uninstall',
-	'yousync_reschedule_on_activation',
+	'yousync_pro_reschedule_on_activation',
 	'yousync_sync_log',
 );
 

@@ -1,16 +1,15 @@
 <?php
 declare(strict_types=1);
-
 /**
  * Sync rule condition evaluator.
  *
  * Stateless class that evaluates a video data array against a conditions
  * array. No WordPress dependencies — pure logic.
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
-namespace YouSync;
+namespace YouSyncPro;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +46,7 @@ class Condition_Evaluator {
 	 * Evaluate a single condition against a video data array.
 	 *
 	 * Routes to the correct type-specific evaluator using
-	 * yousync_get_condition_field_type() from yousync.php.
+	 * yousync_pro_get_condition_field_type() from yousync.php.
 	 *
 	 * Returns true for unknown fields (fail-open) to avoid silently
 	 * dropping videos when a new field hasn't been wired up yet.
@@ -68,8 +67,8 @@ class Condition_Evaluator {
 			return true;
 		}
 
-		$type = function_exists( 'yousync_get_condition_field_type' )
-			? yousync_get_condition_field_type( $field )
+		$type = function_exists( 'yousync_pro_get_condition_field_type' )
+			? yousync_pro_get_condition_field_type( $field )
 			: 'text';
 
 		switch ( $type ) {
@@ -160,6 +159,11 @@ class Condition_Evaluator {
 			case 'starts_with':
 				return mb_strpos( $haystack, $needle ) === 0;
 			case 'ends_with':
+				// Every string ends with the empty string; mb_substr(-0) would
+				// otherwise return the whole haystack and break this.
+				if ( '' === $needle ) {
+					return true;
+				}
 				return mb_substr( $haystack, -mb_strlen( $needle ) ) === $needle;
 			default:
 				return true;

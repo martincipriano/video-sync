@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
-
 /**
  * Video metabox template.
  *
- * @package YouSync
+ * @package YouSyncPro
  *
+ * @var int        $post_id               WordPress post ID.
  * @var string     $nonce_action          Nonce action for wp_nonce_field.
  * @var string     $video_id              YouTube video ID.
  * @var string     $video_url             YouTube video URL.
@@ -23,14 +23,11 @@ declare(strict_types=1);
  * @var string     $comment_count         Comment count.
  * @var string     $sync_source_type      Sync source type.
  * @var int        $last_synced           Last synced timestamp.
- * @var int        $sync_count            Number of syncs.
- * @var array      $sync_errors           Sync errors array.
  * @var array      $thumbnails            Thumbnails array.
  * @var array      $thumbnail_size_labels Thumbnail size labels.
  * @var array|null $preview_thumb         Best thumbnail array or null.
  */
 
-// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -38,228 +35,215 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php wp_nonce_field( $nonce_action, 'yousync_video_meta_nonce' ); ?>
 
 <div class="yousync-metabox">
-	<nav class="nav-tab-wrapper" style="margin-bottom:0; padding-bottom:0;">
-		<a href="#" class="nav-tab nav-tab-active yousync-mb-tab" data-tab="details"><?php esc_html_e( 'Details', 'yousync' ); ?></a>
-		<a href="#" class="nav-tab yousync-mb-tab" data-tab="yt-data"><?php esc_html_e( 'YouTube Data', 'yousync' ); ?></a>
+	<div class="ys-channel-tabs-nav" role="tablist">
+		<button type="button" class="ys-channel-tab-btn" data-tab="details" role="tab" aria-selected="false">
+			<?php esc_html_e( 'Details', 'yousync-pro' ); ?>
+		</button>
 		<?php if ( ! empty( $thumbnails ) ) : ?>
-		<a href="#" class="nav-tab yousync-mb-tab" data-tab="thumbnails"><?php esc_html_e( 'Thumbnails', 'yousync' ); ?></a>
+		<button type="button" class="ys-channel-tab-btn" data-tab="thumbnails" role="tab" aria-selected="false">
+			<?php esc_html_e( 'Images', 'yousync-pro' ); ?>
+		</button>
 		<?php endif; ?>
-		<a href="#" class="nav-tab yousync-mb-tab" data-tab="sync-status"><?php esc_html_e( 'Sync Status', 'yousync' ); ?></a>
-	</nav>
+		<button type="button" class="ys-channel-tab-btn" data-tab="sync" role="tab" aria-selected="false">
+			<?php esc_html_e( 'Sync', 'yousync-pro' ); ?>
+		</button>
+	</div>
 
-	<!-- Details -->
-	<div id="yousync-panel-details" class="yousync-mb-panel" style="padding-top:12px;">
-		<table class="form-table">
-			<?php if ( $video_id ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Video ID', 'yousync' ); ?></th>
-				<td><code><?php echo esc_html( $video_id ); ?></code></td>
-			</tr>
-			<?php endif; ?>
+	<div class="ys-channel-tabs-content">
 
-			<?php if ( $video_url ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Video URL', 'yousync' ); ?></th>
-				<td><a href="<?php echo esc_url( $video_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $video_url ); ?></a></td>
-			</tr>
-			<?php endif; ?>
+		<!-- Details -->
+		<div class="ys-channel-tab-panel ys-hidden" data-panel="details" role="tabpanel">
+			<div class="ys-mb-fields">
 
-			<?php if ( $video_id ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Embed Code', 'yousync' ); ?></th>
-				<td>
-					<div class="ys-copy-embed-wrap">
-						<input type="text" class="code" value="<?php echo esc_attr( '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_id . '" frameborder="0" allowfullscreen></iframe>' ); ?>" readonly onclick="this.select()">
-						<button type="button" class="button ys-copy-embed-btn" title="<?php esc_attr_e( 'Copy embed code', 'yousync' ); ?>"></button>
+				<?php if ( $original_title ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Original Title', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="title"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
 					</div>
-				</td>
-			</tr>
-			<?php endif; ?>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $original_title ); ?>" readonly>
+				</div>
+				<?php endif; ?>
 
-			<?php if ( $channel_id ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></th>
-				<td><code><?php echo esc_html( $channel_id ); ?></code></td>
-			</tr>
-			<?php endif; ?>
+				<?php if ( $original_description ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="description"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<textarea class="ys-mb-textarea" rows="4" readonly><?php echo esc_textarea( $original_description ); ?></textarea>
+				</div>
+				<?php endif; ?>
 
-			<tr>
-				<th scope="row">
-					<label for="yousync_manual_edits"><?php esc_html_e( 'Protected from Sync Rules', 'yousync' ); ?></label>
-				</th>
-				<td>
-					<label <?php echo $manual_edits_disabled ? 'style="opacity:0.6;"' : ''; ?>>
-						<input type="checkbox" name="yousync_manual_edits" id="yousync_manual_edits" value="1" <?php checked( $manual_edits ); ?> <?php echo $manual_edits_disabled ? 'disabled' : ''; ?>>
-						<?php esc_html_e( 'Prevent sync rules from overwriting this video', 'yousync' ); ?>
-					</label>
-					<?php if ( $manual_edits_notice ) : ?>
-					<span style="margin-left:6px; font-size:12px; color:#757575;"><?php echo esc_html( $manual_edits_notice ); ?></span>
+				<?php if ( $channel_title ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Channel', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="channel"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_title ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $published_date ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Published Date', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="published_date"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $published_date ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $duration_seconds !== '' ) : ?>
+				<?php
+				$hours        = floor( (int) $duration_seconds / 3600 );
+				$mins         = floor( ( (int) $duration_seconds % 3600 ) / 60 );
+				$secs         = (int) $duration_seconds % 60;
+				$duration_fmt = $hours > 0
+					? sprintf( '%d:%02d:%02d', $hours, $mins, $secs )
+					: sprintf( '%d:%02d', $mins, $secs );
+				?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Duration', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="duration"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $duration_fmt ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $view_count !== '' ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'View Count', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="view_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $view_count ) ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $like_count !== '' ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Like Count', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="like_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $like_count ) ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $comment_count !== '' ) : ?>
+				<div class="ys-mb-field">
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Comment Count', 'yousync-pro' ); ?></p>
+						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="comment_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+					</div>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $comment_count ) ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $video_url ) : ?>
+				<div class="ys-mb-field">
+					<p class="ys-mb-label"><?php esc_html_e( 'Video Link', 'yousync-pro' ); ?></p>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $video_url ); ?>" readonly>
+				</div>
+				<?php endif; ?>
+
+				<?php if ( $video_id || $channel_id ) : ?>
+				<details class="ys-developer-fields">
+					<summary><?php esc_html_e( 'Developer Fields', 'yousync-pro' ); ?></summary>
+
+					<?php if ( $video_id ) : ?>
+					<div class="ys-mb-field">
+						<div class="ys-mb-label-row">
+							<p class="ys-mb-label"><?php esc_html_e( 'Video ID', 'yousync-pro' ); ?></p>
+							<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="video_id"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+						</div>
+						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $video_id ); ?>" readonly>
+					</div>
 					<?php endif; ?>
-				</td>
-			</tr>
-		</table>
-	</div>
 
-	<!-- YouTube Data -->
-	<div id="yousync-panel-yt-data" class="yousync-mb-panel" style="display:none; padding-top:12px;">
-		<table class="form-table">
-			<?php if ( $original_title ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Original Title', 'yousync' ); ?></th>
-				<td><?php echo esc_html( $original_title ); ?></td>
-			</tr>
+					<?php if ( $video_id ) : ?>
+					<div class="ys-mb-field">
+						<div class="ys-mb-label-row">
+							<p class="ys-mb-label"><?php esc_html_e( 'Embed Code', 'yousync-pro' ); ?></p>
+							<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" type="embed"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+						</div>
+						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_id . '" frameborder="0" allowfullscreen></iframe>' ); ?>" readonly class="ys-mb-input ys-mb-input--url">
+					</div>
+					<?php endif; ?>
+
+					<?php if ( $channel_id ) : ?>
+					<div class="ys-mb-field">
+						<div class="ys-mb-label-row">
+							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync-pro' ); ?></p>
+							<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="channel_id"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+						</div>
+						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
+					</div>
+					<?php endif; ?>
+
+				</details>
+				<?php endif; ?>
+
+			</div>
+		</div>
+
+		<!-- Images -->
+		<?php if ( ! empty( $thumbnails ) ) : ?>
+		<div class="ys-channel-tab-panel ys-hidden" data-panel="thumbnails" role="tabpanel">
+			<?php if ( $preview_thumb ) : ?>
+			<div class="ys-mb-thumb-preview">
+				<img src="<?php echo esc_url( $preview_thumb['url'] ); ?>" alt="">
+			</div>
 			<?php endif; ?>
-
-			<?php if ( $original_description ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Description', 'yousync' ); ?></th>
-				<td>
-					<p class="ys-description-box"><?php echo esc_html( $original_description ); ?></p>
-				</td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $channel_title ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Channel', 'yousync' ); ?></th>
-				<td><?php echo esc_html( $channel_title ); ?></td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $published_date ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Published Date', 'yousync' ); ?></th>
-				<td><?php echo esc_html( $published_date ); ?></td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $duration_seconds !== '' ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Duration', 'yousync' ); ?></th>
-				<td>
-					<?php
-					$hours = floor( (int) $duration_seconds / 3600 );
-					$mins  = floor( ( (int) $duration_seconds % 3600 ) / 60 );
-					$secs  = (int) $duration_seconds % 60;
-					echo esc_html(
-						$hours > 0
-							? sprintf( '%d:%02d:%02d', $hours, $mins, $secs )
-							: sprintf( '%d:%02d', $mins, $secs )
-					);
-					?>
-				</td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $view_count !== '' ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'View Count', 'yousync' ); ?></th>
-				<td><?php echo esc_html( number_format( (int) $view_count ) ); ?></td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $like_count !== '' ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Like Count', 'yousync' ); ?></th>
-				<td><?php echo esc_html( number_format( (int) $like_count ) ); ?></td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( $comment_count !== '' ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Comment Count', 'yousync' ); ?></th>
-				<td><?php echo esc_html( number_format( (int) $comment_count ) ); ?></td>
-			</tr>
-			<?php endif; ?>
-
-			<?php if ( ! $original_title && ! $channel_title && $duration_seconds === '' && $view_count === '' ) : ?>
-			<tr>
-				<td colspan="2"><p style="margin:0; color:#757575;"><?php esc_html_e( 'No YouTube data available yet.', 'yousync' ); ?></p></td>
-			</tr>
-			<?php endif; ?>
-		</table>
-	</div>
-
-	<!-- Thumbnails -->
-	<?php if ( ! empty( $thumbnails ) ) : ?>
-	<div id="yousync-panel-thumbnails" class="yousync-mb-panel" style="display:none; padding-top:16px;">
-		<?php if ( $preview_thumb ) : ?>
-		<img src="<?php echo esc_url( $preview_thumb['url'] ); ?>" style="max-width:768px; width:100%; height:auto; display:block; margin-bottom:16px; border:1px solid #ddd;" alt="">
-		<?php endif; ?>
-
-		<table class="wp-list-table widefat fixed striped" style="max-width:768px;">
-			<thead>
-				<tr>
-					<th style="width:140px;"><?php esc_html_e( 'Size', 'yousync' ); ?></th>
-					<th><?php esc_html_e( 'URL', 'yousync' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
+			<div class="ys-mb-fields">
 				<?php foreach ( array( 'maxres', 'standard', 'high', 'medium', 'default' ) as $size ) : ?>
 					<?php if ( empty( $thumbnails[ $size ]['url'] ) ) : ?>
 						<?php continue; ?>
 					<?php endif; ?>
-					<tr>
-						<td><?php echo esc_html( $thumbnail_size_labels[ $size ] ); ?></td>
-						<td><input type="text" value="<?php echo esc_attr( $thumbnails[ $size ]['url'] ); ?>" readonly style="width:100%; font-family:monospace; font-size:11px;" onclick="this.select()"></td>
-					</tr>
+					<div class="ys-mb-field">
+						<div class="ys-mb-label-row">
+							<p class="ys-mb-label"><?php echo esc_html( $thumbnail_size_labels[ $size ] ); ?></p>
+							<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="thumbnail" size="' . $size . '"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync-pro' ); ?></button>
+						</div>
+						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $thumbnails[ $size ]['url'] ); ?>" readonly>
+					</div>
 				<?php endforeach; ?>
-			</tbody>
-		</table>
-	</div>
-	<?php endif; ?>
+			</div>
+		</div>
+		<?php endif; ?>
 
-	<!-- Sync Status -->
-	<div id="yousync-panel-sync-status" class="yousync-mb-panel" style="display:none; padding-top:12px;">
-		<table class="form-table">
-			<?php if ( $sync_source_type ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Sync Source', 'yousync' ); ?></th>
-				<td><?php echo esc_html( ucfirst( $sync_source_type ) ); ?></td>
-			</tr>
-			<?php endif; ?>
+		<!-- Sync -->
+		<div class="ys-channel-tab-panel ys-hidden" data-panel="sync" role="tabpanel">
+			<div class="ys-mb-fields">
 
-			<?php if ( $last_synced ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Last Synced', 'yousync' ); ?></th>
-				<td><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_synced ) ); ?></td>
-			</tr>
-			<?php endif; ?>
+				<div class="ys-mb-field<?php echo $manual_edits_disabled ? ' ys-mb-field--disabled' : ''; ?>">
+					<p class="ys-mb-label"><?php esc_html_e( 'Protected from Sync Rules', 'yousync-pro' ); ?></p>
+					<div class="ys-toggle-row">
+						<label class="ys-toggle">
+							<input type="checkbox" name="yousync_manual_edits" id="yousync_manual_edits" value="1" <?php checked( $manual_edits ); ?> <?php echo $manual_edits_disabled ? 'disabled' : ''; ?>>
+							<span class="ys-toggle-slider"></span>
+						</label>
+						<?php if ( $manual_edits_notice ) : ?>
+						<span class="ys-field-notice"><?php echo esc_html( $manual_edits_notice ); ?></span>
+						<?php endif; ?>
+					</div>
+					<p class="description"><?php esc_html_e( 'When enabled, sync rules will not overwrite this post. Turn this on to preserve any manual edits you have made.', 'yousync-pro' ); ?></p>
+				</div>
 
-			<?php if ( $sync_count ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Sync Count', 'yousync' ); ?></th>
-				<td><?php echo esc_html( $sync_count ); ?></td>
-			</tr>
-			<?php endif; ?>
+				<?php if ( $last_synced ) : ?>
+				<div class="ys-mb-field">
+					<p class="ys-mb-label"><?php esc_html_e( 'Last Synced', 'yousync-pro' ); ?></p>
+					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_synced ) ); ?>" readonly disabled>
+				</div>
+				<?php else : ?>
+				<p class="ys-not-synced-msg"><?php esc_html_e( 'This video has not been synced yet.', 'yousync-pro' ); ?></p>
+				<?php endif; ?>
 
-			<?php if ( ! empty( $sync_errors ) ) : ?>
-			<tr>
-				<th scope="row"><?php esc_html_e( 'Sync Errors', 'yousync' ); ?></th>
-				<td>
-					<?php foreach ( $sync_errors as $sync_error ) : ?>
-					<p style="margin:0 0 4px; color:#d63638;">
-						<?php
-						if ( ! empty( $sync_error['timestamp'] ) ) {
-							echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $sync_error['timestamp'] ) ) . ' &mdash; ';
-						}
-						echo esc_html( $sync_error['error'] ?? '' );
-						if ( ! empty( $sync_error['code'] ) ) {
-							echo ' <code>' . esc_html( $sync_error['code'] ) . '</code>';
-						}
-						?>
-					</p>
-					<?php endforeach; ?>
-				</td>
-			</tr>
-			<?php endif; ?>
+			</div>
+		</div>
 
-			<?php if ( ! $sync_source_type && ! $last_synced && ! $sync_count && empty( $sync_errors ) ) : ?>
-			<tr>
-				<td colspan="2"><p style="margin:0; color:#757575;"><?php esc_html_e( 'This video has not been synced yet.', 'yousync' ); ?></p></td>
-			</tr>
-			<?php endif; ?>
-		</table>
 	</div>
 </div>
-

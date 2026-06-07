@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 /**
  * YouTube Data API v3 wrapper.
  *
@@ -8,10 +7,10 @@ declare(strict_types=1);
  * (which costs 100 quota units per call). Every method here costs 1 unit
  * per page of up to 50 items.
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
-namespace YouSync;
+namespace YouSyncPro;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,6 +30,16 @@ class YouTube_API {
 	 * @var string
 	 */
 	private const BASE_URL = 'https://www.googleapis.com/youtube/v3/';
+
+	/**
+	 * HTTP status codes that indicate a transient server-side failure worth retrying.
+	 */
+	private const TRANSIENT_STATUSES = [ 429, 500, 502, 503, 504 ];
+
+	/**
+	 * Maximum number of retry attempts on transient failures.
+	 */
+	private const MAX_RETRIES = 3;
 
 	/**
 	 * API key.
@@ -93,7 +102,7 @@ class YouTube_API {
 			'channel_description' => $item['snippet']['description'] ?? '',
 			'subscriber_count'    => (int) ( $item['statistics']['subscriberCount'] ?? 0 ),
 			'video_count'         => (int) ( $item['statistics']['videoCount'] ?? 0 ),
-			'profile_picture'     => array( 'url' => $item['snippet']['thumbnails']['high']['url'] ?? '' ),
+			'profile_picture'     => array( 'url' => $item['snippet']['thumbnails']['high']['url'] ?? $item['snippet']['thumbnails']['medium']['url'] ?? $item['snippet']['thumbnails']['default']['url'] ?? '' ),
 			'banner_image'        => array( 'url' => $this->banner_url( $item['brandingSettings']['image'] ?? array() ) ),
 			'etag'                => $item['etag'] ?? '',
 		);
@@ -103,10 +112,9 @@ class YouTube_API {
 	 * Get all items from a playlist (paginated).
 	 *
 	 * Uses playlistItems.list?part=snippet — 1 quota unit per page of 50.
-	 * Recursively follows nextPageToken until all items are collected.
+	 * Iterates nextPageToken until all items are collected.
 	 *
-	 * @param string      $playlist_id YouTube playlist ID.
-	 * @param string|null $page_token  Pagination token for recursive calls.
+	 * @param string $playlist_id YouTube playlist ID.
 	 * @return array|WP_Error Flat array of items, each: {
 	 *     @type string $video_id
 	 *     @type string $title
@@ -116,55 +124,48 @@ class YouTube_API {
 	 *     @type string $channel_title Channel that owns the video
 	 * }
 	 */
-	public function get_playlist_items( string $playlist_id, ?string $page_token = null ): array|\WP_Error {
-		$params = array(
-			'part'       => 'snippet',
-			'playlistId' => $playlist_id,
-			'maxResults' => 50,
-		);
+	public function get_playlist_items( string $playlist_id ): array|\WP_Error {
+		$items      = array();
+		$page_token = null;
 
-		if ( $page_token ) {
-			$params['pageToken'] = $page_token;
-		}
-
-		$url  = $this->api_url( 'playlistItems', $params );
-		$data = $this->request( $url );
-
-		if ( is_wp_error( $data ) ) {
-			return $data;
-		}
-
-		$items = array();
-
-		foreach ( $data['items'] ?? array() as $item ) {
-			$snippet  = $item['snippet'] ?? array();
-			$resource = $snippet['resourceId'] ?? array();
-
-			// Skip items that are not videos (e.g. deleted/private placeholders).
-			if ( ( $resource['kind'] ?? '' ) !== 'youtube#video' ) {
-				continue;
-			}
-
-			$items[] = array(
-				'video_id'      => $resource['videoId'] ?? '',
-				'title'         => $snippet['title'] ?? '',
-				'description'   => $snippet['description'] ?? '',
-				'published_at'  => $snippet['publishedAt'] ?? '',
-				'position'      => (int) ( $snippet['position'] ?? 0 ),
-				'channel_title' => $snippet['videoOwnerChannelTitle'] ?? '',
+		do {
+			$params = array(
+				'part'       => 'snippet',
+				'playlistId' => $playlist_id,
+				'maxResults' => 50,
 			);
-		}
-
-		// Recurse if there are more pages.
-		if ( ! empty( $data['nextPageToken'] ) ) {
-			$next = $this->get_playlist_items( $playlist_id, $data['nextPageToken'] );
-
-			if ( is_wp_error( $next ) ) {
-				return $next;
+			if ( $page_token ) {
+				$params['pageToken'] = $page_token;
 			}
 
-			$items = array_merge( $items, $next );
-		}
+			$data = $this->request( $this->api_url( 'playlistItems', $params ) );
+
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+
+			foreach ( $data['items'] ?? array() as $item ) {
+				$snippet  = $item['snippet'] ?? array();
+				$resource = $snippet['resourceId'] ?? array();
+
+				// Skip items that are not videos (e.g. deleted/private placeholders).
+				if ( ( $resource['kind'] ?? '' ) !== 'youtube#video' ) {
+					continue;
+				}
+
+				$items[] = array(
+					'video_id'      => $resource['videoId'] ?? '',
+					'title'         => $snippet['title'] ?? '',
+					'description'   => $snippet['description'] ?? '',
+					'published_at'  => $snippet['publishedAt'] ?? '',
+					'position'      => (int) ( $snippet['position'] ?? 0 ),
+					'channel_title' => $snippet['videoOwnerChannelTitle'] ?? '',
+				);
+			}
+
+			$page_token = $data['nextPageToken'] ?? null;
+
+		} while ( $page_token );
 
 		return $items;
 	}
@@ -308,64 +309,56 @@ class YouTube_API {
 	 * Fetch all playlists belonging to a channel (paginated).
 	 *
 	 * Uses playlists.list?part=snippet,contentDetails&channelId=... — 1 unit per page of 50.
-	 * Recursively follows nextPageToken until all playlists are collected.
+	 * Iterates nextPageToken until all playlists are collected.
 	 *
-	 * @param string      $channel_id YouTube channel ID.
-	 * @param string|null $page_token Pagination token for recursive calls.
+	 * @param string $channel_id YouTube channel ID.
 	 * @return array|WP_Error Flat array of playlist data arrays, each matching the
 	 *                        shape returned by get_playlist_data().
 	 */
-	public function get_channel_playlists( string $channel_id, ?string $page_token = null ): array|\WP_Error {
-		$params = array(
-			'part'       => 'snippet,contentDetails',
-			'channelId'  => $channel_id,
-			'maxResults' => 50,
-		);
+	public function get_channel_playlists( string $channel_id ): array|\WP_Error {
+		$playlists  = array();
+		$page_token = null;
 
-		if ( $page_token ) {
-			$params['pageToken'] = $page_token;
-		}
-
-		$url  = $this->api_url( 'playlists', $params );
-		$data = $this->request( $url );
-
-		if ( is_wp_error( $data ) ) {
-			return $data;
-		}
-
-		$playlists = array();
-
-		foreach ( $data['items'] ?? array() as $item ) {
-			$snippet   = $item['snippet'] ?? array();
-			$thumb_url = '';
-
-			foreach ( array( 'maxres', 'standard', 'high', 'medium', 'default' ) as $size ) {
-				if ( ! empty( $snippet['thumbnails'][ $size ]['url'] ) ) {
-					$thumb_url = $snippet['thumbnails'][ $size ]['url'];
-					break;
-				}
-			}
-
-			$playlists[] = array(
-				'playlist_id'          => $item['id'] ?? '',
-				'playlist_title'       => $snippet['title'] ?? '',
-				'playlist_description' => $snippet['description'] ?? '',
-				'playlist_video_count' => (int) ( $item['contentDetails']['itemCount'] ?? 0 ),
-				'thumbnail_url'        => $thumb_url,
-				'etag'                 => $item['etag'] ?? '',
+		do {
+			$params = array(
+				'part'       => 'snippet,contentDetails',
+				'channelId'  => $channel_id,
+				'maxResults' => 50,
 			);
-		}
-
-		// Recurse if there are more pages.
-		if ( ! empty( $data['nextPageToken'] ) ) {
-			$next = $this->get_channel_playlists( $channel_id, $data['nextPageToken'] );
-
-			if ( is_wp_error( $next ) ) {
-				return $next;
+			if ( $page_token ) {
+				$params['pageToken'] = $page_token;
 			}
 
-			$playlists = array_merge( $playlists, $next );
-		}
+			$data = $this->request( $this->api_url( 'playlists', $params ) );
+
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+
+			foreach ( $data['items'] ?? array() as $item ) {
+				$snippet   = $item['snippet'] ?? array();
+				$thumb_url = '';
+
+				foreach ( array( 'maxres', 'standard', 'high', 'medium', 'default' ) as $size ) {
+					if ( ! empty( $snippet['thumbnails'][ $size ]['url'] ) ) {
+						$thumb_url = $snippet['thumbnails'][ $size ]['url'];
+						break;
+					}
+				}
+
+				$playlists[] = array(
+					'playlist_id'          => $item['id'] ?? '',
+					'playlist_title'       => $snippet['title'] ?? '',
+					'playlist_description' => $snippet['description'] ?? '',
+					'playlist_video_count' => (int) ( $item['contentDetails']['itemCount'] ?? 0 ),
+					'thumbnail_url'        => $thumb_url,
+					'etag'                 => $item['etag'] ?? '',
+				);
+			}
+
+			$page_token = $data['nextPageToken'] ?? null;
+
+		} while ( $page_token );
 
 		return $playlists;
 	}
@@ -397,45 +390,57 @@ class YouTube_API {
 	/**
 	 * Execute a GET request and return the decoded JSON body.
 	 *
+	 * Retries up to MAX_RETRIES times on transient failures (429, 5xx, network errors)
+	 * with exponential back-off (1 s, 2 s, 4 s). Permanent errors (400, 401, 403, 404)
+	 * are returned immediately without retrying.
+	 *
 	 * @param string $url Full URL to request.
 	 * @return array|WP_Error Decoded response array or WP_Error on failure.
 	 */
 	private function request( string $url ): array|\WP_Error {
-		$response = wp_remote_get(
-			$url,
-			array(
-				'timeout' => 15,
-			)
-		);
+		$last_error = null;
 
-		if ( is_wp_error( $response ) ) {
-			// Network-level failure (DNS, timeout, SSL, etc.) — almost always transient.
-			return new \WP_Error(
-				'youtube_network_error',
-				'Could not reach YouTube. This is usually temporary — the next scheduled sync will try again. (' . $response->get_error_message() . ')'
-			);
-		}
+		for ( $attempt = 0; $attempt <= self::MAX_RETRIES; $attempt++ ) {
+			if ( $attempt > 0 ) {
+				sleep( 2 ** ( $attempt - 1 ) ); // 1 s, 2 s, 4 s
+			}
 
-		$status  = wp_remote_retrieve_response_code( $response );
-		$body    = wp_remote_retrieve_body( $response );
-		$decoded = json_decode( $body, true );
+			$response = wp_remote_get( $url, array( 'timeout' => 15 ) );
 
-		if ( 200 !== $status ) {
+			if ( is_wp_error( $response ) ) {
+				$last_error = new \WP_Error(
+					'youtube_network_error',
+					'Could not reach YouTube. This is usually temporary — the next scheduled sync will try again. (' . $response->get_error_message() . ')'
+				);
+				continue; // Network errors are always transient — retry.
+			}
+
+			$status  = wp_remote_retrieve_response_code( $response );
+			$body    = wp_remote_retrieve_body( $response );
+			$decoded = json_decode( $body, true );
+
+			if ( 200 === $status ) {
+				if ( ! is_array( $decoded ) ) {
+					return new \WP_Error(
+						'youtube_api_json_error',
+						'YouTube returned an unexpected response. This is usually temporary — the next scheduled sync will try again.'
+					);
+				}
+				return $decoded;
+			}
+
 			$api_message = $decoded['error']['message'] ?? '';
 			$reason      = $decoded['error']['errors'][0]['reason'] ?? '';
+			$message     = $this->friendly_error_message( $status, $reason, $api_message );
+			$last_error  = new \WP_Error( 'youtube_api_error', $message, array( 'status' => $status, 'reason' => $reason ) );
 
-			$message = $this->friendly_error_message( $status, $reason, $api_message );
-			return new \WP_Error( 'youtube_api_error', $message, array( 'status' => $status, 'reason' => $reason ) );
+			// Only retry on transient status codes.
+			if ( ! in_array( $status, self::TRANSIENT_STATUSES, true ) ) {
+				return $last_error;
+			}
 		}
 
-		if ( ! is_array( $decoded ) ) {
-			return new \WP_Error(
-				'youtube_api_json_error',
-				'YouTube returned an unexpected response. This is usually temporary — the next scheduled sync will try again.'
-			);
-		}
-
-		return $decoded;
+		return $last_error ?? new \WP_Error( 'youtube_api_error', 'YouTube API request failed after retrying.' );
 	}
 
 	/**

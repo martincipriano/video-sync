@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
-
 /**
  * Template part for displaying a sync rule condition.
  *
- * @package YouSync
+ * @package YouSyncPro
  *
  * Variables available in this template:
  * @var int|string $rule_index Rule index.
@@ -23,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Dual-mode: Use provided indices or fallback to placeholders for JavaScript
 $rule_index      = isset( $rule_index ) ? $rule_index : '{{RULE_INDEX}}';
 $condition_index = isset( $condition_index ) ? $condition_index : '{{CONDITION_INDEX}}';
+$name_prefix     = isset( $name_prefix ) ? $name_prefix : 'sync_rules';
 
 // Get condition values
 $field    = isset( $condition['field'] ) ? $condition['field'] : '';
@@ -41,17 +41,17 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       class="screen-reader-text"
       for="sync-rules-<?php echo esc_attr( $rule_index ); ?>-conditions-<?php echo esc_attr( $condition_index ); ?>-field"
     >
-      Field
+      Detail
     </label>
     <select
       class="ys-select ys-condition-field"
       id="sync-rules-<?php echo esc_attr( $rule_index ); ?>-conditions-<?php echo esc_attr( $condition_index ); ?>-field"
-      name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][field]"
+      name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][field]"
     >
       <?php if ( $has_field_options ) : ?>
         <?php echo $field_options_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
       <?php else : ?>
-        <option value="" <?php selected( $field, '' ); ?>>&mdash; Select field &mdash;</option>
+        <option value="" <?php selected( $field, '' ); ?>>&mdash; Select detail &mdash;</option>
       <?php endif; ?>
     </select>
   </div>
@@ -66,7 +66,7 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       class="ys-select ys-condition-operator"
       <?php echo $has_operator ? '' : 'disabled'; ?>
       id="sync-rules-<?php echo esc_attr( $rule_index ); ?>-conditions-<?php echo esc_attr( $condition_index ); ?>-operator"
-      name="sync_rules[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][operator]"
+      name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][operator]"
     >
       <?php if ( $has_operator ) echo $operator_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
     </select>
@@ -82,14 +82,13 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       <?php echo $value_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
     <?php else : ?>
       <?php
-        echo yousync_return_template_part( 'input', 'text', array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Return value is trusted internal HTML.
+        echo yousync_pro_return_template_part( 'input', 'text', array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Return value is trusted internal HTML.
           'condition_index' => $condition_index,
           'rule_index'      => $rule_index,
+          'name_prefix'     => $name_prefix,
         ) );
       ?>
     <?php endif; ?>
   </div>
-  <div class="ys-condition-actions">
-    <button class="button ys-remove-condition" title="Remove condition" type="button"><span class="dashicons dashicons-no"></span></button>
-  </div>
+  <button class="ys-remove-condition" title="Remove condition" type="button"></button>
 </div>

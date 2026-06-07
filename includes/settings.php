@@ -1,13 +1,12 @@
 <?php
 declare(strict_types=1);
-
 /**
  * YouSync Settings Class
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
-namespace YouSync;
+namespace YouSyncPro;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,62 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class YouSyncSettings {
 
 	/**
-	 * Custom archives configuration.
-	 *
-	 * @var array
-	 */
-	private $custom_archives = array();
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->custom_archives = array(
-			array(
-				'labels' => array(
-					'name'          => __( 'Videos', 'yousync' ),
-					'singular_name' => __( 'Video', 'yousync' ),
-				),
-				'slug'   => 'ys-video',
-				'type'   => 'post_type',
-			),
-			array(
-				'labels' => array(
-					'name'          => __( 'Channels', 'yousync' ),
-					'singular_name' => __( 'Channel', 'yousync' ),
-				),
-				'slug'   => 'ys-channel',
-				'type'   => 'taxonomy',
-			),
-			array(
-				'labels' => array(
-					'name'          => __( 'Playlists', 'yousync' ),
-					'singular_name' => __( 'Playlist', 'yousync' ),
-				),
-				'slug'   => 'ys-playlist',
-				'type'   => 'taxonomy',
-			),
-			array(
-				'labels' => array(
-					'name'          => __( 'Tags', 'yousync' ),
-					'singular_name' => __( 'Tag', 'yousync' ),
-				),
-				'slug'   => 'ys-tag',
-				'type'   => 'taxonomy',
-			),
-			array(
-				'labels' => array(
-					'name'          => __( 'Categories', 'yousync' ),
-					'singular_name' => __( 'Category', 'yousync' ),
-				),
-				'slug'   => 'ys-category',
-				'type'   => 'taxonomy',
-			),
-		);
-
 		add_action( 'admin_menu', array( $this, 'add_settings_submenu' ), 20 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
-		add_action( 'init', array( $this, 'maybe_flush_rewrite_rules' ) );
 	}
 
 	/**
@@ -85,11 +33,11 @@ class YouSyncSettings {
 	 */
 	public function add_settings_submenu() {
 		add_submenu_page(
-			'edit.php?post_type=yousync_videos',
-			__( 'YouSync Settings', 'yousync' ),
-			__( 'Settings', 'yousync' ),
+			'yousync',
+			__( 'YouSync Settings', 'yousync-pro'),
+			__( 'Settings', 'yousync-pro'),
 			'manage_options',
-			'yousync_settings',
+			'yousync_pro_settings',
 			array( $this, 'settings_html' )
 		);
 	}
@@ -110,15 +58,6 @@ class YouSyncSettings {
 
 		register_setting(
 			'yousync_settings_group',
-			'yousync_active_archives',
-			array(
-				'sanitize_callback' => array( $this, 'sanitize_active_archives' ),
-				'default'           => array(),
-			)
-		);
-
-		register_setting(
-			'yousync_settings_group',
 			'yousync_delete_on_uninstall',
 			array(
 				'sanitize_callback' => 'absint',
@@ -128,39 +67,31 @@ class YouSyncSettings {
 
 		add_settings_section(
 			'yousync_api_settings',
-			__( 'API Settings', 'yousync' ),
+			__( 'API Settings', 'yousync-pro'),
 			null,
-			'yousync_settings'
+			'yousync_pro_settings'
 		);
 
 		add_settings_field(
 			'yousync_api_key',
-			__( 'Google API Key', 'yousync' ),
+			__( 'Google API Key', 'yousync-pro'),
 			array( $this, 'api_key_html' ),
-			'yousync_settings',
-			'yousync_api_settings'
-		);
-
-		add_settings_field(
-			'yousync_playlist_archive',
-			__( 'Enabled Archive Pages', 'yousync' ),
-			array( $this, 'active_archive_html' ),
-			'yousync_settings',
+			'yousync_pro_settings',
 			'yousync_api_settings'
 		);
 
 		add_settings_section(
 			'yousync_advanced_settings',
-			__( 'Advanced', 'yousync' ),
+			__( 'Advanced', 'yousync-pro'),
 			null,
-			'yousync_settings'
+			'yousync_pro_settings'
 		);
 
 		add_settings_field(
 			'yousync_delete_on_uninstall',
-			__( 'Uninstall Data', 'yousync' ),
+			__( 'Uninstall Data', 'yousync-pro'),
 			array( $this, 'delete_on_uninstall_html' ),
-			'yousync_settings',
+			'yousync_pro_settings',
 			'yousync_advanced_settings'
 		);
 	}
@@ -172,60 +103,7 @@ class YouSyncSettings {
 	 */
 	public function api_key_html() {
 		$value = get_option( 'yousync_api_key', '' );
-		yousync_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
-	}
-
-	/**
-	 * Render active archives field HTML.
-	 *
-	 * @return void
-	 */
-	public function active_archive_html() {
-		$active_archives = get_option( 'yousync_active_archives', array() );
-		$custom_archives = $this->custom_archives;
-		yousync_get_template_part( 'settings-field', 'active-archives', compact( 'active_archives', 'custom_archives' ) );
-	}
-
-	/**
-	 * Check if rewrite rules need to be flushed and flush them.
-	 *
-	 * @return void
-	 */
-	public function maybe_flush_rewrite_rules() {
-		if ( get_transient( 'yousync_flush_rewrite_rules' ) ) {
-			flush_rewrite_rules();
-			delete_transient( 'yousync_flush_rewrite_rules' );
-		}
-	}
-
-	/**
-	 * Sanitize active archives input.
-	 *
-	 * @param mixed $input The input to sanitize.
-	 * @return array The sanitized input.
-	 */
-	public function sanitize_active_archives( $input ) {
-		if ( ! is_array( $input ) ) {
-			return array();
-		}
-
-		$sanitized = array();
-		foreach ( $input as $slug => $data ) {
-			$sanitized_slug               = sanitize_key( $slug );
-			$sanitized[ $sanitized_slug ] = array(
-				'enabled' => isset( $data['enabled'] ) ? (bool) $data['enabled'] : false,
-				'slug'    => isset( $data['slug'] ) ? sanitize_title( $data['slug'] ) : '',
-			);
-		}
-
-		// Flush rewrite rules when archive settings change.
-		$old_value = get_option( 'yousync_active_archives', array() );
-		if ( $old_value !== $sanitized ) {
-			// Set a flag to flush rewrite rules on next page load.
-			set_transient( 'yousync_flush_rewrite_rules', true, 300 );
-		}
-
-		return $sanitized;
+		yousync_pro_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
 	}
 
 	/**
@@ -238,7 +116,7 @@ class YouSyncSettings {
 		$input = sanitize_text_field( $input );
 
 		if ( empty( $input ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
+			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync-pro' ) );
 			return get_option( 'yousync_api_key', '' );
 		}
 
@@ -254,7 +132,7 @@ class YouSyncSettings {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync' ) );
+			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync-pro') );
 			return get_option( 'yousync_api_key', '' );
 		}
 
@@ -267,12 +145,15 @@ class YouSyncSettings {
 				'yousync_api_key',
 				'yousync_api_key_invalid',
 				/* translators: %s: Error message from YouTube API */
-				sprintf( __( 'YouTube API error: %s', 'yousync' ), esc_html( $error_msg ) )
+				sprintf( __( 'YouTube API error: %s', 'yousync-pro'), esc_html( $error_msg ) )
 			);
 			return get_option( 'yousync_api_key', '' );
 		}
 
-		add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync' ), 'updated' );
+		$existing = wp_list_pluck( get_settings_errors( 'yousync_api_key' ), 'code' );
+		if ( ! in_array( 'valid_api_key', $existing, true ) ) {
+			add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync-pro' ), 'updated' );
+		}
 
 		return $input;
 	}
@@ -287,10 +168,10 @@ class YouSyncSettings {
 		?>
 		<label>
 			<input type="checkbox" name="yousync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
-			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync' ); ?>
+			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync-pro'); ?>
 		</label>
 		<p class="description">
-			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync' ); ?>
+			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync-pro'); ?>
 		</p>
 		<?php
 	}
@@ -301,8 +182,9 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	public function settings_html() {
-		yousync_get_template_part( 'settings', 'page' );
+		yousync_pro_get_template_part( 'settings', 'page' );
 	}
+
 }
 
 new YouSyncSettings();

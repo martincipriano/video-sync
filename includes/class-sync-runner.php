@@ -1,6 +1,5 @@
 <?php
 declare(strict_types=1);
-
 /**
  * Sync runner.
  *
@@ -8,10 +7,10 @@ declare(strict_types=1);
  * calls the YouTube API, evaluates conditions, imports videos, and
  * writes results back to term meta.
  *
- * @package YouSync
+ * @package YouSyncPro
  */
 
-namespace YouSync;
+namespace YouSyncPro;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,12 +25,69 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Runner {
 
 	/**
+	 * Maximum videos/playlists processed per cron run.
+	 *
+	 * Prevents PHP timeout on large channels. Scheduled rules pick up remaining
+	 * items on the next run. "Once" rules are exempt — users expect full execution.
+	 */
+	private const BATCH_CAP = 500;
+
+	/**
+	 * Seconds before a sync lock is considered stale and ignored.
+	 *
+	 * Matches the progress-transient TTL. A crashed run self-clears after this.
+	 */
+	private const STALE_LOCK_SECONDS = 1800;
+
+	/**
 	 * Index of the rule currently being executed.
 	 * Set at the start of run() so record_success/record_error can write to the correct rule.
 	 *
 	 * @var int
 	 */
 	private int $current_rule_index = 0;
+
+	/**
+	 * Unix timestamp recorded at the start of a sync run.
+	 * Used to compute run duration for the history log.
+	 *
+	 * @var int
+	 */
+	private int $run_started_at = 0;
+
+	/**
+	 * Errors accumulated during the current sync run (non-terminal).
+	 * Flushed into the history entry at the end of the run.
+	 *
+	 * @var array
+	 */
+	private array $run_errors = array();
+
+	/**
+	 * Number of items (videos/playlists/channels) processed in the current run.
+	 * Set by each action handler; written into the history entry.
+	 *
+	 * @var int
+	 */
+	private int $current_run_count = 0;
+
+	/**
+	 * When running an option-based channel (Channels Page), holds the channel
+	 * index within yousync_channel_config. Null for term-based channels.
+	 *
+	 * @var int|null
+	 */
+	private ?int $option_channel_index = null;
+
+	/**
+	 * In-memory copy of the source data when running an option-based channel.
+	 * Returned by get_term_meta_data() instead of term meta. Kept in sync after
+	 * every save_source_data() call so subsequent reads within the same run see
+	 * the latest state.
+	 *
+	 * @var array|null
+	 */
+	private ?array $source_data_override = null;
 
 	/**
 	 * YouTube API wrapper.
@@ -89,9 +145,60 @@ class Sync_Runner {
 			return;
 		}
 
+		// Concurrency guard (option-based channels): stop a second cron tick or a
+		// manual trigger from running the same rule while it is already in flight.
+		// A dedicated transient is used rather than the sync_status field, which
+		// the Channels page pre-sets to 'syncing' before the cron fires.
+		$lock_key = null;
+		if ( null !== $this->option_channel_index ) {
+			$lock_key = 'yousync_lock_' . $this->option_channel_index . '_' . $rule_index;
+			if ( get_transient( $lock_key ) ) {
+				return;
+			}
+			set_transient( $lock_key, time(), self::STALE_LOCK_SECONDS );
+		}
+
 		$this->current_rule_index = $rule_index;
 
+		$action  = $rule['action'] ?? '';
+		$license = yousync_pro_license();
+
+		// Enforce scheduled_sync license gate — recurring schedules require an active license.
+		$schedule = $rule['schedule'] ?? 'once';
+		if ( 'once' !== $schedule && ! $license->is_feature_available( 'scheduled_sync' ) ) {
+			$this->record_history_error( $source_type, $term_id, 'An active license is required for scheduled sync.', 'license_required' );
+			return;
+		}
+
+		// Enforce metadata_update license gate server-side.
+		$metadata_update_actions = array(
+			'videos_update_all', 'videos_update_specific_all',
+			'channel_update_all', 'channel_update_specific',
+			'playlists_update_all', 'playlists_update_specific_all',
+		);
+		if ( in_array( $action, $metadata_update_actions, true ) && ! $license->is_feature_available( 'metadata_update' ) ) {
+			$this->record_history_error( $source_type, $term_id, 'An active license is required for metadata update actions.', 'license_required' );
+			return;
+		}
+
+		// Strip conditions if conditions feature is not licensed.
+		if ( ! empty( $rule['conditions'] ) && ! $license->is_feature_available( 'conditions' ) ) {
+			$rule['conditions'] = array();
+		}
+
+		// "Once" runs bypass the per-run batch cap and may import an entire
+		// channel in a single execution — lift PHP limits so a large back-catalog
+		// completes instead of timing out mid-import. The imported set is
+		// unchanged; this only prevents truncation.
+		if ( 'once' === $schedule ) {
+			if ( function_exists( 'set_time_limit' ) ) {
+				@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			}
+			wp_raise_memory_limit( 'admin' );
+		}
+
 		$this->mark_syncing( $source_type, $term_id, $rule_index );
+		$this->write_progress( 0, 0 ); // Reset any stale progress from a previous run.
 
 		$syncing_cleared = false;
 		register_shutdown_function(
@@ -106,8 +213,6 @@ class Sync_Runner {
 			}
 		);
 
-		$action = $rule['action'] ?? '';
-
 		try {
 			switch ( $action ) {
 				// ---- Video sync ----
@@ -116,13 +221,15 @@ class Sync_Runner {
 					break;
 
 				case 'videos_update_all':
-				case 'videos_update_non_modified':
 				case 'videos_update_specific_all':
-				case 'videos_update_specific_non_modified':
 					$this->handle_videos_update( $source_type, $term_id, $rule, $action );
 					break;
 
-				// ---- Channel metadata ----
+				// ---- Channel ----
+				case 'channel_sync_new':
+					$this->handle_channel_sync_new( $term_id, $rule );
+					break;
+
 				case 'channel_update_all':
 				case 'channel_update_specific':
 					$this->handle_channel_update( $term_id, $rule, $action );
@@ -131,16 +238,8 @@ class Sync_Runner {
 				// ---- Playlists from channel ----
 				case 'playlists_sync_new':
 				case 'playlists_update_all':
-				case 'playlists_update_non_modified':
 				case 'playlists_update_specific_all':
-				case 'playlists_update_specific_non_modified':
 					$this->handle_playlists_sync( $term_id, $rule, $action );
-					break;
-
-				// ---- Playlist metadata (when source is a playlist term) ----
-				case 'playlist_update_all':
-				case 'playlist_update_specific':
-					$this->handle_playlist_update( $term_id, $rule, $action );
 					break;
 
 				default:
@@ -155,18 +254,84 @@ class Sync_Runner {
 			$this->record_error( $source_type, $term_id, $e->getMessage(), 'exception' );
 		} finally {
 			$this->clear_syncing( $source_type, $term_id, $rule_index );
+
+			// Auto-disable once rules here (inside finally) so it runs even on
+			// fatal errors caught by the shutdown function — preventing the rule
+			// from firing a second time if the cron event somehow re-queues.
+			if ( 'once' === ( $rule['schedule'] ?? '' ) ) {
+				$this->disable_once_rule( $source_type, $term_id, $rule_index );
+			}
+
+			if ( null !== $lock_key ) {
+				delete_transient( $lock_key );
+			}
+
 			$syncing_cleared = true;
 		}
+	}
 
-		// For 'once' schedule: auto-disable the rule after it fires.
-		if ( isset( $rule['schedule'] ) && 'once' === $rule['schedule'] ) {
-			$this->disable_once_rule( $source_type, $term_id, $rule_index );
+	/**
+	 * Execute a sync rule for an option-based channel (Channels Page / yousync_channel_config).
+	 *
+	 * Sets up the source data override so that get_term_meta_data() and
+	 * save_source_data() transparently read/write wp_options instead of
+	 * term meta, then delegates to the standard run() method with term_id = 0.
+	 *
+	 * Called by Sync_Scheduler::dispatch_config_sync() when a
+	 * yousync_channel_config_sync_rule cron event fires.
+	 *
+	 * @param int $ch_index   0-based channel index in yousync_channel_config.
+	 * @param int $rule_index 0-based rule index within that channel's sync_rules.
+	 * @return void
+	 */
+	public function run_config_channel( int $ch_index, int $rule_index ): void {
+		$channels = $this->get_normalized_option_channels();
+		$ch_data  = $channels[ $ch_index ] ?? null;
+
+		if ( ! $ch_data ) {
+			return;
 		}
+
+		// Ensure channel_id is present (option stores as youtube_id).
+		$ch_data['channel_id'] = $ch_data['youtube_id'] ?? '';
+
+		$this->option_channel_index = $ch_index;
+		$this->source_data_override  = $ch_data;
+
+		$this->run( 'channel', 0, $rule_index );
+
+		$this->option_channel_index = null;
+		$this->source_data_override  = null;
 	}
 
 	// -------------------------------------------------------------------------
 	// Action handlers
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Resolve the field mapping for a rule, falling back to the per-channel mapping.
+	 *
+	 * Per-rule mapping takes precedence. If empty, the per-channel field_mapping
+	 * (stored in yousync_channel_config) is used. If that is also empty, the
+	 * importer falls back to its built-in default (title → post_title).
+	 *
+	 * @param array $rule Sync rule array.
+	 * @return array Resolved field mapping rows.
+	 */
+	private function resolve_field_mapping( array $rule ): array {
+		$per_rule = $rule['field_mapping'] ?? array();
+		if ( ! empty( $per_rule ) && is_array( $per_rule ) ) {
+			return $per_rule;
+		}
+
+		// Per-channel fallback — $this->source_data_override holds channel config.
+		$per_channel = $this->source_data_override['field_mapping'] ?? array();
+		if ( ! empty( $per_channel ) && is_array( $per_channel ) ) {
+			return $per_channel;
+		}
+
+		return array(); // Importer falls back to its built-in default (title → post_title).
+	}
 
 	/**
 	 * Handle the videos_sync_new action.
@@ -182,7 +347,16 @@ class Sync_Runner {
 	 * @throws \RuntimeException On unrecoverable API failure.
 	 */
 	private function handle_videos_sync_new( string $source_type, int $term_id, array $rule ): void {
-		$conditions = $rule['conditions'] ?? array();
+		$conditions                 = $rule['conditions'] ?? array();
+		$this->warn_invalid_conditions( $conditions );
+		$destination_post_type      = $rule['destination_post_type'] ?? '';
+		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$field_mapping              = $this->resolve_field_mapping( $rule );
+
+		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
+			$this->record_error( $source_type, $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
+			return;
+		}
 
 		if ( 'channel' === $source_type ) {
 			// Channels: need to get the uploads playlist ID first.
@@ -228,24 +402,21 @@ class Sync_Runner {
 		// Extract video IDs from the playlist items.
 		$all_ids = array_filter( array_column( $items, 'video_id' ) );
 
-		// Split into new vs already-imported.
-		$existing_ids = $this->get_existing_video_ids();
+		// Split into new vs already-imported. Dedup is scoped to the destination
+		// post type so the same video can be imported into more than one post type.
+		$existing_ids = $this->importer->get_imported_video_ids( $destination_post_type );
 		$new_ids      = array_values( array_diff( $all_ids, $existing_ids ) );
-		$existing_ids_here = array_values( array_intersect( $all_ids, $existing_ids ) );
-
-		// Already-imported videos: just assign the source term so the post is
-		// associated with this channel/playlist too (a video can belong to many).
-		$existing_post_map = $this->importer->find_posts_by_video_ids( $existing_ids_here );
-		foreach ( $existing_post_map as $video_id => $post_id ) {
-			$this->importer->assign_term( $post_id, $source_type, $term_id );
-		}
 
 		if ( empty( $new_ids ) ) {
 			return; // All videos already imported.
 		}
 
+		$max = (int) ( $rule['max_videos'] ?? 0 );
+
 		// Batch-fetch full video details and import.
-		$imported = $this->batch_fetch_and_import( $new_ids, $conditions, $source_type, $term_id );
+		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $conditions, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, $field_mapping, ! $is_once );
+		$this->current_run_count = $imported;
 
 		// Warn when candidates were available but nothing was imported.
 		// This usually means the sync conditions are too restrictive or contain a typo.
@@ -258,7 +429,7 @@ class Sync_Runner {
 						'No videos were imported. %d candidate was fetched but did not match the sync conditions. Check your conditions for typos.',
 						'No videos were imported. %d candidates were fetched but none matched the sync conditions. Check your conditions for typos.',
 						$candidate_count,
-						'yousync'
+						'yousync-pro'
 					),
 					$candidate_count
 				);
@@ -269,13 +440,13 @@ class Sync_Runner {
 						'No videos were imported. %d candidate was fetched from the API but could not be saved.',
 						'No videos were imported. %d candidates were fetched from the API but none could be saved.',
 						$candidate_count,
-						'yousync'
+						'yousync-pro'
 					),
 					$candidate_count
 				);
 			}
 
-			Sync_Logger::log_error( $source_type, $term_id, $message, 'no_results' );
+			$this->accumulate_error( $source_type, $term_id, $message, 'no_results' );
 		}
 	}
 
@@ -331,25 +502,105 @@ class Sync_Runner {
 		}
 
 		$data['etag'] = $fresh['etag'] ?? $data['etag'];
-		update_term_meta( $term_id, 'yousync_channel', wp_slash( wp_json_encode( $data ) ) );
+		$this->save_source_data( 'channel', $term_id, $data );
+
+		// Also update every channel WP post for this channel (one per post type).
+		$channel_post_ids = $this->importer->find_posts_by_channel_id( $data['channel_id'] );
+		$mode_str         = 'channel_update_specific' === $action ? 'update_specific' : 'update_all';
+		$spec             = 'channel_update_specific' === $action ? ( $rule['specific_metadata'] ?? array() ) : array();
+		foreach ( $channel_post_ids as $channel_post_id ) {
+			$this->importer->update_channel( $channel_post_id, $fresh, $data['channel_id'], $mode_str, $spec );
+		}
+
+		$this->current_run_count = 1;
+	}
+
+	/**
+	 * Handle the channel_sync_new action.
+	 *
+	 * Fetches fresh channel data from the API and creates a WordPress post for the channel.
+	 * If a post for this channel already exists (deduped by _yousync_channel_post), nothing
+	 * is done — channel update actions handle refreshing an existing post.
+	 *
+	 * @param int   $term_id Channel term ID (0 for option-based channels).
+	 * @param array $rule    Sync rule array.
+	 * @return void
+	 * @throws \RuntimeException On missing channel ID.
+	 */
+	private function handle_channel_sync_new( int $term_id, array $rule ): void {
+		$data = $this->get_term_meta_data( 'channel', $term_id );
+		if ( ! $data || empty( $data['channel_id'] ) ) {
+			throw new \RuntimeException( 'Channel ID not found in term meta.' );
+		}
+
+		$channel_id = $data['channel_id'];
+
+		$destination_post_type      = $rule['destination_post_type'] ?? '';
+		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$field_mapping              = $this->resolve_field_mapping( $rule );
+
+		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
+			$this->record_error( 'channel', $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
+			return;
+		}
+
+		// Skip if this channel is already imported into this post type, but
+		// backfill the featured image if missing.
+		$existing_post_id = $this->importer->find_post_by_channel_id( $channel_id, $destination_post_type );
+		if ( $existing_post_id ) {
+			$this->importer->ensure_channel_featured_image( $existing_post_id );
+			return;
+		}
+
+		$fresh = $this->api->get_channel_data( $channel_id );
+		if ( is_wp_error( $fresh ) ) {
+			$this->record_error( 'channel', $term_id, $fresh->get_error_message(), $fresh->get_error_code() );
+			return;
+		}
+
+		$this->write_progress( 0, 1 );
+		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $destination_taxonomy_terms, $field_mapping );
+
+		if ( is_wp_error( $result ) ) {
+			$this->accumulate_error( 'channel', $term_id, $result->get_error_message(), $result->get_error_code() );
+		} else {
+			$this->current_run_count = 1;
+		}
+		$this->write_progress( 1, 1 );
 	}
 
 	/**
 	 * Handle playlists_sync_new and playlists_update_* actions.
 	 *
-	 * For sync_new: creates new yousync_playlist terms for playlists not yet imported.
-	 * For update variants: updates term meta for already-imported playlist terms.
+	 * For sync_new: creates a new post for each playlist not yet imported.
+	 * For update variants: updates existing playlist posts.
 	 *
-	 * @param int    $term_id Channel term ID.
+	 * @param int    $term_id Channel term ID (0 for option-based channels).
 	 * @param array  $rule    Sync rule array.
 	 * @param string $action  Action slug.
 	 * @return void
 	 * @throws \RuntimeException On missing channel ID.
 	 */
 	private function handle_playlists_sync( int $term_id, array $rule, string $action ): void {
+		$destination_post_type      = $rule['destination_post_type'] ?? '';
+		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$conditions                 = $rule['conditions'] ?? array();
+		$this->warn_invalid_conditions( $conditions );
+		$specific_metadata          = $rule['specific_metadata'] ?? array();
+
 		$data = $this->get_term_meta_data( 'channel', $term_id );
 		if ( ! $data || empty( $data['channel_id'] ) ) {
-			throw new \RuntimeException( 'Channel ID not found in term meta.' );
+			throw new \RuntimeException( 'Channel ID not found.' );
+		}
+
+		$is_update     = str_starts_with( $action, 'playlists_update' );
+		$specific_only = str_contains( $action, 'specific' );
+
+		// sync_new must have a valid destination post type; update actions carry
+		// no post type. Validate before spending an API call.
+		if ( ! $is_update && $this->invalid_destination_post_type( $destination_post_type ) ) {
+			$this->record_error( 'channel', $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
+			return;
 		}
 
 		$channel_id = $data['channel_id'];
@@ -359,107 +610,48 @@ class Sync_Runner {
 			$this->record_error( 'channel', $term_id, $playlists->get_error_message(), $playlists->get_error_code() );
 			return;
 		}
+		$max           = (int) ( $rule['max_videos'] ?? 0 ); // max_videos field doubles as max_playlists.
+		$processed     = 0;
+		$total_pl      = $max > 0 ? min( $max, count( $playlists ) ) : count( $playlists );
+		$scanned_pl    = 0;
 
-		$conditions        = $rule['conditions'] ?? array();
-		$specific_metadata = $rule['specific_metadata'] ?? array();
-		$is_update         = str_starts_with( $action, 'playlists_update' );
-		$non_modified_only = str_contains( $action, 'non_modified' );
-		$specific_only     = str_contains( $action, 'specific' );
+		$this->write_progress( 0, $total_pl );
 
 		foreach ( $playlists as $playlist_data ) {
+			if ( $max > 0 && $processed >= $max ) {
+				break;
+			}
+
 			if ( empty( $playlist_data['playlist_id'] ) ) {
 				continue;
 			}
 
-			// Evaluate conditions against the playlist fields.
 			if ( ! $this->evaluator->evaluate_all( $this->playlist_to_condition_data( $playlist_data ), $conditions ) ) {
 				continue;
 			}
 
-			// Find existing playlist term by playlist_id flat meta key.
-			$existing_term_id = $this->find_playlist_term_by_id( $playlist_data['playlist_id'] );
-
 			if ( ! $is_update ) {
-				// playlists_sync_new: create if missing.
-				if ( ! $existing_term_id ) {
-					$this->create_playlist_term( $playlist_data, $term_id );
+				// playlists_sync_new: create if missing in this post type.
+				$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
+				if ( ! $existing_post_id ) {
+					$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $destination_taxonomy_terms );
+					++$processed;
 				}
 			} else {
-				// Update variants: only process already-imported playlists.
-				if ( ! $existing_term_id ) {
-					continue;
-				}
-
-				$playlist_meta = $this->get_term_meta_data( 'playlist', $existing_term_id );
-
-				// Skip manually-edited playlists for non_modified variants.
-				if ( $non_modified_only && ! empty( $playlist_meta['manual_edits'] ) ) {
-					continue;
-				}
-
-				if ( $specific_only ) {
-					$this->update_playlist_term_meta_fields( $existing_term_id, $playlist_meta, $playlist_data, $specific_metadata );
-				} else {
-					$this->update_playlist_term_meta_all( $existing_term_id, $playlist_meta, $playlist_data );
+				// Update variants: refresh every already-imported playlist post
+				// for this playlist (one per post type).
+				$mode      = $specific_only ? 'update_specific_all' : 'update_all';
+				$post_ids  = $this->importer->find_posts_by_playlist_id( $playlist_data['playlist_id'] );
+				foreach ( $post_ids as $existing_post_id ) {
+					$this->importer->update_playlist( $existing_post_id, $playlist_data, $mode, $specific_metadata, $destination_taxonomy_terms );
+					++$processed;
 				}
 			}
-		}
-	}
-
-	/**
-	 * Handle playlist_update_all and playlist_update_specific (playlist source).
-	 *
-	 * Fetches fresh metadata for this playlist term's own playlist_id and
-	 * writes it back to term meta.
-	 *
-	 * @param int    $term_id Playlist term ID.
-	 * @param array  $rule    Sync rule array.
-	 * @param string $action  Action slug.
-	 * @return void
-	 * @throws \RuntimeException On missing playlist ID.
-	 */
-	private function handle_playlist_update( int $term_id, array $rule, string $action ): void {
-		$data = $this->get_term_meta_data( 'playlist', $term_id );
-		if ( ! $data || empty( $data['playlist_id'] ) ) {
-			throw new \RuntimeException( 'Playlist ID not found in term meta.' );
+			++$scanned_pl;
+			$this->write_progress( min( $scanned_pl, $total_pl ), $total_pl );
 		}
 
-		$fresh = $this->api->get_playlist_data( $data['playlist_id'] );
-		if ( is_wp_error( $fresh ) ) {
-			$this->record_error( 'playlist', $term_id, $fresh->get_error_message(), $fresh->get_error_code() );
-			return;
-		}
-
-		$field_map = array(
-			'playlist_title'       => 'playlist_title',
-			'playlist_description' => 'playlist_description',
-			'playlist_video_count' => 'playlist_video_count',
-			'playlist_thumbnail'   => 'thumbnail_url',
-		);
-
-		if ( 'playlist_update_specific' === $action ) {
-			$fields = $rule['specific_metadata'] ?? array();
-		} else {
-			$fields = array_keys( $field_map );
-		}
-
-		foreach ( $fields as $field ) {
-			if ( 'playlist_thumbnail' === $field ) {
-				// Only update the URL — full attachment re-download is Phase 3.
-				if ( ! empty( $fresh['thumbnail_url'] ) ) {
-					if ( is_array( $data['playlist_thumbnail'] ?? null ) ) {
-						$data['playlist_thumbnail']['url'] = $fresh['thumbnail_url'];
-					} else {
-						$data['playlist_thumbnail'] = array( 'url' => $fresh['thumbnail_url'], 'attachment_id' => 0 );
-					}
-				}
-			} elseif ( isset( $field_map[ $field ], $fresh[ $field_map[ $field ] ] ) ) {
-				$data[ $field_map[ $field ] ] = $fresh[ $field_map[ $field ] ];
-			}
-		}
-
-		$data['etag'] = $fresh['etag'] ?? $data['etag'];
-		update_term_meta( $term_id, 'yousync_playlist', wp_slash( wp_json_encode( $data ) ) );
+		$this->current_run_count = $processed;
 	}
 
 	/**
@@ -476,15 +668,15 @@ class Sync_Runner {
 	 * @throws \RuntimeException On missing source ID.
 	 */
 	private function handle_videos_update( string $source_type, int $term_id, array $rule, string $action ): void {
-		$conditions        = $rule['conditions'] ?? array();
-		$specific_metadata = $rule['specific_metadata'] ?? array();
+		$conditions                 = $rule['conditions'] ?? array();
+		$this->warn_invalid_conditions( $conditions );
+		$specific_metadata          = $rule['specific_metadata'] ?? array();
+		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
 
 		// Map action to the mode string expected by Video_Importer::update().
 		$mode_map = array(
-			'videos_update_all'                  => 'update_all',
-			'videos_update_non_modified'         => 'update_non_modified',
-			'videos_update_specific_all'         => 'update_specific_all',
-			'videos_update_specific_non_modified' => 'update_specific_non_modified',
+			'videos_update_all'          => 'update_all',
+			'videos_update_specific_all' => 'update_specific_all',
 		);
 		$mode = $mode_map[ $action ] ?? 'update_all';
 
@@ -508,6 +700,8 @@ class Sync_Runner {
 			$playlist_id = $data['playlist_id'];
 		}
 
+		// Fetch every item in the source playlist; the per-run cap is applied
+		// later in batch_fetch_and_update(), not during pagination.
 		$items = $this->api->get_playlist_items( $playlist_id );
 		if ( is_wp_error( $items ) ) {
 			$this->record_error( $source_type, $term_id, $items->get_error_message(), $items->get_error_code() );
@@ -518,8 +712,11 @@ class Sync_Runner {
 			return;
 		}
 
-		$all_ids = array_filter( array_column( $items, 'video_id' ) );
-		$this->batch_fetch_and_update( $all_ids, $conditions, $source_type, $term_id, $mode, $specific_metadata );
+		$all_ids = array_values( array_filter( array_column( $items, 'video_id' ) ) );
+		$max     = (int) ( $rule['max_videos'] ?? 0 );
+
+		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
+		$this->current_run_count = $this->batch_fetch_and_update( $all_ids, $conditions, $source_type, $term_id, $mode, $specific_metadata, $destination_taxonomy_terms, $max, ! $is_once );
 	}
 
 	// -------------------------------------------------------------------------
@@ -539,33 +736,52 @@ class Sync_Runner {
 		array $video_ids,
 		array $conditions,
 		string $source_type,
-		int $term_id
+		int $term_id,
+		string $destination_post_type = '',
+		array $destination_taxonomy_terms = array(),
+		int $max = 0,
+		array $field_mapping = array(),
+		bool $apply_cap = true
 	): int {
-		$chunks   = array_chunk( $video_ids, 50 );
+		$cap     = $apply_cap ? self::BATCH_CAP : PHP_INT_MAX;
+		$cap     = $max > 0 ? min( $max, $cap ) : $cap;
+		$chunks  = array_chunk( $video_ids, 50 );
+		$total   = min( $cap, count( $video_ids ) );
+		$scanned = 0;
 		$imported = 0;
+
+		$this->write_progress( 0, $total );
 
 		foreach ( $chunks as $chunk ) {
 			$videos = $this->api->get_videos_by_ids( $chunk );
 
 			if ( is_wp_error( $videos ) ) {
-				// Record the error but continue — one bad batch shouldn't abort the rest.
-				$this->record_error( $source_type, $term_id, $videos->get_error_message(), $videos->get_error_code() );
+				$this->accumulate_error( $source_type, $term_id, $videos->get_error_message(), $videos->get_error_code() );
+				$scanned += count( $chunk );
+				$this->write_progress( min( $scanned, $total ), $total );
 				continue;
 			}
 
 			foreach ( $videos as $video_data ) {
-				if ( ! $this->evaluator->evaluate_all( $video_data, $conditions ) ) {
-					continue; // Video does not pass conditions.
+				if ( $imported >= $cap ) {
+					return $imported;
 				}
 
-				$result = $this->importer->import( $video_data, $source_type, $term_id );
+				if ( ! $this->evaluator->evaluate_all( $video_data, $conditions ) ) {
+					++$scanned;
+					$this->write_progress( min( $scanned, $total ), $total );
+					continue;
+				}
+
+				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $field_mapping );
 
 				if ( is_wp_error( $result ) ) {
-					// Log import errors but continue with remaining videos.
-					$this->record_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
+					$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
 				} else {
 					++$imported;
 				}
+				++$scanned;
+				$this->write_progress( min( $scanned, $total ), $total );
 			}
 		}
 
@@ -581,9 +797,9 @@ class Sync_Runner {
 	 * @param array    $conditions        Conditions from the rule.
 	 * @param string   $source_type       'channel' or 'playlist'.
 	 * @param int      $term_id           Source term ID.
-	 * @param string   $mode              Update mode (update_all, update_non_modified, etc.).
+	 * @param string   $mode              Update mode: 'update_all' or 'update_specific_all'.
 	 * @param string[] $specific_metadata Fields to update (for specific modes).
-	 * @return void
+	 * @return int Number of videos successfully updated.
 	 */
 	private function batch_fetch_and_update(
 		array $video_ids,
@@ -591,173 +807,67 @@ class Sync_Runner {
 		string $source_type,
 		int $term_id,
 		string $mode,
-		array $specific_metadata
-	): void {
-		$chunks = array_chunk( $video_ids, 50 );
+		array $specific_metadata,
+		array $destination_taxonomy_terms = array(),
+		int $max = 0,
+		bool $apply_cap = true
+	): int {
+		$cap     = $apply_cap ? self::BATCH_CAP : PHP_INT_MAX;
+		$cap     = $max > 0 ? min( $max, $cap ) : $cap;
+		$chunks  = array_chunk( $video_ids, 50 );
+		$total   = min( $cap, count( $video_ids ) );
+		$scanned = 0;
+		$updated = 0;
+
+		$this->write_progress( 0, $total );
 
 		foreach ( $chunks as $chunk ) {
 			$videos = $this->api->get_videos_by_ids( $chunk );
 
 			if ( is_wp_error( $videos ) ) {
-				$this->record_error( $source_type, $term_id, $videos->get_error_message(), $videos->get_error_code() );
+				$this->accumulate_error( $source_type, $term_id, $videos->get_error_message(), $videos->get_error_code() );
+				$scanned += count( $chunk );
+				$this->write_progress( min( $scanned, $total ), $total );
 				continue;
 			}
 
+			$chunk_video_ids = array_column( $videos, 'video_id' );
+			$post_map        = $this->importer->find_posts_by_video_ids( $chunk_video_ids );
+
 			foreach ( $videos as $video_data ) {
+				if ( $updated >= $cap ) {
+					return $updated;
+				}
+
 				if ( ! $this->evaluator->evaluate_all( $video_data, $conditions ) ) {
+					++$scanned;
+					$this->write_progress( min( $scanned, $total ), $total );
 					continue;
 				}
 
-				$post_id = $this->importer->find_post_by_video_id( $video_data['video_id'] );
-				if ( ! $post_id ) {
-					continue; // Not imported yet — update modes skip new videos.
+				// A video may exist as one post per destination post type. Update
+				// every matching post (update rules carry no post-type filter).
+				$post_ids = $post_map[ $video_data['video_id'] ] ?? array();
+				if ( empty( $post_ids ) ) {
+					++$scanned;
+					$this->write_progress( min( $scanned, $total ), $total );
+					continue;
 				}
 
-				$result = $this->importer->update( $post_id, $video_data, $mode, $specific_metadata );
-				if ( is_wp_error( $result ) ) {
-					$this->record_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
+				foreach ( $post_ids as $post_id ) {
+					$result = $this->importer->update( $post_id, $video_data, $mode, $specific_metadata, $destination_taxonomy_terms );
+					if ( is_wp_error( $result ) ) {
+						$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
+					} else {
+						++$updated;
+					}
 				}
-			}
-		}
-	}
-
-	// -------------------------------------------------------------------------
-	// Playlist term helpers
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Find an existing yousync_playlist term by its YouTube playlist ID.
-	 *
-	 * Uses a flat yousync_playlist_id term meta key for indexed lookups.
-	 *
-	 * @param string $playlist_id YouTube playlist ID.
-	 * @return int Term ID, or 0 if not found.
-	 */
-	private function find_playlist_term_by_id( string $playlist_id ): int {
-		$terms = get_terms(
-			array(
-				'taxonomy'   => 'yousync_playlist',
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'meta_query' => array(
-					array(
-						'key'   => 'yousync_playlist_id',
-						'value' => $playlist_id,
-					),
-				),
-			)
-		);
-
-		if ( is_wp_error( $terms ) || empty( $terms ) ) {
-			return 0;
-		}
-
-		return (int) $terms[0];
-	}
-
-	/**
-	 * Create a new yousync_playlist term from API data and link it to a channel term.
-	 *
-	 * Stores a flat yousync_playlist_id meta key for fast future lookups.
-	 * Stores a flat yousync_source_channel_term_id meta key so update actions
-	 * can find playlists belonging to a specific channel.
-	 *
-	 * @param array $playlist_data      Playlist data from the API.
-	 * @param int   $channel_term_id    WordPress term ID of the source channel.
-	 * @return void
-	 */
-	private function create_playlist_term( array $playlist_data, int $channel_term_id ): void {
-		$result = wp_insert_term(
-			sanitize_text_field( $playlist_data['playlist_title'] ?: $playlist_data['playlist_id'] ),
-			'yousync_playlist'
-		);
-
-		if ( is_wp_error( $result ) ) {
-			return;
-		}
-
-		$new_term_id = (int) $result['term_id'];
-
-		// Flat lookup keys.
-		update_term_meta( $new_term_id, 'yousync_playlist_id', $playlist_data['playlist_id'] );
-		update_term_meta( $new_term_id, 'yousync_source_channel_term_id', $channel_term_id );
-
-		// Full JSON meta.
-		$meta = array(
-			'playlist_id'          => $playlist_data['playlist_id'],
-			'playlist_title'       => $playlist_data['playlist_title'],
-			'playlist_description' => $playlist_data['playlist_description'],
-			'playlist_video_count' => $playlist_data['playlist_video_count'],
-			'playlist_thumbnail'   => array(
-				'url'           => $playlist_data['thumbnail_url'],
-				'attachment_id' => 0,
-			),
-			'etag'                 => $playlist_data['etag'],
-			'last_synced'          => time(),
-			'sync_count'           => 0,
-			'sync_errors'          => array(),
-			'sync_rules'           => array(),
-			'manual_edits'         => false,
-		);
-
-		update_term_meta( $new_term_id, 'yousync_playlist', wp_slash( wp_json_encode( $meta ) ) );
-	}
-
-	/**
-	 * Update all metadata fields on an existing playlist term.
-	 *
-	 * @param int   $term_id      Playlist term ID.
-	 * @param array $current_meta Current decoded yousync_playlist meta.
-	 * @param array $fresh        Fresh playlist data from the API.
-	 * @return void
-	 */
-	private function update_playlist_term_meta_all( int $term_id, array $current_meta, array $fresh ): void {
-		$current_meta['playlist_title']       = $fresh['playlist_title'];
-		$current_meta['playlist_description'] = $fresh['playlist_description'];
-		$current_meta['playlist_video_count'] = $fresh['playlist_video_count'];
-		$current_meta['etag']                 = $fresh['etag'];
-
-		if ( ! empty( $fresh['thumbnail_url'] ) ) {
-			if ( is_array( $current_meta['playlist_thumbnail'] ?? null ) ) {
-				$current_meta['playlist_thumbnail']['url'] = $fresh['thumbnail_url'];
-			} else {
-				$current_meta['playlist_thumbnail'] = array( 'url' => $fresh['thumbnail_url'], 'attachment_id' => 0 );
+				++$scanned;
+				$this->write_progress( min( $scanned, $total ), $total );
 			}
 		}
 
-		update_term_meta( $term_id, 'yousync_playlist', wp_slash( wp_json_encode( $current_meta ) ) );
-	}
-
-	/**
-	 * Update only specific metadata fields on an existing playlist term.
-	 *
-	 * @param int      $term_id      Playlist term ID.
-	 * @param array    $current_meta Current decoded yousync_playlist meta.
-	 * @param array    $fresh        Fresh playlist data from the API.
-	 * @param string[] $fields       Field names to update.
-	 * @return void
-	 */
-	private function update_playlist_term_meta_fields( int $term_id, array $current_meta, array $fresh, array $fields ): void {
-		$field_map = array(
-			'playlist_title'       => 'playlist_title',
-			'playlist_description' => 'playlist_description',
-			'playlist_video_count' => 'playlist_video_count',
-		);
-
-		foreach ( $fields as $field ) {
-			if ( 'playlist_thumbnail' === $field && ! empty( $fresh['thumbnail_url'] ) ) {
-				if ( is_array( $current_meta['playlist_thumbnail'] ?? null ) ) {
-					$current_meta['playlist_thumbnail']['url'] = $fresh['thumbnail_url'];
-				} else {
-					$current_meta['playlist_thumbnail'] = array( 'url' => $fresh['thumbnail_url'], 'attachment_id' => 0 );
-				}
-			} elseif ( isset( $field_map[ $field ] ) ) {
-				$current_meta[ $field_map[ $field ] ] = $fresh[ $field_map[ $field ] ];
-			}
-		}
-
-		$current_meta['etag'] = $fresh['etag'];
-		update_term_meta( $term_id, 'yousync_playlist', wp_slash( wp_json_encode( $current_meta ) ) );
+		return $updated;
 	}
 
 	/**
@@ -782,42 +892,79 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Get all YouTube video IDs already imported as yousync_videos posts.
+	 * Record non-fatal warnings for conditions that reference an unknown field or
+	 * an unsupported operator.
 	 *
-	 * Uses the flat _yousync_video_id meta key for an indexed lookup.
+	 * Such conditions fail-open in the evaluator (everything passes), which can
+	 * silently import far more than intended. Warnings are added to the run so
+	 * they appear in the sync history without aborting the run.
 	 *
-	 * @return string[] Array of YouTube video IDs.
+	 * @param array $conditions Rule conditions.
+	 * @return void
 	 */
-	private function get_existing_video_ids(): array {
-		$query = new \WP_Query(
-			array(
-				'post_type'      => 'yousync_videos',
-				'post_status'    => array( 'publish', 'draft', 'private', 'trash' ),
-				'fields'         => 'ids',
-				'posts_per_page' => -1,
-				'no_found_rows'  => true,
-				'meta_query'     => array(
-					array(
-						'key'     => '_yousync_video_id',
-						'compare' => 'EXISTS',
-					),
-				),
-			)
+	private function warn_invalid_conditions( array $conditions ): void {
+		$valid_ops = array(
+			'text'   => array( 'contains', 'not_contains', 'equals', 'not_equals', 'starts_with', 'ends_with' ),
+			'number' => array( 'greater_than', 'less_than', 'equal_to' ),
+			'date'   => array( 'before', 'after', 'on' ),
 		);
 
-		if ( empty( $query->posts ) ) {
-			return array();
-		}
+		foreach ( $conditions as $condition ) {
+			$field = $condition['field'] ?? '';
+			$op    = $condition['operator'] ?? '';
+			$type  = function_exists( 'yousync_pro_get_condition_field_type' )
+				? yousync_pro_get_condition_field_type( $field )
+				: '';
 
-		$video_ids = array();
-		foreach ( $query->posts as $post_id ) {
-			$vid = get_post_meta( (int) $post_id, '_yousync_video_id', true );
-			if ( $vid ) {
-				$video_ids[] = $vid;
+			if ( '' === $type ) {
+				$this->run_errors[] = array(
+					'timestamp' => time(),
+					/* translators: %s: condition field name */
+					'error'     => sprintf( __( 'Condition field "%s" is not recognised, so it was ignored (every item passed it). Check the rule for a typo.', 'yousync-pro' ), $field ),
+					'code'      => 'condition_warning',
+				);
+				continue;
+			}
+
+			if ( ! in_array( $op, $valid_ops[ $type ] ?? array(), true ) ) {
+				$this->run_errors[] = array(
+					'timestamp' => time(),
+					/* translators: 1: operator, 2: field name */
+					'error'     => sprintf( __( 'Operator "%1$s" is not supported for the "%2$s" condition, so it was ignored. Check the rule for a typo.', 'yousync-pro' ), $op, $field ),
+					'code'      => 'condition_warning',
+				);
 			}
 		}
+	}
 
-		return $video_ids;
+	/**
+	 * Whether a rule's destination post type is unusable (empty or not registered).
+	 *
+	 * sync_new actions must refuse to run rather than let wp_insert_post() fall
+	 * back to the default 'post' type or create posts under an orphaned type.
+	 *
+	 * @param string $post_type Destination post type from the rule.
+	 * @return bool True when the post type cannot be used.
+	 */
+	private function invalid_destination_post_type( string $post_type ): bool {
+		return '' === $post_type || ! post_type_exists( $post_type );
+	}
+
+	/**
+	 * Build the user-facing error for an invalid destination post type.
+	 *
+	 * @param string $post_type The offending post type value.
+	 * @return string
+	 */
+	private function invalid_post_type_message( string $post_type ): string {
+		if ( '' === $post_type ) {
+			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'yousync-pro' );
+		}
+		return sprintf(
+			/* translators: %s: post type slug */
+			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'yousync-pro' ),
+			$post_type
+		);
 	}
 
 	// -------------------------------------------------------------------------
@@ -867,17 +1014,24 @@ class Sync_Runner {
 		}
 
 		$data['etag'] = $channel_data['etag'] ?? ( $data['etag'] ?? '' );
-		update_term_meta( $term_id, 'yousync_channel', wp_slash( wp_json_encode( $data ) ) );
+		$this->save_source_data( 'channel', $term_id, $data );
 	}
 
 	/**
 	 * Read and decode the source term's JSON meta.
+	 *
+	 * When running an option-based channel (option_channel_index is set),
+	 * returns the in-memory source_data_override instead of reading term meta.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
 	 * @param int    $term_id     Term ID.
 	 * @return array|null Decoded data array, or null on failure.
 	 */
 	private function get_term_meta_data( string $source_type, int $term_id ): ?array {
+		if ( null !== $this->source_data_override && 'channel' === $source_type ) {
+			return $this->source_data_override;
+		}
+
 		$meta_key = $this->meta_key( $source_type );
 		$raw      = get_term_meta( $term_id, $meta_key, true );
 
@@ -887,6 +1041,75 @@ class Sync_Runner {
 
 		$data = json_decode( $raw, true );
 		return is_array( $data ) ? $data : null;
+	}
+
+	/**
+	 * Persist source data to term meta or, for option-based channels, to
+	 * yousync_channel_config and the in-memory override.
+	 *
+	 * Replaces direct update_term_meta() calls for the channel JSON blob so
+	 * that all write paths work for both term-based and option-based channels.
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID (ignored for option channels).
+	 * @param array  $data        Decoded data to persist.
+	 * @return void
+	 */
+	private function save_source_data( string $source_type, int $term_id, array $data ): void {
+		if ( null !== $this->option_channel_index && 'channel' === $source_type ) {
+			$this->update_option_channel( $this->option_channel_index, $data );
+			$this->source_data_override = $data;
+			return;
+		}
+
+		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+	}
+
+	/**
+	 * Return the normalized list of channels from yousync_channel_config.
+	 *
+	 * Handles both the single-channel flat array and the multi-channel indexed
+	 * array format, returning a 0-indexed array of channel config arrays.
+	 *
+	 * @return array
+	 */
+	private function get_normalized_option_channels(): array {
+		return yousync_pro_normalize_channels( get_option( 'yousync_channel_config', array() ) );
+	}
+
+	/**
+	 * Write an updated channel data array back to yousync_channel_config.
+	 *
+	 * Preserves the original youtube_id key (the option uses youtube_id;
+	 * the runner temporarily adds channel_id as an alias — we don't store it).
+	 *
+	 * @param int   $ch_index Channel index.
+	 * @param array $data     Updated channel data.
+	 * @return void
+	 */
+	private function update_option_channel( int $ch_index, array $data ): void {
+		// Preserve youtube_id from the original option key.
+		if ( ! isset( $data['youtube_id'] ) && isset( $data['channel_id'] ) ) {
+			$data['youtube_id'] = $data['channel_id'];
+		}
+
+		$config = get_option( 'yousync_channel_config', array() );
+		if ( ! is_array( $config ) ) {
+			return;
+		}
+
+		if ( isset( $config['youtube_id'] ) ) {
+			// Single-channel flat format.
+			if ( 0 === $ch_index ) {
+				update_option( 'yousync_channel_config', $data );
+			}
+		} else {
+			// Multi-channel indexed format.
+			if ( isset( $config[ $ch_index ] ) ) {
+				$config[ $ch_index ] = $data;
+				update_option( 'yousync_channel_config', $config );
+			}
+		}
 	}
 
 	/**
@@ -902,6 +1125,94 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 	// Status recording
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Append a run entry to the channel's per-channel sync history.
+	 *
+	 * Writes ONE entry per run — called only from record_success() and terminal
+	 * record_error() calls. All mid-run errors are already in $this->run_errors.
+	 * Only runs for option-based channels (source_data_override is set).
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID.
+	 * @param bool   $has_error   Whether the run produced any error (terminal or accumulated).
+	 * @return void
+	 */
+	private function append_history( string $source_type, int $term_id, bool $has_error ): void {
+		if ( null === $this->source_data_override ) {
+			return;
+		}
+		$youtube_id = $this->source_data_override['youtube_id'] ?? '';
+		if ( ! $youtube_id ) {
+			return;
+		}
+
+		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$rule = $data['sync_rules'][ $this->current_rule_index ] ?? array();
+
+		// Resolve taxonomy term names now so they survive future term deletions/renames.
+		$terms_config = $rule['destination_taxonomy_terms'] ?? array();
+		$term_names   = array();
+		foreach ( $terms_config as $tt ) {
+			foreach ( array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) ) as $tid ) {
+				if ( ! $tid ) {
+					continue;
+				}
+				$term = get_term( $tid );
+				if ( $term && ! is_wp_error( $term ) ) {
+					$term_names[] = $term->name;
+				}
+			}
+		}
+
+		Sync_History::append( $youtube_id, array(
+			'timestamp'             => time(),
+			'rule_action'           => $rule['action'] ?? '',
+			'rule_index'            => $this->current_rule_index,
+			'duration'              => max( 0, time() - $this->run_started_at ),
+			'has_error'             => $has_error,
+			'errors'                => $this->run_errors,
+			'items_count'           => $this->current_run_count,
+			'destination_post_type' => $rule['destination_post_type'] ?? '',
+			'term_names'            => $term_names,
+		) );
+	}
+
+	/**
+	 * Accumulate a non-terminal error during the current sync run.
+	 *
+	 * Pushes the error to $run_errors (flushed into one history entry at the end)
+	 * and updates the rule's sync_errors meta for quick UI display.
+	 * Use this for errors inside batch loops where the run continues after the error.
+	 * For terminal errors where the run stops, use record_error() instead.
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID.
+	 * @param string $error       Human-readable error message.
+	 * @param string $code        Error code string.
+	 * @return void
+	 */
+	private function accumulate_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
+		$this->run_errors[] = array(
+			'timestamp' => time(),
+			'error'     => $error,
+			'code'      => $code,
+		);
+
+		$data = $this->get_term_meta_data( $source_type, $term_id );
+		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
+			return;
+		}
+
+		$rule                = &$data['sync_rules'][ $this->current_rule_index ];
+		$errors              = $rule['sync_errors'] ?? array();
+		$errors[]            = array( 'timestamp' => time(), 'error' => $error, 'code' => $code );
+		$rule['sync_errors'] = array_slice( $errors, -5 );
+		$rule['sync_status'] = 'failed';
+		unset( $rule );
+
+		$this->save_source_data( $source_type, $term_id, $data );
+	}
 
 	/**
 	 * Record a successful sync run in term meta.
@@ -926,13 +1237,37 @@ class Sync_Runner {
 		$rule['sync_errors'] = array();
 		unset( $rule );
 
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->save_source_data( $source_type, $term_id, $data );
+		$this->append_history( $source_type, $term_id, ! empty( $this->run_errors ) );
 	}
 
 	/**
-	 * Append an error to term meta sync_errors (max 5 most recent).
+	 * Resolve a human-readable name for the sync source.
 	 *
-	 * Sets sync_status = 'failed'.
+	 * For option-based channels the title is taken from source_data_override.
+	 * For legacy term-based channels it is read from term meta.
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID (0 for option-based channels).
+	 * @return string
+	 */
+	private function get_source_name( string $source_type, int $term_id ): string {
+		if ( null !== $this->source_data_override && 'channel' === $source_type ) {
+			return $this->source_data_override['channel_title'] ?? '';
+		}
+		if ( $term_id > 0 ) {
+			$term = get_term( $term_id );
+			return ( $term && ! is_wp_error( $term ) ) ? $term->name : '';
+		}
+		return '';
+	}
+
+	/**
+	 * Record a terminal sync error — the run stops here.
+	 *
+	 * Accumulates the error (updates rule meta + run_errors buffer), then
+	 * writes the single history entry for this run.
+	 * For non-terminal errors inside batch loops, use accumulate_error() instead.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
 	 * @param int    $term_id     Term ID.
@@ -941,29 +1276,29 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function record_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
-		// Write to the global error log (single option, capped at 50 entries).
-		Sync_Logger::log_error( $source_type, $term_id, $error, $code );
+		$this->accumulate_error( $source_type, $term_id, $error, $code );
+		$this->append_history( $source_type, $term_id, true );
+	}
 
-		// Also store the last 5 errors in the specific rule's meta for quick display.
-		$data = $this->get_term_meta_data( $source_type, $term_id );
-		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
-			return;
-		}
-
-		$entry = array(
+	/**
+	 * Record an error in sync history only — does NOT write to the rule's inline sync_errors meta.
+	 *
+	 * Use for license-gate errors where the rule UI already communicates the locked state,
+	 * so the inline error display would be redundant and confusing.
+	 *
+	 * @param string $source_type 'channel' or 'playlist'.
+	 * @param int    $term_id     Term ID.
+	 * @param string $error       Human-readable error message.
+	 * @param string $code        Error code string.
+	 * @return void
+	 */
+	private function record_history_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
+		$this->run_errors[] = array(
 			'timestamp' => time(),
 			'error'     => $error,
 			'code'      => $code,
 		);
-
-		$rule                = &$data['sync_rules'][ $this->current_rule_index ];
-		$errors              = $rule['sync_errors'] ?? array();
-		$errors[]            = $entry;
-		$rule['sync_errors'] = array_slice( $errors, -5 );
-		$rule['sync_status'] = 'failed';
-		unset( $rule );
-
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->append_history( $source_type, $term_id, true );
 	}
 
 	/**
@@ -989,7 +1324,11 @@ class Sync_Runner {
 		$rule['sync_started_at'] = time();
 		unset( $rule );
 
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->run_started_at    = time();
+		$this->run_errors        = array();
+		$this->current_run_count = 0;
+
+		$this->save_source_data( $source_type, $term_id, $data );
 	}
 
 	/**
@@ -1018,7 +1357,7 @@ class Sync_Runner {
 		}
 		unset( $rule );
 
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->save_source_data( $source_type, $term_id, $data );
 	}
 
 	/**
@@ -1039,6 +1378,34 @@ class Sync_Runner {
 		}
 
 		$data['sync_rules'][ $rule_index ]['enabled'] = false;
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->save_source_data( $source_type, $term_id, $data );
+		// Progress transient is intentionally left to expire — the UI reads it
+		// in the onSyncDone response to briefly show the final count.
 	}
+
+	// -------------------------------------------------------------------------
+	// Progress tracking
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Write sync progress to a transient for UI polling.
+	 *
+	 * Only tracked for option-based channels (option_channel_index is set).
+	 * The transient expires after 30 minutes — a stale lock guard.
+	 *
+	 * @param int $current Items scanned so far.
+	 * @param int $total   Total items to scan.
+	 * @return void
+	 */
+	private function write_progress( int $current, int $total ): void {
+		if ( null === $this->option_channel_index ) {
+			return;
+		}
+		set_transient(
+			'yousync_prog_' . $this->option_channel_index . '_' . $this->current_rule_index,
+			array( 'current' => $current, 'total' => $total ),
+			1800
+		);
+	}
+
 }

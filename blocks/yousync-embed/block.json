@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "yousync/embed",
+  "title": "YouSync Embed",
+  "category": "yousync",
+  "description": "Embed a YouSync YouTube video player.",
+  "keywords": ["yousync", "youtube", "embed", "video", "player"],
+  "textdomain": "yousync-pro",
+  "attributes": {
+    "postId": { "type": "number", "default": 0 }
+  },
+  "supports": { "html": false },
+  "editorScript": "file:./index.js"
+}
