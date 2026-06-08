@@ -149,7 +149,6 @@ register_activation_hook( YOUSYNC_PLUGIN_FILE, function () {
  */
 register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'yousync_channel_config_sync_rule' );
-	wp_unschedule_hook( 'yousync_daily_license_check' );
 } );
 
 /**
@@ -184,11 +183,6 @@ require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-history.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-channels-page.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-blocks.php';
-
-// Load shared license client library.
-require_once YOUSYNC_PLUGIN_DIR . 'includes/license-client/class-wpbuoy-license-client.php';
-use WPBuoy_License_Client\v1\Client;
-require_once YOUSYNC_PLUGIN_DIR . 'includes/class-yousync-updater.php';
 
 /**
  * Instantiate the sync engine.
@@ -240,7 +234,7 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  * @return void
  */
 function yousync_render_video_metabox( $post ) {
-	$has_video_protection = yousync_license()->is_feature_available( 'video_protection' );
+	$has_video_protection = false;
 	$thumbnails           = get_post_meta( $post->ID, '_yousync_thumbnails', true );
 	$thumbnails           = is_array( $thumbnails ) ? $thumbnails : array();
 
@@ -587,59 +581,6 @@ function yousync_ajax_get_terms() {
 		array_map( fn( $t ) => [ 'id' => $t->term_id, 'name' => $t->name ], $terms )
 	);
 }
-
-// -----------------------------------------------------------------------
-// License
-// -----------------------------------------------------------------------
-
-/**
- * Returns the Wpbuoy_License_Client instance for YouSync Pro.
- *
- * Uses a static variable so the instance is created only once and its
- * constructor hooks register a single time regardless of how often this
- * function is called.
- *
- * @return Wpbuoy_License_Client
- */
-function yousync_license(): Client {
-	static $instance = null;
-
-	if ( null === $instance ) {
-		$license_base = defined( 'WPBUOY_LICENSE_SERVER' )
-			? untrailingslashit( WPBUOY_LICENSE_SERVER )
-			: 'https://wpbuoy.com';
-
-		$instance = new Client( array(
-			'plugin_slug'  => 'yousync',
-			'server_url'   => $license_base . '/wp-json/wpbylm/v1/verify',
-			'pro_features' => array(
-				'scheduled_sync',
-				'metadata_update',
-				'conditions',
-				'field_mapping',
-				'taxonomy_terms',
-				'video_protection',
-				'multi_channel',
-			),
-			'text_domain'  => 'yousync',
-			'plugin_name'  => 'YouSync Pro',
-			'pricing_url'  => $license_base . '/pricing',
-			'account_url'  => $license_base . '/my-account/licenses',
-			'page_slug'    => 'yousync_license',
-		) );
-	}
-
-	return $instance;
-}
-
-// Instantiate immediately so the license client's hooks (init, admin_init, admin_post_*) register at plugin load.
-yousync_license();
-
-new \YouSync\Updater(
-	'yousync',
-	plugin_basename( __FILE__ ),
-	defined( 'WPBUOY_LICENSE_SERVER' ) ? WPBUOY_LICENSE_SERVER : 'https://wpbuoy.com'
-);
 
 
 /**

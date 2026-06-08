@@ -64,11 +64,11 @@ $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
 	&& ( time() - $sync_started_at ) < 1800;
 
 // License feature flags
-$ys_has_scheduled_sync  = yousync_license()->is_feature_available( 'scheduled_sync' );
-$ys_has_metadata_update = yousync_license()->is_feature_available( 'metadata_update' );
-$ys_has_conditions      = yousync_license()->is_feature_available( 'conditions' );
-$ys_has_field_mapping   = yousync_license()->is_feature_available( 'field_mapping' );
-$ys_has_taxonomy        = yousync_license()->is_feature_available( 'taxonomy_terms' );
+$ys_has_scheduled_sync  = false;
+$ys_has_metadata_update = false;
+$ys_has_conditions      = false;
+$ys_has_field_mapping   = false;
+$ys_has_taxonomy        = false;
 
 // Determine the resource type from the action (used for field options and metadata options)
 $resource = '';

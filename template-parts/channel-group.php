@@ -35,8 +35,8 @@ $post_types             = get_post_types( array( 'public' => true ), 'objects' )
 $available_taxonomies   = get_taxonomies( array( 'public' => true ), 'objects' );
 $default_post_type      = $channel['default_post_type'] ?? '';
 $default_taxonomy_terms = $channel['default_taxonomy_terms'] ?? array();
-$ys_has_taxonomy        = yousync_license()->is_feature_available( 'taxonomy_terms' );
-$ys_has_field_mapping   = yousync_license()->is_feature_available( 'field_mapping' );
+$ys_has_taxonomy        = false;
+$ys_has_field_mapping   = false;
 
 $profile_picture  = $channel['profile_picture'] ?? array();
 $profile_src      = '';

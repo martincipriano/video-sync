@@ -23,9 +23,9 @@ $available_taxonomies = get_taxonomies( array( 'public' => true ), 'objects' );
 
 $default_post_type      = $default_post_type ?? '';
 $default_taxonomy_terms = $default_taxonomy_terms ?? array();
-$has_scheduled_sync  = yousync_license()->is_feature_available( 'scheduled_sync' );
-$has_conditions      = yousync_license()->is_feature_available( 'conditions' );
-$has_metadata_update = yousync_license()->is_feature_available( 'metadata_update' );
+$has_scheduled_sync  = false;
+$has_conditions      = false;
+$has_metadata_update = false;
 
 $mu = $has_metadata_update ? '' : 'disabled';
 

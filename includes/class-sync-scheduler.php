@@ -282,7 +282,7 @@ class Sync_Scheduler {
 		}
 
 		// Enforce scheduled_sync license gate — downgrade to once if unlicensed.
-		if ( ! yousync_license()->is_feature_available( 'scheduled_sync' ) ) {
+		if ( ! false ) {
 			wp_schedule_single_event( time(), self::CRON_HOOK_CONFIG, $args );
 			return true;
 		}

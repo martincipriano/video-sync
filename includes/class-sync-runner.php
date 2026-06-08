@@ -161,28 +161,27 @@ class Sync_Runner {
 		$this->current_rule_index = $rule_index;
 
 		$action  = $rule['action'] ?? '';
-		$license = yousync_license();
 
-		// Enforce scheduled_sync license gate — recurring schedules require an active license.
+		// Free supports the 'once' schedule only — recurring schedules are Pro.
 		$schedule = $rule['schedule'] ?? 'once';
-		if ( 'once' !== $schedule && ! $license->is_feature_available( 'scheduled_sync' ) ) {
-			$this->record_history_error( $source_type, $term_id, 'An active license is required for scheduled sync.', 'license_required' );
+		if ( 'once' !== $schedule ) {
+			$this->record_history_error( $source_type, $term_id, 'Scheduled sync is a Pro feature.', 'pro_only' );
 			return;
 		}
 
-		// Enforce metadata_update license gate server-side.
+		// Metadata update actions are Pro-only.
 		$metadata_update_actions = array(
 			'videos_update_all', 'videos_update_specific_all',
 			'channel_update_all', 'channel_update_specific',
 			'playlists_update_all', 'playlists_update_specific_all',
 		);
-		if ( in_array( $action, $metadata_update_actions, true ) && ! $license->is_feature_available( 'metadata_update' ) ) {
-			$this->record_history_error( $source_type, $term_id, 'An active license is required for metadata update actions.', 'license_required' );
+		if ( in_array( $action, $metadata_update_actions, true ) ) {
+			$this->record_history_error( $source_type, $term_id, 'Metadata update actions are a Pro feature.', 'pro_only' );
 			return;
 		}
 
-		// Strip conditions if conditions feature is not licensed.
-		if ( ! empty( $rule['conditions'] ) && ! $license->is_feature_available( 'conditions' ) ) {
+		// Conditions are Pro-only — ignore any that slipped into a free rule.
+		if ( ! empty( $rule['conditions'] ) ) {
 			$rule['conditions'] = array();
 		}
 

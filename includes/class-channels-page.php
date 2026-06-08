@@ -55,24 +55,6 @@ class Channels_Page {
 			'yousync',
 			array( $this, 'render_page' )
 		);
-
-		// License submenu.
-		add_submenu_page(
-			'yousync',
-			__( 'License', 'yousync' ),
-			__( 'License', 'yousync' ),
-			'manage_options',
-			'yousync_license',
-			function () {
-				yousync_license()->render_license_page( array(
-					'scheduled_sync'   => __( 'Sync schedules: Hourly, Daily, Weekly, Monthly, Custom', 'yousync' ),
-					'metadata_update'  => __( 'Update metadata for existing videos and playlists', 'yousync' ),
-					'conditions'       => __( 'Conditional sync rules (filter by field, operator, value)', 'yousync' ),
-					'video_protection' => __( 'Protect individual videos from being overwritten by sync', 'yousync' ),
-					'multi_channel'    => __( 'Manage multiple YouTube channels from a single dashboard', 'yousync' ),
-				) );
-			}
-		);
 	}
 
 	/**
@@ -86,7 +68,7 @@ class Channels_Page {
 			$config = array();
 		}
 
-		$is_pro          = yousync_license()->is_feature_available( 'multi_channel' );
+		$is_pro          = false;
 		$can_add_channel = $is_pro;
 
 		// Normalize single config to array of channels.
@@ -121,12 +103,6 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function enqueue_assets( $hook ) {
-		// Enqueue admin CSS on Insights and License subpages too.
-		if ( 'yousync_page_yousync_license' === $hook ) {
-			wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array(), YOUSYNC_VERSION );
-			return;
-		}
-
 		if ( 'toplevel_page_yousync' !== $hook ) {
 			return;
 		}
@@ -359,7 +335,7 @@ class Channels_Page {
 		$new_channels = array_values( array_filter( $new_channels, fn( $ch ) => ! empty( $ch['youtube_id'] ) ) );
 
 		// Free: save as single channel format. Pro: save as-is.
-		$is_pro = yousync_license()->is_feature_available( 'multi_channel' );
+		$is_pro = false;
 		if ( ! $is_pro || count( $new_channels ) === 1 ) {
 			update_option( 'yousync_channel_config', $new_channels[0] ?? array() );
 		} else {
