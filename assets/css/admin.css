@@ -1782,10 +1782,13 @@
 }
 
 .ys-history-empty {
-  color: #646970;
+  border: 1px dashed #c3c4c7;
+  color: #8c8f94;
   font-size: 13px;
-  margin: 0;
-  padding: 20px;
+  font-style: italic;
+  margin: 20px;
+  padding: 12px;
+  text-align: center;
 }
 
 .ys-history-entry-summary {
