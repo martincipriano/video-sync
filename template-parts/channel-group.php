@@ -308,14 +308,8 @@ $fm_sources = array(
 				<?php
 				$action_labels = array(
 					'videos_sync_new'               => __( 'Sync new videos', 'yousync' ),
-					'videos_update_all'             => __( 'Update all video metadata', 'yousync' ),
-					'videos_update_specific_all'    => __( 'Update specific video metadata', 'yousync' ),
 					'playlists_sync_new'            => __( 'Sync new playlists', 'yousync' ),
-					'playlists_update_all'          => __( 'Update all playlist metadata', 'yousync' ),
-					'playlists_update_specific_all' => __( 'Update specific playlist metadata', 'yousync' ),
 					'channel_sync_new'              => __( 'Sync channel', 'yousync' ),
-					'channel_update_all'            => __( 'Update all channel metadata', 'yousync' ),
-					'channel_update_specific'       => __( 'Update specific channel metadata', 'yousync' ),
 				);
 				?>
 			<?php foreach ( $history as $entry ) :

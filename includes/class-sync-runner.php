@@ -169,17 +169,6 @@ class Sync_Runner {
 			return;
 		}
 
-		// Metadata update actions are Pro-only.
-		$metadata_update_actions = array(
-			'videos_update_all', 'videos_update_specific_all',
-			'channel_update_all', 'channel_update_specific',
-			'playlists_update_all', 'playlists_update_specific_all',
-		);
-		if ( in_array( $action, $metadata_update_actions, true ) ) {
-			$this->record_history_error( $source_type, $term_id, 'Metadata update actions are a Pro feature.', 'pro_only' );
-			return;
-		}
-
 		// Conditions are Pro-only — ignore any that slipped into a free rule.
 		if ( ! empty( $rule['conditions'] ) ) {
 			$rule['conditions'] = array();
@@ -219,25 +208,13 @@ class Sync_Runner {
 					$this->handle_videos_sync_new( $source_type, $term_id, $rule );
 					break;
 
-				case 'videos_update_all':
-				case 'videos_update_specific_all':
-					$this->handle_videos_update( $source_type, $term_id, $rule, $action );
-					break;
-
 				// ---- Channel ----
 				case 'channel_sync_new':
 					$this->handle_channel_sync_new( $term_id, $rule );
 					break;
 
-				case 'channel_update_all':
-				case 'channel_update_specific':
-					$this->handle_channel_update( $term_id, $rule, $action );
-					break;
-
 				// ---- Playlists from channel ----
 				case 'playlists_sync_new':
-				case 'playlists_update_all':
-				case 'playlists_update_specific_all':
 					$this->handle_playlists_sync( $term_id, $rule, $action );
 					break;
 
@@ -458,67 +435,6 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Handle channel_update_all and channel_update_specific.
-	 *
-	 * Fetches fresh channel metadata from the API and merges it into the
-	 * channel's yousync_channel term meta. For the _specific variant, only
-	 * the fields listed in $rule['specific_metadata'] are updated.
-	 *
-	 * @param int    $term_id Channel term ID.
-	 * @param array  $rule    Sync rule array.
-	 * @param string $action  Action slug.
-	 * @return void
-	 * @throws \RuntimeException On missing channel ID.
-	 */
-	private function handle_channel_update( int $term_id, array $rule, string $action ): void {
-		$data = $this->get_term_meta_data( 'channel', $term_id );
-		if ( ! $data || empty( $data['channel_id'] ) ) {
-			throw new \RuntimeException( 'Channel ID not found in term meta.' );
-		}
-
-		$fresh = $this->api->get_channel_data( $data['channel_id'] );
-		if ( is_wp_error( $fresh ) ) {
-			$this->record_error( 'channel', $term_id, $fresh->get_error_message(), $fresh->get_error_code() );
-			return;
-		}
-
-		// Map API field names to meta field names.
-		$field_map = array(
-			'channel_title'       => 'channel_title',
-			'channel_description' => 'channel_description',
-			'subscriber_count'    => 'subscriber_count',
-			'video_count'         => 'video_count',
-			'profile_picture'     => 'profile_picture',
-			'banner_image'        => 'banner_image',
-		);
-
-		if ( 'channel_update_specific' === $action ) {
-			$fields = $rule['specific_metadata'] ?? array();
-		} else {
-			$fields = array_keys( $field_map ); // All fields.
-		}
-
-		foreach ( $fields as $field ) {
-			if ( isset( $field_map[ $field ], $fresh[ $field_map[ $field ] ] ) ) {
-				$data[ $field_map[ $field ] ] = $fresh[ $field_map[ $field ] ];
-			}
-		}
-
-		$data['etag'] = $fresh['etag'] ?? $data['etag'];
-		$this->save_source_data( 'channel', $term_id, $data );
-
-		// Also update every channel WP post for this channel (one per post type).
-		$channel_post_ids = $this->importer->find_posts_by_channel_id( $data['channel_id'] );
-		$mode_str         = 'channel_update_specific' === $action ? 'update_specific' : 'update_all';
-		$spec             = 'channel_update_specific' === $action ? ( $rule['specific_metadata'] ?? array() ) : array();
-		foreach ( $channel_post_ids as $channel_post_id ) {
-			$this->importer->update_channel( $channel_post_id, $fresh, $data['channel_id'], $mode_str, $spec );
-		}
-
-		$this->current_run_count = 1;
-	}
-
-	/**
 	 * Handle the channel_sync_new action.
 	 *
 	 * Fetches fresh channel data from the API and creates a WordPress post for the channel.
@@ -573,14 +489,14 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Handle playlists_sync_new and playlists_update_* actions.
+	 * Handle the playlists_sync_new action.
 	 *
-	 * For sync_new: creates a new post for each playlist not yet imported.
-	 * For update variants: updates existing playlist posts.
+	 * Creates a new post for each playlist not yet imported into the destination
+	 * post type.
 	 *
 	 * @param int    $term_id Channel term ID (0 for option-based channels).
 	 * @param array  $rule    Sync rule array.
-	 * @param string $action  Action slug.
+	 * @param string $action  Action slug (always playlists_sync_new).
 	 * @return void
 	 * @throws \RuntimeException On missing channel ID.
 	 */
@@ -589,19 +505,14 @@ class Sync_Runner {
 		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
 		$conditions                 = $rule['conditions'] ?? array();
 		$this->warn_invalid_conditions( $conditions );
-		$specific_metadata          = $rule['specific_metadata'] ?? array();
 
 		$data = $this->get_term_meta_data( 'channel', $term_id );
 		if ( ! $data || empty( $data['channel_id'] ) ) {
 			throw new \RuntimeException( 'Channel ID not found.' );
 		}
 
-		$is_update     = str_starts_with( $action, 'playlists_update' );
-		$specific_only = str_contains( $action, 'specific' );
-
-		// sync_new must have a valid destination post type; update actions carry
-		// no post type. Validate before spending an API call.
-		if ( ! $is_update && $this->invalid_destination_post_type( $destination_post_type ) ) {
+		// Validate the destination post type before spending an API call.
+		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
 			$this->record_error( 'channel', $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
 			return;
 		}
@@ -613,10 +524,10 @@ class Sync_Runner {
 			$this->record_error( 'channel', $term_id, $playlists->get_error_message(), $playlists->get_error_code() );
 			return;
 		}
-		$max           = (int) ( $rule['max_videos'] ?? 0 ); // max_videos field doubles as max_playlists.
-		$processed     = 0;
-		$total_pl      = $max > 0 ? min( $max, count( $playlists ) ) : count( $playlists );
-		$scanned_pl    = 0;
+		$max        = (int) ( $rule['max_videos'] ?? 0 ); // max_videos field doubles as max_playlists.
+		$processed  = 0;
+		$total_pl   = $max > 0 ? min( $max, count( $playlists ) ) : count( $playlists );
+		$scanned_pl = 0;
 
 		$this->write_progress( 0, $total_pl );
 
@@ -633,93 +544,17 @@ class Sync_Runner {
 				continue;
 			}
 
-			if ( ! $is_update ) {
-				// playlists_sync_new: create if missing in this post type.
-				$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
-				if ( ! $existing_post_id ) {
-					$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $destination_taxonomy_terms );
-					++$processed;
-				}
-			} else {
-				// Update variants: refresh every already-imported playlist post
-				// for this playlist (one per post type).
-				$mode      = $specific_only ? 'update_specific_all' : 'update_all';
-				$post_ids  = $this->importer->find_posts_by_playlist_id( $playlist_data['playlist_id'] );
-				foreach ( $post_ids as $existing_post_id ) {
-					$this->importer->update_playlist( $existing_post_id, $playlist_data, $mode, $specific_metadata, $destination_taxonomy_terms );
-					++$processed;
-				}
+			// Create if missing in this post type.
+			$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
+			if ( ! $existing_post_id ) {
+				$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $destination_taxonomy_terms );
+				++$processed;
 			}
 			++$scanned_pl;
 			$this->write_progress( min( $scanned_pl, $total_pl ), $total_pl );
 		}
 
 		$this->current_run_count = $processed;
-	}
-
-	/**
-	 * Handle videos_update_* actions (all four update modes).
-	 *
-	 * Fetches the full video list from the source, finds matching WP posts,
-	 * and calls Video_Importer::update() on each.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param array  $rule        Sync rule array.
-	 * @param string $action      Action slug.
-	 * @return void
-	 * @throws \RuntimeException On missing source ID.
-	 */
-	private function handle_videos_update( string $source_type, int $term_id, array $rule, string $action ): void {
-		$conditions                 = $rule['conditions'] ?? array();
-		$this->warn_invalid_conditions( $conditions );
-		$specific_metadata          = $rule['specific_metadata'] ?? array();
-		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
-
-		// Map action to the mode string expected by Video_Importer::update().
-		$mode_map = array(
-			'videos_update_all'          => 'update_all',
-			'videos_update_specific_all' => 'update_specific_all',
-		);
-		$mode = $mode_map[ $action ] ?? 'update_all';
-
-		// Get the playlist ID to iterate.
-		if ( 'channel' === $source_type ) {
-			$data = $this->get_term_meta_data( 'channel', $term_id );
-			if ( ! $data || empty( $data['channel_id'] ) ) {
-				throw new \RuntimeException( 'Channel ID not found in term meta.' );
-			}
-			$channel_data = $this->api->get_channel_data( $data['channel_id'] );
-			if ( is_wp_error( $channel_data ) ) {
-				$this->record_error( $source_type, $term_id, $channel_data->get_error_message(), $channel_data->get_error_code() );
-				return;
-			}
-			$playlist_id = $channel_data['uploads_playlist_id'] ?? '';
-		} else {
-			$data = $this->get_term_meta_data( 'playlist', $term_id );
-			if ( ! $data || empty( $data['playlist_id'] ) ) {
-				throw new \RuntimeException( 'Playlist ID not found in term meta.' );
-			}
-			$playlist_id = $data['playlist_id'];
-		}
-
-		// Fetch every item in the source playlist; the per-run cap is applied
-		// later in batch_fetch_and_update(), not during pagination.
-		$items = $this->api->get_playlist_items( $playlist_id );
-		if ( is_wp_error( $items ) ) {
-			$this->record_error( $source_type, $term_id, $items->get_error_message(), $items->get_error_code() );
-			return;
-		}
-
-		if ( empty( $items ) ) {
-			return;
-		}
-
-		$all_ids = array_values( array_filter( array_column( $items, 'video_id' ) ) );
-		$max     = (int) ( $rule['max_videos'] ?? 0 );
-
-		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
-		$this->current_run_count = $this->batch_fetch_and_update( $all_ids, $conditions, $source_type, $term_id, $mode, $specific_metadata, $destination_taxonomy_terms, $max, ! $is_once );
 	}
 
 	// -------------------------------------------------------------------------
@@ -789,88 +624,6 @@ class Sync_Runner {
 		}
 
 		return $imported;
-	}
-
-	/**
-	 * Fetch video details in batches of 50, evaluate conditions, and update.
-	 *
-	 * Only processes video IDs that already have a matching WP post.
-	 *
-	 * @param string[] $video_ids         All video IDs from the source playlist.
-	 * @param array    $conditions        Conditions from the rule.
-	 * @param string   $source_type       'channel' or 'playlist'.
-	 * @param int      $term_id           Source term ID.
-	 * @param string   $mode              Update mode: 'update_all' or 'update_specific_all'.
-	 * @param string[] $specific_metadata Fields to update (for specific modes).
-	 * @return int Number of videos successfully updated.
-	 */
-	private function batch_fetch_and_update(
-		array $video_ids,
-		array $conditions,
-		string $source_type,
-		int $term_id,
-		string $mode,
-		array $specific_metadata,
-		array $destination_taxonomy_terms = array(),
-		int $max = 0,
-		bool $apply_cap = true
-	): int {
-		$cap     = $apply_cap ? self::BATCH_CAP : PHP_INT_MAX;
-		$cap     = $max > 0 ? min( $max, $cap ) : $cap;
-		$chunks  = array_chunk( $video_ids, 50 );
-		$total   = min( $cap, count( $video_ids ) );
-		$scanned = 0;
-		$updated = 0;
-
-		$this->write_progress( 0, $total );
-
-		foreach ( $chunks as $chunk ) {
-			$videos = $this->api->get_videos_by_ids( $chunk );
-
-			if ( is_wp_error( $videos ) ) {
-				$this->accumulate_error( $source_type, $term_id, $videos->get_error_message(), $videos->get_error_code() );
-				$scanned += count( $chunk );
-				$this->write_progress( min( $scanned, $total ), $total );
-				continue;
-			}
-
-			$chunk_video_ids = array_column( $videos, 'video_id' );
-			$post_map        = $this->importer->find_posts_by_video_ids( $chunk_video_ids );
-
-			foreach ( $videos as $video_data ) {
-				if ( $updated >= $cap ) {
-					return $updated;
-				}
-
-				if ( ! $this->evaluator->evaluate_all( $video_data, $conditions ) ) {
-					++$scanned;
-					$this->write_progress( min( $scanned, $total ), $total );
-					continue;
-				}
-
-				// A video may exist as one post per destination post type. Update
-				// every matching post (update rules carry no post-type filter).
-				$post_ids = $post_map[ $video_data['video_id'] ] ?? array();
-				if ( empty( $post_ids ) ) {
-					++$scanned;
-					$this->write_progress( min( $scanned, $total ), $total );
-					continue;
-				}
-
-				foreach ( $post_ids as $post_id ) {
-					$result = $this->importer->update( $post_id, $video_data, $mode, $specific_metadata, $destination_taxonomy_terms );
-					if ( is_wp_error( $result ) ) {
-						$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
-					} else {
-						++$updated;
-					}
-				}
-				++$scanned;
-				$this->write_progress( min( $scanned, $total ), $total );
-			}
-		}
-
-		return $updated;
 	}
 
 	/**

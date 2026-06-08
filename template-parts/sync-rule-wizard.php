@@ -68,18 +68,12 @@ $allowed_sources = array(
 					<option value=""><?php esc_html_e( '— Select action —', 'yousync' ); ?></option>
 					<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
 						<option data-resource="video" value="videos_sync_new"><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
-						<option data-resource="video" <?php echo esc_attr( $mu ); ?> value="videos_update_all"><?php esc_html_e( 'Update all video details', 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="video" <?php echo esc_attr( $mu ); ?> value="videos_update_specific_all"><?php esc_html_e( 'Update specific video details', 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
 						<option data-resource="playlist" value="playlists_sync_new"><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
-						<option data-resource="playlist" <?php echo esc_attr( $mu ); ?> value="playlists_update_all"><?php esc_html_e( 'Update all playlist details', 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="playlist" <?php echo esc_attr( $mu ); ?> value="playlists_update_specific_all"><?php esc_html_e( 'Update specific playlist details', 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
 						<option data-resource="channel" value="channel_sync_new"><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
-						<option data-resource="channel" <?php echo esc_attr( $mu ); ?> value="channel_update_all"><?php esc_html_e( "Update this channel's details", 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="channel" <?php echo esc_attr( $mu ); ?> value="channel_update_specific"><?php esc_html_e( 'Update specific details of this channel', 'yousync' ); ?><?php echo $has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 				</select>
 			</div>

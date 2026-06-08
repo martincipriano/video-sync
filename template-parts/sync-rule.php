@@ -37,14 +37,8 @@ $rule_index = isset( $index ) ? $index : '{{INDEX}}';
 // Auto-generated rule label from action + schedule
 $_action_labels = array(
 	'channel_sync_new'            => __( 'Sync this channel', 'yousync' ),
-	'channel_update_all'          => __( "Update this channel's details", 'yousync' ),
-	'channel_update_specific'     => __( 'Update specific details of this channel', 'yousync' ),
 	'playlists_sync_new'          => __( 'Sync new playlists', 'yousync' ),
-	'playlists_update_all'        => __( 'Update all playlist details', 'yousync' ),
-	'playlists_update_specific_all' => __( 'Update specific playlist details', 'yousync' ),
 	'videos_sync_new'             => __( 'Sync new videos', 'yousync' ),
-	'videos_update_all'           => __( 'Update all video details', 'yousync' ),
-	'videos_update_specific_all'  => __( 'Update specific video details', 'yousync' ),
 );
 $_schedule_suffixes = array(
 	'once'    => __( 'immediately after saving', 'yousync' ),
@@ -175,18 +169,12 @@ $_post_type_label = 'playlists_sync_new' === $action
 					<?php $mu = $ys_has_metadata_update ? '' : 'disabled'; ?>
 					<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
 						<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
-						<option data-resource="video" <?php echo esc_attr( $mu ); ?> value="videos_update_all" <?php selected( $action, 'videos_update_all' ); ?>><?php esc_html_e( 'Update all video details', 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="video" <?php echo esc_attr( $mu ); ?> value="videos_update_specific_all" <?php selected( $action, 'videos_update_specific_all' ); ?>><?php esc_html_e( 'Update specific video details', 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
 						<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
-						<option data-resource="playlist" <?php echo esc_attr( $mu ); ?> value="playlists_update_all" <?php selected( $action, 'playlists_update_all' ); ?>><?php esc_html_e( 'Update all playlist details', 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="playlist" <?php echo esc_attr( $mu ); ?> value="playlists_update_specific_all" <?php selected( $action, 'playlists_update_specific_all' ); ?>><?php esc_html_e( 'Update specific playlist details', 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 					<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
 							<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
-						<option data-resource="channel" <?php echo esc_attr( $mu ); ?> value="channel_update_all" <?php selected( $action, 'channel_update_all' ); ?>><?php esc_html_e( "Update this channel's details", 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
-						<option data-resource="channel" <?php echo esc_attr( $mu ); ?> value="channel_update_specific" <?php selected( $action, 'channel_update_specific' ); ?>><?php esc_html_e( 'Update specific details of this channel', 'yousync' ); ?><?php echo $ys_has_metadata_update ? '' : esc_html__( ' (Pro)', 'yousync' ); ?></option>
 					</optgroup>
 				</select>
 				<p class="ys-quota-estimate ys-hidden"></p>
