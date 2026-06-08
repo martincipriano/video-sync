@@ -4,10 +4,10 @@ declare(strict_types=1);
  * Template part for a single taxonomy + term repeater row.
  *
  * Used both for server-side rendering (sync-rule.php) and as the JS insertion
- * template via yousync_pro_get_taxonomy_term_row_template() — in the latter
+ * template via yousync_get_taxonomy_term_row_template() — in the latter
  * case the variables are {{PLACEHOLDER}} token strings that JS replaces.
  *
- * @package YouSyncPro
+ * @package YouSync
  *
  * Variables available in this template:
  * @var string $name_prefix        Form name prefix (e.g. "channels[0][sync_rules]" or "{{NAME_PREFIX}}").
@@ -31,9 +31,9 @@ $term_disabled = isset( $term_disabled ) ? (bool) $term_disabled : true;
 	</select>
 	<div class="ys-term-select-wrapper">
 		<select name="<?php echo esc_attr( "{$name_prefix}[{$rule_index}][destination_taxonomy_terms][{$tt_index}][term_ids][]" ); ?>" class="ys-select ys-term-select"<?php echo $term_disabled ? ' disabled' : ''; ?>>
-			<option value=""><?php esc_html_e( '&mdash; Select term &mdash;', 'yousync-pro' ); ?></option>
+			<option value=""><?php esc_html_e( '&mdash; Select term &mdash;', 'yousync' ); ?></option>
 			<?php echo $term_options ?? ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Caller is responsible for escaping. ?>
 		</select>
 	</div>
-	<button type="button" class="ys-remove-taxonomy-term" aria-label="<?php esc_attr_e( 'Remove', 'yousync-pro' ); ?>"></button>
+	<button type="button" class="ys-remove-taxonomy-term" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
 </div>

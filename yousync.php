@@ -1,21 +1,21 @@
 <?php
 declare(strict_types=1);
 /**
- * Plugin Name: YouSync Pro
+ * Plugin Name: YouSync
  * Plugin URI: https://wpbuoy.com/product/yousync/
- * Description: Sync YouTube channels and playlists to WordPress. Import videos as a custom post type with metadata, thumbnails, tags, and flexible sync rules.
- * Version: 2.1.0
+ * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
+ * Version: 2.0.0
  * Author: Martin Cipriano
  * Author URI: https://martincipriano.com
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: yousync-pro
+ * Text Domain: yousync
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Tested up to: 6.9
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
 // Exit if accessed directly.
@@ -24,11 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'YOUSYNC_PRO_VERSION', '2.1.0' );
-define( 'YOUSYNC_PRO_PLUGIN_FILE', __FILE__ );
-define( 'YOUSYNC_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'YOUSYNC_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'YOUSYNC_PRO', true );
+define( 'YOUSYNC_VERSION', '2.0.0' );
+define( 'YOUSYNC_PLUGIN_FILE', __FILE__ );
+define( 'YOUSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'YOUSYNC', true );
 
 /**
  * Load a template part into a plugin template.
@@ -41,7 +41,7 @@ define( 'YOUSYNC_PRO', true );
  * @param array  $args Optional. Additional arguments passed to the template. Default empty array.
  * @return string|bool The template path if found, false otherwise.
  */
-function yousync_pro_get_template_part( $slug, $name = null, $args = array() ) {
+function yousync_get_template_part( $slug, $name = null, $args = array() ) {
 	$templates  = array();
 	$plugin_dir = plugin_dir_path( __FILE__ );
 
@@ -81,19 +81,19 @@ function yousync_pro_get_template_part( $slug, $name = null, $args = array() ) {
  * Load a template part and return its output as a string.
  *
  * Uses output buffering to capture the template output instead of echoing it directly.
- * Utilizes yousync_pro_get_template_part() internally to avoid code duplication.
+ * Utilizes yousync_get_template_part() internally to avoid code duplication.
  *
  * @param string $slug The slug name for the generic template.
  * @param string $name Optional. The name of the specialized template. Default null.
  * @param array  $args Optional. Additional arguments passed to the template. Default empty array.
  * @return string The template output as a string, or empty string if template not found.
  */
-function yousync_pro_return_template_part( $slug, $name = null, $args = array() ) {
+function yousync_return_template_part( $slug, $name = null, $args = array() ) {
 	// Start output buffering.
 	ob_start();
 
 	// Use the existing get_template_part function.
-	yousync_pro_get_template_part( $slug, $name, $args );
+	yousync_get_template_part( $slug, $name, $args );
 
 	// Get the buffered content and clean the buffer.
 	return ob_get_clean();
@@ -107,7 +107,7 @@ function yousync_pro_return_template_part( $slug, $name = null, $args = array() 
  * @param string $field The condition field name.
  * @return string Field type: 'text', 'number', or 'date'. Empty string if unknown.
  */
-function yousync_pro_get_condition_field_type( $field ) {
+function yousync_get_condition_field_type( $field ) {
 	$map = array(
 		// Channel fields
 		'channel_title'        => 'text',
@@ -139,49 +139,36 @@ function yousync_pro_get_condition_field_type( $field ) {
  * Taxonomies are not registered during the activation hook, so the actual
  * rescheduling is deferred to init priority 20 on the next page load.
  */
-register_activation_hook( YOUSYNC_PRO_PLUGIN_FILE, function () {
-	if ( ! function_exists( 'deactivate_plugins' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	}
-	deactivate_plugins( 'yousync/yousync.php' );
-	update_option( 'yousync_pro_reschedule_on_activation', true );
+register_activation_hook( YOUSYNC_PLUGIN_FILE, function () {
+	update_option( 'yousync_reschedule_on_activation', true );
 	flush_rewrite_rules();
-} );
-
-add_action( 'admin_init', function () {
-	if ( ! function_exists( 'is_plugin_active' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-	}
-	if ( is_plugin_active( 'yousync/yousync.php' ) ) {
-		deactivate_plugins( 'yousync/yousync.php' );
-	}
 } );
 
 /**
  * Plugin deactivation — remove scheduled events and clear any stale syncing locks.
  */
-register_deactivation_hook( YOUSYNC_PRO_PLUGIN_FILE, function () {
+register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'yousync_channel_config_sync_rule' );
-	wp_unschedule_hook( 'yousync-pro_daily_license_check' );
+	wp_unschedule_hook( 'yousync_daily_license_check' );
 } );
 
 // Load plugin files.
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/functions.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/settings.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/functions.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/settings.php';
 // Load sync engine.
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-youtube-api.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-condition-evaluator.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-video-importer.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-sync-runner.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-sync-history.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-channels-page.php';
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-blocks.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-youtube-api.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-condition-evaluator.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-video-importer.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-runner.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-history.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-channels-page.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-blocks.php';
 
 // Load shared license client library.
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/license-client/class-wpbuoy-license-client.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/license-client/class-wpbuoy-license-client.php';
 use WPBuoy_License_Client\v1\Client;
-require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-yousync-updater.php';
+require_once YOUSYNC_PLUGIN_DIR . 'includes/class-yousync-updater.php';
 
 /**
  * Instantiate the sync engine.
@@ -193,16 +180,16 @@ require_once YOUSYNC_PRO_PLUGIN_DIR . 'includes/class-yousync-updater.php';
 add_action(
 	'init',
 	function () {
-		$api       = new \YouSyncPro\YouTube_API( get_option( 'yousync_api_key', '' ) );
-		$evaluator = new \YouSyncPro\Condition_Evaluator();
-		$importer  = new \YouSyncPro\Video_Importer();
-		$runner    = new \YouSyncPro\Sync_Runner( $api, $evaluator, $importer );
-		new \YouSyncPro\Sync_Scheduler( $runner );
+		$api       = new \YouSync\YouTube_API( get_option( 'yousync_api_key', '' ) );
+		$evaluator = new \YouSync\Condition_Evaluator();
+		$importer  = new \YouSync\Video_Importer();
+		$runner    = new \YouSync\Sync_Runner( $api, $evaluator, $importer );
+		new \YouSync\Sync_Scheduler( $runner );
 	},
 	5
 );
 
-new \YouSyncPro\Blocks();
+new \YouSync\Blocks();
 
 
 /**
@@ -216,8 +203,8 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'yousync_video_details',
-		__( 'YouSync Video Details', 'yousync-pro' ),
-		'yousync_pro_render_video_metabox',
+		__( 'YouSync Video Details', 'yousync' ),
+		'yousync_render_video_metabox',
 		$post_type,
 		'normal',
 		'high'
@@ -232,20 +219,20 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  * @param WP_Post $post The current post object.
  * @return void
  */
-function yousync_pro_render_video_metabox( $post ) {
-	$has_video_protection = yousync_pro_license()->is_feature_available( 'video_protection' );
+function yousync_render_video_metabox( $post ) {
+	$has_video_protection = yousync_license()->is_feature_available( 'video_protection' );
 	$thumbnails           = get_post_meta( $post->ID, '_yousync_thumbnails', true );
 	$thumbnails           = is_array( $thumbnails ) ? $thumbnails : array();
 
-	yousync_pro_get_template_part( 'metabox', 'video', array(
-		'nonce_action'          => 'yousync_pro_save_video_meta',
+	yousync_get_template_part( 'metabox', 'video', array(
+		'nonce_action'          => 'yousync_save_video_meta',
 		'post_id'               => $post->ID,
 		'video_id'              => (string) get_post_meta( $post->ID, '_yousync_video_id', true ),
 		'video_url'             => (string) get_post_meta( $post->ID, '_yousync_video_url', true ),
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_id', true ),
 		'manual_edits'          => (bool) get_post_meta( $post->ID, '_yousync_protected', true ),
 		'manual_edits_disabled' => ! $has_video_protection,
-		'manual_edits_notice'   => $has_video_protection ? '' : __( '(Pro Only)', 'yousync-pro' ),
+		'manual_edits_notice'   => $has_video_protection ? '' : __( '(Pro Only)', 'yousync' ),
 		'original_title'        => (string) get_post_meta( $post->ID, '_yousync_original_title', true ),
 		'original_description'  => (string) get_post_meta( $post->ID, '_yousync_original_description', true ),
 		'channel_title'         => (string) get_post_meta( $post->ID, '_yousync_channel_title', true ),
@@ -264,7 +251,7 @@ function yousync_pro_render_video_metabox( $post ) {
 			'medium'   => 'Medium (320×180)',
 			'default'  => 'Default (120×90)',
 		),
-		'preview_thumb'         => \YouSyncPro\Video_Importer::get_best_thumbnail( $thumbnails ),
+		'preview_thumb'         => \YouSync\Video_Importer::get_best_thumbnail( $thumbnails ),
 	) );
 }
 
@@ -279,9 +266,9 @@ function yousync_pro_render_video_metabox( $post ) {
  * @param int $post_id The current post ID.
  * @return void
  */
-function yousync_pro_save_video_meta( $post_id ) {
+function yousync_save_video_meta( $post_id ) {
 	if ( ! isset( $_POST['yousync_video_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_video_meta_nonce'] ) ), 'yousync_pro_save_video_meta' ) ) {
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_video_meta_nonce'] ) ), 'yousync_save_video_meta' ) ) {
 		return;
 	}
 
@@ -299,7 +286,7 @@ function yousync_pro_save_video_meta( $post_id ) {
 		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
 	);
 }
-add_action( 'save_post', 'yousync_pro_save_video_meta' );
+add_action( 'save_post', 'yousync_save_video_meta' );
 
 /**
  * Fall back to the YouTube thumbnail URL when no featured image is set.
@@ -314,7 +301,7 @@ add_action( 'save_post', 'yousync_pro_save_video_meta' );
  * @param string|array $attr           Additional HTML attributes.
  * @return string HTML img tag, or original $html.
  */
-function yousync_pro_post_thumbnail_html( string $html, int $post_id, int $post_thumbnail_id, $size, $attr ): string {
+function yousync_post_thumbnail_html( string $html, int $post_id, int $post_thumbnail_id, $size, $attr ): string {
 	if ( $post_thumbnail_id ) {
 		return $html;
 	}
@@ -325,7 +312,7 @@ function yousync_pro_post_thumbnail_html( string $html, int $post_id, int $post_
 		return $html;
 	}
 
-	$thumb = \YouSyncPro\Video_Importer::get_best_thumbnail( $thumbnails );
+	$thumb = \YouSync\Video_Importer::get_best_thumbnail( $thumbnails );
 
 	if ( ! $thumb ) {
 		return $html;
@@ -337,7 +324,7 @@ function yousync_pro_post_thumbnail_html( string $html, int $post_id, int $post_
 
 	return '<img src="' . esc_url( $thumb['url'] ) . '"' . $width . $height . ' alt="' . $alt . '" class="attachment-post-thumbnail size-post-thumbnail wp-post-image">';
 }
-add_filter( 'post_thumbnail_html', 'yousync_pro_post_thumbnail_html', 10, 5 );
+add_filter( 'post_thumbnail_html', 'yousync_post_thumbnail_html', 10, 5 );
 
 /**
  * Show the YouTube thumbnail in the featured image metabox when none is set.
@@ -351,7 +338,7 @@ add_filter( 'post_thumbnail_html', 'yousync_pro_post_thumbnail_html', 10, 5 );
  * @param int|null $thumbnail_id Attachment ID of the set thumbnail, or null if none.
  * @return string Modified HTML.
  */
-function yousync_pro_admin_post_thumbnail_html( string $content, int $post_id, $thumbnail_id ): string {
+function yousync_admin_post_thumbnail_html( string $content, int $post_id, $thumbnail_id ): string {
 	if ( $thumbnail_id ) {
 		return $content;
 	}
@@ -362,7 +349,7 @@ function yousync_pro_admin_post_thumbnail_html( string $content, int $post_id, $
 		return $content;
 	}
 
-	$thumb = \YouSyncPro\Video_Importer::get_best_thumbnail( $thumbnails );
+	$thumb = \YouSync\Video_Importer::get_best_thumbnail( $thumbnails );
 
 	if ( ! $thumb ) {
 		return $content;
@@ -371,16 +358,16 @@ function yousync_pro_admin_post_thumbnail_html( string $content, int $post_id, $
 	$preview = '<img'
 		. ' src="' . esc_url( $thumb['url'] ) . '"'
 		. ' onclick="document.getElementById(\'set-post-thumbnail\').click()"'
-		. ' title="' . esc_attr__( 'Click to set a custom featured image', 'yousync-pro') . '"'
+		. ' title="' . esc_attr__( 'Click to set a custom featured image', 'yousync') . '"'
 		. ' alt=""'
 		. '>';
 	$label   = '<p class="hide-if-no-js howto" id="set-post-thumbnail-desc">'
-		. esc_html__( 'Click the YouTube thumbnail to edit or update', 'yousync-pro')
+		. esc_html__( 'Click the YouTube thumbnail to edit or update', 'yousync')
 		. '</p>';
 
 	return $preview . $label . $content;
 }
-add_filter( 'admin_post_thumbnail_html', 'yousync_pro_admin_post_thumbnail_html', 10, 3 );
+add_filter( 'admin_post_thumbnail_html', 'yousync_admin_post_thumbnail_html', 10, 3 );
 
 
 /**
@@ -394,8 +381,8 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'yousync_playlist_details',
-		__( 'YouSync Playlist Details', 'yousync-pro' ),
-		'yousync_pro_render_playlist_metabox',
+		__( 'YouSync Playlist Details', 'yousync' ),
+		'yousync_render_playlist_metabox',
 		$post_type,
 		'normal',
 		'high'
@@ -408,10 +395,10 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  * @param WP_Post $post The current post object.
  * @return void
  */
-function yousync_pro_render_playlist_metabox( $post ) {
-	yousync_pro_get_template_part( 'metabox', 'playlist', array(
+function yousync_render_playlist_metabox( $post ) {
+	yousync_get_template_part( 'metabox', 'playlist', array(
 		'post_id'               => $post->ID,
-		'nonce_action'          => 'yousync_pro_save_playlist_meta',
+		'nonce_action'          => 'yousync_save_playlist_meta',
 		'playlist_id'           => (string) get_post_meta( $post->ID, '_yousync_playlist_id', true ),
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_id', true ),
 		'playlist_title'        => (string) get_post_meta( $post->ID, '_yousync_playlist_title', true ),
@@ -429,9 +416,9 @@ function yousync_pro_render_playlist_metabox( $post ) {
  * @param int $post_id Post ID.
  * @return void
  */
-function yousync_pro_save_playlist_meta( $post_id ) {
+function yousync_save_playlist_meta( $post_id ) {
 	if ( ! isset( $_POST['yousync_playlist_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_playlist_meta_nonce'] ) ), 'yousync_pro_save_playlist_meta' ) ) {
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_playlist_meta_nonce'] ) ), 'yousync_save_playlist_meta' ) ) {
 		return;
 	}
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
@@ -446,7 +433,7 @@ function yousync_pro_save_playlist_meta( $post_id ) {
 		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
 	);
 }
-add_action( 'save_post', 'yousync_pro_save_playlist_meta' );
+add_action( 'save_post', 'yousync_save_playlist_meta' );
 
 
 /**
@@ -463,8 +450,8 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'yousync_channel_details',
-		__( 'YouSync Channel Details', 'yousync-pro' ),
-		'yousync_pro_render_channel_metabox',
+		__( 'YouSync Channel Details', 'yousync' ),
+		'yousync_render_channel_metabox',
 		$post_type,
 		'normal',
 		'high'
@@ -477,9 +464,9 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  * @param WP_Post $post The current post object.
  * @return void
  */
-function yousync_pro_render_channel_metabox( $post ) {
-	yousync_pro_get_template_part( 'metabox', 'channel', array(
-		'nonce_action'          => 'yousync_pro_save_channel_meta',
+function yousync_render_channel_metabox( $post ) {
+	yousync_get_template_part( 'metabox', 'channel', array(
+		'nonce_action'          => 'yousync_save_channel_meta',
 		'post_id'               => $post->ID,
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_post', true ),
 		'channel_title'         => (string) get_post_meta( $post->ID, '_yousync_channel_title', true ),
@@ -499,9 +486,9 @@ function yousync_pro_render_channel_metabox( $post ) {
  * @param int $post_id Post ID.
  * @return void
  */
-function yousync_pro_save_channel_meta( $post_id ) {
+function yousync_save_channel_meta( $post_id ) {
 	if ( ! isset( $_POST['yousync_channel_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_channel_meta_nonce'] ) ), 'yousync_pro_save_channel_meta' ) ) {
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_channel_meta_nonce'] ) ), 'yousync_save_channel_meta' ) ) {
 		return;
 	}
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
@@ -516,7 +503,7 @@ function yousync_pro_save_channel_meta( $post_id ) {
 		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
 	);
 }
-add_action( 'save_post', 'yousync_pro_save_channel_meta' );
+add_action( 'save_post', 'yousync_save_channel_meta' );
 
 
 /**
@@ -524,7 +511,7 @@ add_action( 'save_post', 'yousync_pro_save_channel_meta' );
  *
  * @return void
  */
-function yousync_pro_enqueue_video_list_assets(): void {
+function yousync_enqueue_video_list_assets(): void {
 	$screen = get_current_screen();
 	if ( ! $screen || 'post' !== $screen->base ) {
 		return;
@@ -541,29 +528,29 @@ function yousync_pro_enqueue_video_list_assets(): void {
 	}
 
 	wp_enqueue_style(
-		'yousync-pro-admin',
-		YOUSYNC_PRO_PLUGIN_URL . 'assets/css/admin.css',
+		'yousync-admin',
+		YOUSYNC_PLUGIN_URL . 'assets/css/admin.css',
 		array(),
-		YOUSYNC_PRO_VERSION
+		YOUSYNC_VERSION
 	);
 	wp_enqueue_script(
-		'yousync-pro-metabox',
-		YOUSYNC_PRO_PLUGIN_URL . 'assets/js/metabox.js',
+		'yousync-metabox',
+		YOUSYNC_PLUGIN_URL . 'assets/js/metabox.js',
 		array(),
-		YOUSYNC_PRO_VERSION,
+		YOUSYNC_VERSION,
 		true
 	);
 }
-add_action( 'admin_enqueue_scripts', 'yousync_pro_enqueue_video_list_assets' );
+add_action( 'admin_enqueue_scripts', 'yousync_enqueue_video_list_assets' );
 
-add_action( 'wp_ajax_yousync_get_terms', 'yousync_pro_ajax_get_terms' );
+add_action( 'wp_ajax_yousync_get_terms', 'yousync_ajax_get_terms' );
 
 /**
  * AJAX handler — fetch terms for a given public taxonomy.
  *
  * @return void
  */
-function yousync_pro_ajax_get_terms() {
+function yousync_ajax_get_terms() {
 	check_ajax_referer( 'yousync_get_terms', 'nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Forbidden', 403 );
@@ -594,7 +581,7 @@ function yousync_pro_ajax_get_terms() {
  *
  * @return Wpbuoy_License_Client
  */
-function yousync_pro_license(): Client {
+function yousync_license(): Client {
 	static $instance = null;
 
 	if ( null === $instance ) {
@@ -614,7 +601,7 @@ function yousync_pro_license(): Client {
 				'video_protection',
 				'multi_channel',
 			),
-			'text_domain'  => 'yousync-pro',
+			'text_domain'  => 'yousync',
 			'plugin_name'  => 'YouSync Pro',
 			'pricing_url'  => $license_base . '/pricing',
 			'account_url'  => $license_base . '/my-account/licenses',
@@ -626,9 +613,9 @@ function yousync_pro_license(): Client {
 }
 
 // Instantiate immediately so the license client's hooks (init, admin_init, admin_post_*) register at plugin load.
-yousync_pro_license();
+yousync_license();
 
-new \YouSyncPro\Updater(
+new \YouSync\Updater(
 	'yousync',
 	plugin_basename( __FILE__ ),
 	defined( 'WPBUOY_LICENSE_SERVER' ) ? WPBUOY_LICENSE_SERVER : 'https://wpbuoy.com'
@@ -638,11 +625,11 @@ new \YouSyncPro\Updater(
 /**
  * One-time migration: convert _yousync_video JSON blob to individual flat meta keys.
  *
- * Runs on admin_init, gated by the yousync_pro_flat_meta_migrated option.
+ * Runs on admin_init, gated by the yousync_flat_meta_migrated option.
  * Processes posts in batches of 50 per request until all legacy blobs are migrated.
  */
 add_action( 'admin_init', function (): void {
-	if ( get_option( 'yousync_pro_flat_meta_migrated' ) ) {
+	if ( get_option( 'yousync_flat_meta_migrated' ) ) {
 		return;
 	}
 
@@ -713,6 +700,6 @@ add_action( 'admin_init', function (): void {
 	}
 
 	if ( $query->found_posts <= 50 ) {
-		update_option( 'yousync_pro_flat_meta_migrated', true, false );
+		update_option( 'yousync_flat_meta_migrated', true, false );
 	}
 } );

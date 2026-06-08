@@ -3,10 +3,10 @@ declare(strict_types=1);
 /**
  * YouSync Settings Class
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -34,10 +34,10 @@ class YouSyncSettings {
 	public function add_settings_submenu() {
 		add_submenu_page(
 			'yousync',
-			__( 'YouSync Settings', 'yousync-pro'),
-			__( 'Settings', 'yousync-pro'),
+			__( 'YouSync Settings', 'yousync'),
+			__( 'Settings', 'yousync'),
 			'manage_options',
-			'yousync_pro_settings',
+			'yousync_settings',
 			array( $this, 'settings_html' )
 		);
 	}
@@ -67,31 +67,31 @@ class YouSyncSettings {
 
 		add_settings_section(
 			'yousync_api_settings',
-			__( 'API Settings', 'yousync-pro'),
+			__( 'API Settings', 'yousync'),
 			null,
-			'yousync_pro_settings'
+			'yousync_settings'
 		);
 
 		add_settings_field(
 			'yousync_api_key',
-			__( 'Google API Key', 'yousync-pro'),
+			__( 'Google API Key', 'yousync'),
 			array( $this, 'api_key_html' ),
-			'yousync_pro_settings',
+			'yousync_settings',
 			'yousync_api_settings'
 		);
 
 		add_settings_section(
 			'yousync_advanced_settings',
-			__( 'Advanced', 'yousync-pro'),
+			__( 'Advanced', 'yousync'),
 			null,
-			'yousync_pro_settings'
+			'yousync_settings'
 		);
 
 		add_settings_field(
 			'yousync_delete_on_uninstall',
-			__( 'Uninstall Data', 'yousync-pro'),
+			__( 'Uninstall Data', 'yousync'),
 			array( $this, 'delete_on_uninstall_html' ),
-			'yousync_pro_settings',
+			'yousync_settings',
 			'yousync_advanced_settings'
 		);
 	}
@@ -103,7 +103,7 @@ class YouSyncSettings {
 	 */
 	public function api_key_html() {
 		$value = get_option( 'yousync_api_key', '' );
-		yousync_pro_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
+		yousync_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
 	}
 
 	/**
@@ -116,7 +116,7 @@ class YouSyncSettings {
 		$input = sanitize_text_field( $input );
 
 		if ( empty( $input ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync-pro' ) );
+			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
 			return get_option( 'yousync_api_key', '' );
 		}
 
@@ -132,7 +132,7 @@ class YouSyncSettings {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync-pro') );
+			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync') );
 			return get_option( 'yousync_api_key', '' );
 		}
 
@@ -145,14 +145,14 @@ class YouSyncSettings {
 				'yousync_api_key',
 				'yousync_api_key_invalid',
 				/* translators: %s: Error message from YouTube API */
-				sprintf( __( 'YouTube API error: %s', 'yousync-pro'), esc_html( $error_msg ) )
+				sprintf( __( 'YouTube API error: %s', 'yousync'), esc_html( $error_msg ) )
 			);
 			return get_option( 'yousync_api_key', '' );
 		}
 
 		$existing = wp_list_pluck( get_settings_errors( 'yousync_api_key' ), 'code' );
 		if ( ! in_array( 'valid_api_key', $existing, true ) ) {
-			add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync-pro' ), 'updated' );
+			add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync' ), 'updated' );
 		}
 
 		return $input;
@@ -168,10 +168,10 @@ class YouSyncSettings {
 		?>
 		<label>
 			<input type="checkbox" name="yousync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
-			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync-pro'); ?>
+			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync'); ?>
 		</label>
 		<p class="description">
-			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync-pro'); ?>
+			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync'); ?>
 		</p>
 		<?php
 	}
@@ -182,7 +182,7 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	public function settings_html() {
-		yousync_pro_get_template_part( 'settings', 'page' );
+		yousync_get_template_part( 'settings', 'page' );
 	}
 
 }

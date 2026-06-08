@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace YouSyncPro;
+namespace YouSync;
 
 /**
  * Registers Gutenberg blocks, the [yousync] shortcode, and the REST endpoint
  * used by the block editor post selector.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 class Blocks {
 
@@ -22,9 +22,9 @@ class Blocks {
 	public function enqueue_editor_assets(): void {
 		wp_enqueue_style(
 			'yousync-block-editor',
-			YOUSYNC_PRO_PLUGIN_URL . 'blocks/editor.css',
+			YOUSYNC_PLUGIN_URL . 'blocks/editor.css',
 			array( 'wp-block-editor' ),
-			YOUSYNC_PRO_VERSION
+			YOUSYNC_VERSION
 		);
 	}
 
@@ -50,7 +50,7 @@ class Blocks {
 
 		foreach ( $blocks as $slug => $callback ) {
 			register_block_type(
-				YOUSYNC_PRO_PLUGIN_DIR . 'blocks/' . $slug,
+				YOUSYNC_PLUGIN_DIR . 'blocks/' . $slug,
 				[ 'render_callback' => $callback ]
 			);
 		}
@@ -90,7 +90,7 @@ class Blocks {
 				return '';
 			}
 			$alt = esc_attr( (string) get_post_meta( $post_id, '_yousync_channel_title', true ) );
-			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="yousync-profile-photo">';
+			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="yousyncfile-photo">';
 		}
 
 		if ( 'banner_image' === $field ) {
@@ -163,7 +163,7 @@ class Blocks {
 				return '';
 			}
 			$alt = esc_attr( (string) get_post_meta( $post_id, '_yousync_channel_title', true ) );
-			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="yousync-profile-photo">';
+			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="yousyncfile-photo">';
 		}
 
 		if ( 'banner_image' === $field ) {
@@ -217,7 +217,7 @@ class Blocks {
 			function ( $id ) {
 				$title = get_the_title( $id );
 				/* translators: %d: post ID */
-				return [ 'id' => $id, 'title' => $title ?: sprintf( __( 'Post #%d', 'yousync-pro' ), $id ) ];
+				return [ 'id' => $id, 'title' => $title ?: sprintf( __( 'Post #%d', 'yousync' ), $id ) ];
 			},
 			$posts
 		);

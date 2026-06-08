@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Stores the last 50 sync run entries (max 90 days) for each channel
  * in a non-autoloaded wp_options entry keyed by YouTube channel ID.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

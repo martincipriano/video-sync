@@ -8,10 +8,10 @@ declare(strict_types=1);
  * Option-based channel events use the 'yousync_channel_config_sync_rule' hook
  * with args [ $ch_index, $rule_index ].
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -160,7 +160,7 @@ class Sync_Scheduler {
 		// Monthly (30 days) — not built into WordPress.
 		$schedules['yousync_monthly'] = array(
 			'interval' => 30 * DAY_IN_SECONDS,
-			'display'  => __( 'Once a Month (YouSync)', 'yousync-pro'),
+			'display'  => __( 'Once a Month (YouSync)', 'yousync'),
 		);
 
 		// Collect unique custom_schedule values from option-based channels.
@@ -172,7 +172,7 @@ class Sync_Scheduler {
 				$schedules[ $key ] = array(
 					'interval' => $hours * HOUR_IN_SECONDS,
 					/* translators: %d: number of hours */
-					'display'  => sprintf( __( 'Every %d Hours (YouSync)', 'yousync-pro'), $hours ),
+					'display'  => sprintf( __( 'Every %d Hours (YouSync)', 'yousync'), $hours ),
 				);
 			}
 		}
@@ -220,7 +220,7 @@ class Sync_Scheduler {
 	private function collect_custom_schedule_hours(): array {
 		$hours = array();
 
-		$option_channels = yousync_pro_normalize_channels( get_option( 'yousync_channel_config', array() ) );
+		$option_channels = yousync_normalize_channels( get_option( 'yousync_channel_config', array() ) );
 		foreach ( $option_channels as $channel ) {
 			if ( ! is_array( $channel ) ) {
 				continue;
@@ -282,7 +282,7 @@ class Sync_Scheduler {
 		}
 
 		// Enforce scheduled_sync license gate — downgrade to once if unlicensed.
-		if ( ! yousync_pro_license()->is_feature_available( 'scheduled_sync' ) ) {
+		if ( ! yousync_license()->is_feature_available( 'scheduled_sync' ) ) {
 			wp_schedule_single_event( time(), self::CRON_HOOK_CONFIG, $args );
 			return true;
 		}

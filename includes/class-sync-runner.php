@@ -7,10 +7,10 @@ declare(strict_types=1);
  * calls the YouTube API, evaluates conditions, imports videos, and
  * writes results back to term meta.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -161,7 +161,7 @@ class Sync_Runner {
 		$this->current_rule_index = $rule_index;
 
 		$action  = $rule['action'] ?? '';
-		$license = yousync_pro_license();
+		$license = yousync_license();
 
 		// Enforce scheduled_sync license gate — recurring schedules require an active license.
 		$schedule = $rule['schedule'] ?? 'once';
@@ -429,7 +429,7 @@ class Sync_Runner {
 						'No videos were imported. %d candidate was fetched but did not match the sync conditions. Check your conditions for typos.',
 						'No videos were imported. %d candidates were fetched but none matched the sync conditions. Check your conditions for typos.',
 						$candidate_count,
-						'yousync-pro'
+						'yousync'
 					),
 					$candidate_count
 				);
@@ -440,7 +440,7 @@ class Sync_Runner {
 						'No videos were imported. %d candidate was fetched from the API but could not be saved.',
 						'No videos were imported. %d candidates were fetched from the API but none could be saved.',
 						$candidate_count,
-						'yousync-pro'
+						'yousync'
 					),
 					$candidate_count
 				);
@@ -912,15 +912,15 @@ class Sync_Runner {
 		foreach ( $conditions as $condition ) {
 			$field = $condition['field'] ?? '';
 			$op    = $condition['operator'] ?? '';
-			$type  = function_exists( 'yousync_pro_get_condition_field_type' )
-				? yousync_pro_get_condition_field_type( $field )
+			$type  = function_exists( 'yousync_get_condition_field_type' )
+				? yousync_get_condition_field_type( $field )
 				: '';
 
 			if ( '' === $type ) {
 				$this->run_errors[] = array(
 					'timestamp' => time(),
 					/* translators: %s: condition field name */
-					'error'     => sprintf( __( 'Condition field "%s" is not recognised, so it was ignored (every item passed it). Check the rule for a typo.', 'yousync-pro' ), $field ),
+					'error'     => sprintf( __( 'Condition field "%s" is not recognised, so it was ignored (every item passed it). Check the rule for a typo.', 'yousync' ), $field ),
 					'code'      => 'condition_warning',
 				);
 				continue;
@@ -930,7 +930,7 @@ class Sync_Runner {
 				$this->run_errors[] = array(
 					'timestamp' => time(),
 					/* translators: 1: operator, 2: field name */
-					'error'     => sprintf( __( 'Operator "%1$s" is not supported for the "%2$s" condition, so it was ignored. Check the rule for a typo.', 'yousync-pro' ), $op, $field ),
+					'error'     => sprintf( __( 'Operator "%1$s" is not supported for the "%2$s" condition, so it was ignored. Check the rule for a typo.', 'yousync' ), $op, $field ),
 					'code'      => 'condition_warning',
 				);
 			}
@@ -958,11 +958,11 @@ class Sync_Runner {
 	 */
 	private function invalid_post_type_message( string $post_type ): string {
 		if ( '' === $post_type ) {
-			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'yousync-pro' );
+			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'yousync' );
 		}
 		return sprintf(
 			/* translators: %s: post type slug */
-			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'yousync-pro' ),
+			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'yousync' ),
 			$post_type
 		);
 	}
@@ -1074,7 +1074,7 @@ class Sync_Runner {
 	 * @return array
 	 */
 	private function get_normalized_option_channels(): array {
-		return yousync_pro_normalize_channels( get_option( 'yousync_channel_config', array() ) );
+		return yousync_normalize_channels( get_option( 'yousync_channel_config', array() ) );
 	}
 
 	/**

@@ -11,5 +11,5 @@ declare(strict_types=1);
   name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][conditions][<?php echo esc_attr( $condition_index ); ?>][value]"
   type="number"
   value="<?php echo esc_attr( $input_value ); ?>"
-  placeholder="<?php esc_attr_e( 'Enter value...', 'yousync-pro'); ?>"
+  placeholder="<?php esc_attr_e( 'Enter value...', 'yousync'); ?>"
 >

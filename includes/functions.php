@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * YouSync Pro — General helper functions.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
 // Exit if accessed directly.
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param mixed $config Raw yousync_channel_config option value.
  * @return array<int, array> 0-indexed list of channel config arrays.
  */
-function yousync_pro_normalize_channels( $config ): array {
+function yousync_normalize_channels( $config ): array {
 	if ( ! is_array( $config ) ) {
 		return array();
 	}
@@ -43,7 +43,7 @@ function yousync_pro_normalize_channels( $config ): array {
  * @param array $rule Raw rule data from $_POST.
  * @return array Sanitized rule.
  */
-function yousync_pro_sanitize_sync_rule( $rule ) {
+function yousync_sanitize_sync_rule( $rule ) {
 	$sanitized = array(
 		'enabled'           => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
 		'title'             => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
@@ -95,7 +95,7 @@ function yousync_pro_sanitize_sync_rule( $rule ) {
 		}
 	}
 
-	$sanitized['field_mapping'] = yousync_pro_sanitize_field_mapping( $rule['field_mapping'] ?? array() );
+	$sanitized['field_mapping'] = yousync_sanitize_field_mapping( $rule['field_mapping'] ?? array() );
 
 	return $sanitized;
 }
@@ -109,7 +109,7 @@ function yousync_pro_sanitize_sync_rule( $rule ) {
  * @param mixed $rows Raw field mapping data from $_POST or stored option.
  * @return array Sanitized array of ['source' => string, 'target' => string] rows.
  */
-function yousync_pro_sanitize_field_mapping( $rows ): array {
+function yousync_sanitize_field_mapping( $rows ): array {
 	if ( ! is_array( $rows ) ) {
 		return array();
 	}
@@ -159,12 +159,12 @@ function yousync_pro_sanitize_field_mapping( $rows ): array {
  *
  * @return array<string, string>
  */
-function yousync_pro_get_taxonomy_options_by_post_type() {
+function yousync_get_taxonomy_options_by_post_type() {
 	$all_public_taxes = get_taxonomies( [ 'public' => true ], 'objects' );
 	$map              = [];
 	foreach ( array_keys( get_post_types( [ 'public' => true ] ) ) as $pt_slug ) {
 		$pt_tax_names = get_object_taxonomies( $pt_slug );
-		$opts         = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync-pro' ) . '</option>';
+		$opts         = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync' ) . '</option>';
 		foreach ( $all_public_taxes as $tax ) {
 			if ( ! in_array( $tax->name, $pt_tax_names, true ) ) continue;
 			$opts .= '<option value="' . esc_attr( $tax->name ) . '">'
@@ -182,8 +182,8 @@ function yousync_pro_get_taxonomy_options_by_post_type() {
  *
  * @return string
  */
-function yousync_pro_get_taxonomy_options_html() {
-	$opts = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync-pro' ) . '</option>';
+function yousync_get_taxonomy_options_html() {
+	$opts = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync' ) . '</option>';
 	foreach ( get_taxonomies( [ 'public' => true ], 'objects' ) as $tax ) {
 		$opts .= '<option value="' . esc_attr( $tax->name ) . '">'
 			   . esc_html( $tax->labels->singular_name ) . '</option>';
@@ -199,8 +199,8 @@ function yousync_pro_get_taxonomy_options_html() {
  *
  * @return string
  */
-function yousync_pro_get_taxonomy_term_row_template(): string {
-	return yousync_pro_return_template_part( 'taxonomy-term-row', null, array(
+function yousync_get_taxonomy_term_row_template(): string {
+	return yousync_return_template_part( 'taxonomy-term-row', null, array(
 		'name_prefix'      => '{{NAME_PREFIX}}',
 		'rule_index'       => '{{RULE_INDEX}}',
 		'tt_index'         => '{{TT_INDEX}}',

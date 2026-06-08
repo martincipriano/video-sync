@@ -3,10 +3,10 @@ declare(strict_types=1);
 /**
  * Channels admin page — top-level YouSync menu.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,8 +37,8 @@ class Channels_Page {
 	 */
 	public function register_menu() {
 		add_menu_page(
-			__( 'YouSync', 'yousync-pro' ),
-			__( 'YouSync', 'yousync-pro' ),
+			__( 'YouSync', 'yousync' ),
+			__( 'YouSync', 'yousync' ),
 			'manage_options',
 			'yousync',
 			array( $this, 'render_page' ),
@@ -49,8 +49,8 @@ class Channels_Page {
 		// Replace auto-generated first submenu item.
 		add_submenu_page(
 			'yousync',
-			__( 'Channels', 'yousync-pro' ),
-			__( 'Channels', 'yousync-pro' ),
+			__( 'Channels', 'yousync' ),
+			__( 'Channels', 'yousync' ),
 			'manage_options',
 			'yousync',
 			array( $this, 'render_page' )
@@ -59,17 +59,17 @@ class Channels_Page {
 		// License submenu.
 		add_submenu_page(
 			'yousync',
-			__( 'License', 'yousync-pro' ),
-			__( 'License', 'yousync-pro' ),
+			__( 'License', 'yousync' ),
+			__( 'License', 'yousync' ),
 			'manage_options',
 			'yousync_license',
 			function () {
-				yousync_pro_license()->render_license_page( array(
-					'scheduled_sync'   => __( 'Sync schedules: Hourly, Daily, Weekly, Monthly, Custom', 'yousync-pro' ),
-					'metadata_update'  => __( 'Update metadata for existing videos and playlists', 'yousync-pro' ),
-					'conditions'       => __( 'Conditional sync rules (filter by field, operator, value)', 'yousync-pro' ),
-					'video_protection' => __( 'Protect individual videos from being overwritten by sync', 'yousync-pro' ),
-					'multi_channel'    => __( 'Manage multiple YouTube channels from a single dashboard', 'yousync-pro' ),
+				yousync_license()->render_license_page( array(
+					'scheduled_sync'   => __( 'Sync schedules: Hourly, Daily, Weekly, Monthly, Custom', 'yousync' ),
+					'metadata_update'  => __( 'Update metadata for existing videos and playlists', 'yousync' ),
+					'conditions'       => __( 'Conditional sync rules (filter by field, operator, value)', 'yousync' ),
+					'video_protection' => __( 'Protect individual videos from being overwritten by sync', 'yousync' ),
+					'multi_channel'    => __( 'Manage multiple YouTube channels from a single dashboard', 'yousync' ),
 				) );
 			}
 		);
@@ -86,7 +86,7 @@ class Channels_Page {
 			$config = array();
 		}
 
-		$is_pro          = yousync_pro_license()->is_feature_available( 'multi_channel' );
+		$is_pro          = yousync_license()->is_feature_available( 'multi_channel' );
 		$can_add_channel = $is_pro;
 
 		// Normalize single config to array of channels.
@@ -111,7 +111,7 @@ class Channels_Page {
 
 		$has_api_key = ! empty( get_option( 'yousync_api_key', '' ) );
 
-		yousync_pro_get_template_part( 'channels', 'page', compact( 'channels', 'can_add_channel', 'is_pro', 'ch_errors', 'has_api_key' ) );
+		yousync_get_template_part( 'channels', 'page', compact( 'channels', 'can_add_channel', 'is_pro', 'ch_errors', 'has_api_key' ) );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Channels_Page {
 	public function enqueue_assets( $hook ) {
 		// Enqueue admin CSS on Insights and License subpages too.
 		if ( 'yousync_page_yousync_license' === $hook ) {
-			wp_enqueue_style( 'yousync-pro-admin', YOUSYNC_PRO_PLUGIN_URL . 'assets/css/admin.css', array(), YOUSYNC_PRO_VERSION );
+			wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array(), YOUSYNC_VERSION );
 			return;
 		}
 
@@ -132,40 +132,40 @@ class Channels_Page {
 		}
 
 		wp_enqueue_style( 'material-icons-outlined', 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined', array(), null );
-		wp_enqueue_style( 'tom-select', YOUSYNC_PRO_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
-		wp_enqueue_style( 'yousync-pro-admin', YOUSYNC_PRO_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), YOUSYNC_PRO_VERSION );
-		wp_enqueue_script( 'tom-select', YOUSYNC_PRO_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
-		wp_enqueue_script( 'yousync-pro-admin', YOUSYNC_PRO_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), YOUSYNC_PRO_VERSION, true );
+		wp_enqueue_style( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
+		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), YOUSYNC_VERSION );
+		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
+		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), YOUSYNC_VERSION, true );
 
 		// Render sync rule/condition templates with channel-specific name_prefix placeholder.
 		$name_prefix = 'channels[{{CHANNEL_INDEX}}][sync_rules]';
 
-		wp_localize_script( 'yousync-pro-admin', 'youSync', array(
+		wp_localize_script( 'yousync-admin', 'youSync', array(
 			'operators' => array(
-				'text'   => yousync_pro_return_template_part( 'options', 'text-operators', array( 'operator' => '' ) ),
-				'number' => yousync_pro_return_template_part( 'options', 'number-operators', array( 'operator' => '' ) ),
-				'date'   => yousync_pro_return_template_part( 'options', 'date-operators', array( 'operator' => '' ) ),
+				'text'   => yousync_return_template_part( 'options', 'text-operators', array( 'operator' => '' ) ),
+				'number' => yousync_return_template_part( 'options', 'number-operators', array( 'operator' => '' ) ),
+				'date'   => yousync_return_template_part( 'options', 'date-operators', array( 'operator' => '' ) ),
 			),
 			'values'   => array(
-				'text'   => yousync_pro_return_template_part( 'input', 'text', array( 'name_prefix' => $name_prefix ) ),
-				'number' => yousync_pro_return_template_part( 'input', 'number', array( 'name_prefix' => $name_prefix ) ),
-				'date'   => yousync_pro_return_template_part( 'input', 'date', array( 'name_prefix' => $name_prefix ) ),
+				'text'   => yousync_return_template_part( 'input', 'text', array( 'name_prefix' => $name_prefix ) ),
+				'number' => yousync_return_template_part( 'input', 'number', array( 'name_prefix' => $name_prefix ) ),
+				'date'   => yousync_return_template_part( 'input', 'date', array( 'name_prefix' => $name_prefix ) ),
 			),
 			'syncRule' => array(
 				'channel' => array(
-					'fieldOptions'    => yousync_pro_return_template_part( 'options', 'channel-fields' ),
-					'metadataOptions' => yousync_pro_return_template_part( 'options', 'channel-metadata' ),
+					'fieldOptions'    => yousync_return_template_part( 'options', 'channel-fields' ),
+					'metadataOptions' => yousync_return_template_part( 'options', 'channel-metadata' ),
 				),
 				'video' => array(
-					'fieldOptions'    => yousync_pro_return_template_part( 'options', 'video-fields' ),
-					'metadataOptions' => yousync_pro_return_template_part( 'options', 'video-metadata' ),
+					'fieldOptions'    => yousync_return_template_part( 'options', 'video-fields' ),
+					'metadataOptions' => yousync_return_template_part( 'options', 'video-metadata' ),
 				),
 				'playlist' => array(
-					'fieldOptions'    => yousync_pro_return_template_part( 'options', 'playlist-fields' ),
-					'metadataOptions' => yousync_pro_return_template_part( 'options', 'playlist-metadata' ),
+					'fieldOptions'    => yousync_return_template_part( 'options', 'playlist-fields' ),
+					'metadataOptions' => yousync_return_template_part( 'options', 'playlist-metadata' ),
 				),
-				'condition' => yousync_pro_return_template_part( 'sync-rule', 'condition', array( 'name_prefix' => $name_prefix ) ),
-				'rule'      => yousync_pro_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
+				'condition' => yousync_return_template_part( 'sync-rule', 'condition', array( 'name_prefix' => $name_prefix ) ),
+				'rule'      => yousync_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
 			),
 			'isChannelsPage'           => true,
 			'ajaxUrl'                  => admin_url( 'admin-ajax.php' ),
@@ -173,50 +173,50 @@ class Channels_Page {
 			'addRuleNonce'             => wp_create_nonce( 'yousync_add_rule' ),
 			'syncProgressNonce'        => wp_create_nonce( 'yousync_sync_progress' ),
 			'markHistoryReadNonce'     => wp_create_nonce( 'yousync_mark_history_read' ),
-			'taxonomyOptions'          => yousync_pro_get_taxonomy_options_html(),
-			'taxonomyOptionsByPostType' => yousync_pro_get_taxonomy_options_by_post_type(),
-			'taxonomyTermRow'          => yousync_pro_get_taxonomy_term_row_template(),
-			'tmplMetadataRow'          => '<div class="ys-specific-metadata-row"><select class="ys-select ys-specific-metadata" {{NAME}}>{{OPTIONS}}</select><button type="button" class="ys-remove-metadata-field" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
-			'tmplWizardTaxonomyRow'    => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-wizard-taxonomy-select">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-wizard-term-select" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync-pro' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
-			'tmplWizardFMRow'          => '<div class="ys-field-mapping-row"><select class="ys-select ys-wizard-fm-source"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync-pro' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
-			'tmplRuleFMRow'            => '<div class="ys-field-mapping-row"><select class="ys-select ys-rule-fm-source" name="{{NAME_PREFIX}}[{{IDX}}][source]"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync-pro' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" name="{{NAME_PREFIX}}[{{IDX}}][target]" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
-			'tmplChannelTaxRow'        => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-channel-taxonomy-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][taxonomy]">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-channel-term-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][term_ids][]" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync-pro' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
-			'tmplDefaultsFMRow'        => '<div class="ys-field-mapping-row"><select name="field_mapping[{{IDX}}][source]" class="ys-select"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync-pro' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" name="field_mapping[{{IDX}}][target]" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync-pro' ) . '"></button></div>',
+			'taxonomyOptions'          => yousync_get_taxonomy_options_html(),
+			'taxonomyOptionsByPostType' => yousync_get_taxonomy_options_by_post_type(),
+			'taxonomyTermRow'          => yousync_get_taxonomy_term_row_template(),
+			'tmplMetadataRow'          => '<div class="ys-specific-metadata-row"><select class="ys-select ys-specific-metadata" {{NAME}}>{{OPTIONS}}</select><button type="button" class="ys-remove-metadata-field" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
+			'tmplWizardTaxonomyRow'    => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-wizard-taxonomy-select">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-wizard-term-select" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
+			'tmplWizardFMRow'          => '<div class="ys-field-mapping-row"><select class="ys-select ys-wizard-fm-source"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
+			'tmplRuleFMRow'            => '<div class="ys-field-mapping-row"><select class="ys-select ys-rule-fm-source" name="{{NAME_PREFIX}}[{{IDX}}][source]"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" name="{{NAME_PREFIX}}[{{IDX}}][target]" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
+			'tmplChannelTaxRow'        => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-channel-taxonomy-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][taxonomy]">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-channel-term-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][term_ids][]" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
+			'tmplDefaultsFMRow'        => '<div class="ys-field-mapping-row"><select name="field_mapping[{{IDX}}][source]" class="ys-select"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" name="field_mapping[{{IDX}}][target]" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
 			'fieldMappingSources'      => array(
 				'video'    => implode( '', array_map(
 					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
 					array( 'title', 'description', 'duration', 'view_count', 'like_count', 'published_at', 'thumbnail_url', 'channel_title' ),
 					array(
-						__( 'Title', 'yousync-pro' ),
-						__( 'Description', 'yousync-pro' ),
-						__( 'Duration (seconds)', 'yousync-pro' ),
-						__( 'View Count', 'yousync-pro' ),
-						__( 'Like Count', 'yousync-pro' ),
-						__( 'Published Date', 'yousync-pro' ),
-						__( 'Thumbnail URL', 'yousync-pro' ),
-						__( 'Channel Title', 'yousync-pro' ),
+						__( 'Title', 'yousync' ),
+						__( 'Description', 'yousync' ),
+						__( 'Duration (seconds)', 'yousync' ),
+						__( 'View Count', 'yousync' ),
+						__( 'Like Count', 'yousync' ),
+						__( 'Published Date', 'yousync' ),
+						__( 'Thumbnail URL', 'yousync' ),
+						__( 'Channel Title', 'yousync' ),
 					)
 				) ),
 				'playlist' => implode( '', array_map(
 					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
 					array( 'playlist_title', 'playlist_description', 'playlist_video_count', 'playlist_thumbnail' ),
 					array(
-						__( 'Title', 'yousync-pro' ),
-						__( 'Description', 'yousync-pro' ),
-						__( 'Video Count', 'yousync-pro' ),
-						__( 'Thumbnail URL', 'yousync-pro' ),
+						__( 'Title', 'yousync' ),
+						__( 'Description', 'yousync' ),
+						__( 'Video Count', 'yousync' ),
+						__( 'Thumbnail URL', 'yousync' ),
 					)
 				) ),
 				'channel' => implode( '', array_map(
 					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
 					array( 'channel_title', 'channel_description', 'subscriber_count', 'video_count', 'profile_picture_url', 'banner_image_url' ),
 					array(
-						__( 'Channel Title', 'yousync-pro' ),
-						__( 'Description', 'yousync-pro' ),
-						__( 'Subscriber Count', 'yousync-pro' ),
-						__( 'Video Count', 'yousync-pro' ),
-						__( 'Profile Picture URL', 'yousync-pro' ),
-						__( 'Banner Image URL', 'yousync-pro' ),
+						__( 'Channel Title', 'yousync' ),
+						__( 'Description', 'yousync' ),
+						__( 'Subscriber Count', 'yousync' ),
+						__( 'Video Count', 'yousync' ),
+						__( 'Profile Picture URL', 'yousync' ),
+						__( 'Banner Image URL', 'yousync' ),
 					)
 				) ),
 			),
@@ -231,11 +231,11 @@ class Channels_Page {
 	public function save_channels() {
 		if ( ! isset( $_POST['yousync_channels_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_channels_nonce'] ) ), 'yousync_save_channels' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'yousync-pro' ) );
+			wp_die( esc_html__( 'Security check failed.', 'yousync' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'yousync-pro' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'yousync' ) );
 		}
 
 		$existing = get_option( 'yousync_channel_config', array() );
@@ -276,7 +276,7 @@ class Channels_Page {
 			// Sync rules.
 			$old_rules = $old_ch['sync_rules'] ?? array();
 			if ( isset( $ch_data['sync_rules'] ) && is_array( $ch_data['sync_rules'] ) ) {
-				$new_rules = array_values( array_map( 'yousync_pro_sanitize_sync_rule', $ch_data['sync_rules'] ) );
+				$new_rules = array_values( array_map( 'yousync_sanitize_sync_rule', $ch_data['sync_rules'] ) );
 
 				foreach ( $new_rules as $i => &$new_rule ) {
 					if ( isset( $old_rules[ $i ] ) ) {
@@ -323,7 +323,7 @@ class Channels_Page {
 			}
 
 			// Per-channel field mapping.
-			$channel['field_mapping'] = yousync_pro_sanitize_field_mapping(
+			$channel['field_mapping'] = yousync_sanitize_field_mapping(
 				wp_unslash( $ch_data['field_mapping'] ?? array() )
 			);
 
@@ -359,7 +359,7 @@ class Channels_Page {
 		$new_channels = array_values( array_filter( $new_channels, fn( $ch ) => ! empty( $ch['youtube_id'] ) ) );
 
 		// Free: save as single channel format. Pro: save as-is.
-		$is_pro = yousync_pro_license()->is_feature_available( 'multi_channel' );
+		$is_pro = yousync_license()->is_feature_available( 'multi_channel' );
 		if ( ! $is_pro || count( $new_channels ) === 1 ) {
 			update_option( 'yousync_channel_config', $new_channels[0] ?? array() );
 		} else {
@@ -395,7 +395,7 @@ class Channels_Page {
 			? wp_unslash( $_POST['rule'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing
 			: array();
 
-		$rule                  = yousync_pro_sanitize_sync_rule( $raw_rule );
+		$rule                  = yousync_sanitize_sync_rule( $raw_rule );
 		$rule['scheduled_at']  = time();
 		$rule['sync_status']   = '';
 		$rule['last_synced']   = 0;
@@ -423,7 +423,7 @@ class Channels_Page {
 		// Render the accordion card for the new rule.
 		$name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 		ob_start();
-		yousync_pro_get_template_part( 'sync-rule', null, array(
+		yousync_get_template_part( 'sync-rule', null, array(
 			'index'              => $rule_index,
 			'rule'               => $rule,
 			'term_id'            => 0,

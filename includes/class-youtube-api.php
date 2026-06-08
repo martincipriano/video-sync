@@ -7,10 +7,10 @@ declare(strict_types=1);
  * (which costs 100 quota units per call). Every method here costs 1 unit
  * per page of up to 50 items.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

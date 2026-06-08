@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template part for displaying a sync rule condition.
  *
- * @package YouSyncPro
+ * @package YouSync
  *
  * Variables available in this template:
  * @var int|string $rule_index Rule index.
@@ -82,7 +82,7 @@ $has_value         = isset( $value_html ) && $value_html !== null && $value_html
       <?php echo $value_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-rendered HTML from trusted internal source. ?>
     <?php else : ?>
       <?php
-        echo yousync_pro_return_template_part( 'input', 'text', array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Return value is trusted internal HTML.
+        echo yousync_return_template_part( 'input', 'text', array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Return value is trusted internal HTML.
           'condition_index' => $condition_index,
           'rule_index'      => $rule_index,
           'name_prefix'     => $name_prefix,

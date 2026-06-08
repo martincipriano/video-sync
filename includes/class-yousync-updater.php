@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Hooks into the WordPress update transient to deliver
  * auto-updates from wpbuoy.com, authenticated by license key.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -31,7 +31,7 @@ class Updater {
 
 	/**
 	 * @param string $plugin_slug  Base plugin slug (must match WC product slug).
-	 * @param string $plugin_file  Relative plugin file path (e.g. "yousync-pro/yousync-pro.php").
+	 * @param string $plugin_file  Relative plugin file path (e.g. "yousync/yousync.php").
 	 * @param string $server_base  Base URL of the wpbuoy license server.
 	 */
 	public function __construct( string $plugin_slug, string $plugin_file, string $server_base ) {
@@ -59,7 +59,7 @@ class Updater {
 			return $transient;
 		}
 
-		$license_key = yousync_pro_license()->get_license_key();
+		$license_key = yousync_license()->get_license_key();
 		if ( empty( $license_key ) ) {
 			delete_transient( $this->cache_key );
 			unset( $transient->response[ $this->plugin_file ] );
@@ -74,7 +74,7 @@ class Updater {
 		$plugin_data = (object) array(
 			'slug'         => $this->plugin_slug,
 			'plugin'       => $this->plugin_file,
-			'new_version'  => $info['version'] ?? YOUSYNC_PRO_VERSION,
+			'new_version'  => $info['version'] ?? YOUSYNC_VERSION,
 			'url'          => '',
 			'package'      => $info['download_url'] ?? '',
 			'tested'       => $info['tested'] ?? '',
@@ -84,7 +84,7 @@ class Updater {
 			'banners'      => $info['banners'] ?? array(),
 		);
 
-		if ( isset( $info['version'] ) && version_compare( YOUSYNC_PRO_VERSION, $info['version'], '<' ) ) {
+		if ( isset( $info['version'] ) && version_compare( YOUSYNC_VERSION, $info['version'], '<' ) ) {
 			$transient->response[ $this->plugin_file ] = $plugin_data;
 		} else {
 			$transient->no_update[ $this->plugin_file ] = $plugin_data;
@@ -113,7 +113,7 @@ class Updater {
 		return (object) array(
 			'name'          => 'YouSync Pro',
 			'slug'          => $this->plugin_slug,
-			'version'       => $info['version'] ?? YOUSYNC_PRO_VERSION,
+			'version'       => $info['version'] ?? YOUSYNC_VERSION,
 			'author'        => $info['author'] ?? '',
 			'homepage'      => $info['homepage'] ?? '',
 			'requires'      => $info['requires'] ?? '6.0',
@@ -174,7 +174,7 @@ class Updater {
 			return $cached ?: null;
 		}
 
-		$license_key = yousync_pro_license()->get_license_key();
+		$license_key = yousync_license()->get_license_key();
 		if ( empty( $license_key ) ) {
 			return null;
 		}
@@ -184,7 +184,7 @@ class Updater {
 				array(
 					'plugin_slug' => rawurlencode( $this->plugin_slug ),
 					'license_key' => rawurlencode( $license_key ),
-					'version'     => YOUSYNC_PRO_VERSION,
+					'version'     => YOUSYNC_VERSION,
 				),
 				$this->update_check_url
 			),

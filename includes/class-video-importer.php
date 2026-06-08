@@ -8,10 +8,10 @@ declare(strict_types=1);
  * The post_thumbnail_html filter in yousync.php serves the YouTube URL when
  * no featured image is explicitly set by the user.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {

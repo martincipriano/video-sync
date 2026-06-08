@@ -7,7 +7,7 @@ declare(strict_types=1);
  * All inputs and selects are disabled so they cannot be focused or edited.
  * Click interactions are intercepted in admin.js to show a Pro upsell tooltip.
  *
- * @package YouSyncPro
+ * @package YouSync
  *
  * @var string|null $field_options_html Pre-rendered field options HTML.
  * @var string|null $operator_html      Pre-rendered operator options HTML.

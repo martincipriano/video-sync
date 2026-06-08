@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template part for a single channel group card.
  *
- * @package YouSyncPro
+ * @package YouSync
  *
  * Variables available in this template:
  * @var array $channel  Channel configuration data.
@@ -21,9 +21,9 @@ $youtube_id          = $channel['youtube_id'] ?? '';
 $ch_errors           = isset( $ch_errors ) && is_array( $ch_errors ) ? $ch_errors : array();
 $channel_error       = $channel['_api_error'] ?? $ch_errors[ $youtube_id ] ?? '';
 $is_new_channel      = ! $youtube_id || ! empty( $channel_error );
-$history             = \YouSyncPro\Sync_History::get( $youtube_id );
+$history             = \YouSync\Sync_History::get( $youtube_id );
 $error_count         = count( array_filter( $history, fn( $e ) => $e['has_error'] ?? false ) );
-$has_errors          = \YouSyncPro\Sync_History::has_unread_errors( $youtube_id );
+$has_errors          = \YouSync\Sync_History::has_unread_errors( $youtube_id );
 $channel_title       = $channel['channel_title'] ?? '';
 $channel_description = $channel['channel_description'] ?? '';
 $subscriber_count    = isset( $channel['subscriber_count'] ) ? $channel['subscriber_count'] : '';
@@ -35,8 +35,8 @@ $post_types             = get_post_types( array( 'public' => true ), 'objects' )
 $available_taxonomies   = get_taxonomies( array( 'public' => true ), 'objects' );
 $default_post_type      = $channel['default_post_type'] ?? '';
 $default_taxonomy_terms = $channel['default_taxonomy_terms'] ?? array();
-$ys_has_taxonomy        = yousync_pro_license()->is_feature_available( 'taxonomy_terms' );
-$ys_has_field_mapping   = yousync_pro_license()->is_feature_available( 'field_mapping' );
+$ys_has_taxonomy        = yousync_license()->is_feature_available( 'taxonomy_terms' );
+$ys_has_field_mapping   = yousync_license()->is_feature_available( 'field_mapping' );
 
 $profile_picture  = $channel['profile_picture'] ?? array();
 $profile_src      = '';
@@ -51,14 +51,14 @@ if ( ! $profile_src && ! empty( $profile_picture['url'] ) ) {
 $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 
 $fm_sources = array(
-	'title'         => __( 'Title', 'yousync-pro' ),
-	'description'   => __( 'Description', 'yousync-pro' ),
-	'duration'      => __( 'Duration (seconds)', 'yousync-pro' ),
-	'view_count'    => __( 'View Count', 'yousync-pro' ),
-	'like_count'    => __( 'Like Count', 'yousync-pro' ),
-	'published_at'  => __( 'Published Date', 'yousync-pro' ),
-	'thumbnail_url' => __( 'Thumbnail URL', 'yousync-pro' ),
-	'channel_title' => __( 'Channel Title', 'yousync-pro' ),
+	'title'         => __( 'Title', 'yousync' ),
+	'description'   => __( 'Description', 'yousync' ),
+	'duration'      => __( 'Duration (seconds)', 'yousync' ),
+	'view_count'    => __( 'View Count', 'yousync' ),
+	'like_count'    => __( 'Like Count', 'yousync' ),
+	'published_at'  => __( 'Published Date', 'yousync' ),
+	'thumbnail_url' => __( 'Thumbnail URL', 'yousync' ),
+	'channel_title' => __( 'Channel Title', 'yousync' ),
 );
 ?>
 
@@ -77,7 +77,7 @@ $fm_sources = array(
 				echo esc_html( $channel_title );
 			} else {
 				/* translators: %d: channel number */
-				printf( esc_html__( 'Channel %d', 'yousync-pro' ), $ch_index + 1 );
+				printf( esc_html__( 'Channel %d', 'yousync' ), $ch_index + 1 );
 			}
 			?>
 		</h2>
@@ -87,18 +87,18 @@ $fm_sources = array(
 
 		<div class="ys-channel-tabs-nav" role="tablist">
 			<button type="button" class="ys-channel-tab-btn ys-channel-tab-btn--active" data-tab="info" role="tab" aria-selected="true">
-				<?php esc_html_e( 'Info', 'yousync-pro' ); ?>
+				<?php esc_html_e( 'Info', 'yousync' ); ?>
 			</button>
 			<button type="button" class="ys-channel-tab-btn" data-tab="rules" role="tab" aria-selected="false">
-				<?php esc_html_e( 'Sync', 'yousync-pro' ); ?>
+				<?php esc_html_e( 'Sync', 'yousync' ); ?>
 			</button>
 			<button type="button" class="ys-channel-tab-btn" data-tab="settings" role="tab" aria-selected="false">
-				<?php esc_html_e( 'Settings', 'yousync-pro' ); ?>
+				<?php esc_html_e( 'Settings', 'yousync' ); ?>
 			</button>
 			<button type="button" class="ys-channel-tab-btn" data-tab="history" role="tab" aria-selected="false">
-				<?php esc_html_e( 'History', 'yousync-pro' ); ?>
+				<?php esc_html_e( 'History', 'yousync' ); ?>
 				<?php if ( $has_errors ) : ?>
-				<span class="ys-history-badge" aria-label="<?php echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'yousync-pro' ), $error_count ) ); ?>"><?php echo (int) $error_count; ?></span>
+				<span class="ys-history-badge" aria-label="<?php echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'yousync' ), $error_count ) ); ?>"><?php echo (int) $error_count; ?></span>
 				<?php endif; ?>
 			</button>
 		</div>
@@ -110,14 +110,14 @@ $fm_sources = array(
 
 				<div class="ys-mb-fields">
 					<div class="ys-mb-field<?php echo $channel_error ? ' ys-form-group--error' : ''; ?>">
-						<label class="ys-mb-label" for="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Channel ID', 'yousync-pro' ); ?> <span class="ys-required" aria-hidden="true">*</span></label>
+						<label class="ys-mb-label" for="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Channel ID', 'yousync' ); ?> <span class="ys-required" aria-hidden="true">*</span></label>
 						<input
 							type="text"
 							id="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"
 							name="channels[<?php echo esc_attr( $ch_index ); ?>][youtube_id]"
 							value="<?php echo esc_attr( $youtube_id ); ?>"
 							class="ys-text"
-							placeholder="<?php esc_attr_e( 'e.g. UCuAXFkgsw1L7xaCfnd5JJOw', 'yousync-pro' ); ?>"
+							placeholder="<?php esc_attr_e( 'e.g. UCuAXFkgsw1L7xaCfnd5JJOw', 'yousync' ); ?>"
 							required
 						>
 						<?php if ( $channel_error ) : ?>
@@ -127,28 +127,28 @@ $fm_sources = array(
 
 					<?php if ( $channel_title ) : ?>
 					<div class="ys-mb-field">
-						<p class="ys-mb-label"><?php esc_html_e( 'Title', 'yousync-pro' ); ?></p>
+						<p class="ys-mb-label"><?php esc_html_e( 'Title', 'yousync' ); ?></p>
 						<input type="text" class="ys-text" value="<?php echo esc_attr( $channel_title ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( '' !== $subscriber_count ) : ?>
 					<div class="ys-mb-field">
-						<p class="ys-mb-label"><?php esc_html_e( 'Subscribers', 'yousync-pro' ); ?></p>
+						<p class="ys-mb-label"><?php esc_html_e( 'Subscribers', 'yousync' ); ?></p>
 						<input type="text" class="ys-text" value="<?php echo esc_attr( number_format_i18n( (int) $subscriber_count ) ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( $video_count ) : ?>
 					<div class="ys-mb-field">
-						<p class="ys-mb-label"><?php esc_html_e( 'Videos', 'yousync-pro' ); ?></p>
+						<p class="ys-mb-label"><?php esc_html_e( 'Videos', 'yousync' ); ?></p>
 						<input type="text" class="ys-text" value="<?php echo esc_attr( number_format_i18n( (int) $video_count ) ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( $channel_description ) : ?>
 					<div class="ys-mb-field">
-						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync-pro' ); ?></p>
+						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync' ); ?></p>
 						<textarea class="ys-text" rows="3" disabled readonly><?php echo esc_textarea( $channel_description ); ?></textarea>
 					</div>
 					<?php endif; ?>
@@ -160,12 +160,12 @@ $fm_sources = array(
 			<div class="ys-channel-tab-panel ys-hidden" data-panel="rules" role="tabpanel">
 
 				<button type="button" class="ys-add-rule">
-					<?php esc_html_e( 'Add sync rule', 'yousync-pro' ); ?>
+					<?php esc_html_e( 'Add sync rule', 'yousync' ); ?>
 				</button>
 				<div class="ys-rules ys-rules--init" data-video-count="<?php echo (int) $video_count; ?>">
 					<?php
 					foreach ( $sync_rules as $index => $rule ) {
-						yousync_pro_get_template_part( 'sync-rule', null, array(
+						yousync_get_template_part( 'sync-rule', null, array(
 							'index'              => $index,
 							'rule'               => $rule,
 							'term_id'            => 0,
@@ -178,7 +178,7 @@ $fm_sources = array(
 					?>
 				</div>
 				<?php
-				yousync_pro_get_template_part( 'sync-rule-wizard', null, array(
+				yousync_get_template_part( 'sync-rule-wizard', null, array(
 					'ch_index'                => $ch_index,
 					'default_post_type'       => $default_post_type,
 					'default_taxonomy_terms'  => $default_taxonomy_terms,
@@ -193,10 +193,10 @@ $fm_sources = array(
 
 				<div class="ys-form-group">
 					<label for="ys-default-post-type-<?php echo esc_attr( $ch_index ); ?>">
-						<?php esc_html_e( 'Default Post Type', 'yousync-pro' ); ?>
+						<?php esc_html_e( 'Default Post Type', 'yousync' ); ?>
 						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync-pro' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'yousync-pro' ); ?></span>
+							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
+							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'yousync' ); ?></span>
 						</span>
 					</label>
 					<select
@@ -204,7 +204,7 @@ $fm_sources = array(
 						name="channels[<?php echo esc_attr( $ch_index ); ?>][default_post_type]"
 						class="ys-select ys-channel-default-post-type"
 					>
-						<option value=""><?php esc_html_e( '— Select post type —', 'yousync-pro' ); ?></option>
+						<option value=""><?php esc_html_e( '— Select post type —', 'yousync' ); ?></option>
 						<?php foreach ( $post_types as $pt ) : ?>
 						<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 						<?php endforeach; ?>
@@ -213,10 +213,10 @@ $fm_sources = array(
 
 				<div class="ys-form-group ys-channel-taxonomy-terms-wrapper<?php echo ! $ys_has_taxonomy ? ' ys-taxonomy-terms-locked' : ''; ?><?php echo ( $default_post_type && ! empty( $available_taxonomies ) ) ? '' : ' ys-hidden'; ?>">
 					<label>
-						<?php esc_html_e( 'Default Taxonomy Terms', 'yousync-pro' ); ?>
+						<?php esc_html_e( 'Default Taxonomy Terms', 'yousync' ); ?>
 						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync-pro' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Automatically apply these taxonomy terms to posts created by sync automations in this channel.', 'yousync-pro' ); ?></span>
+							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
+							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Automatically apply these taxonomy terms to posts created by sync automations in this channel.', 'yousync' ); ?></span>
 						</span>
 					</label>
 					<div class="ys-taxonomy-terms ys-channel-taxonomy-terms">
@@ -225,11 +225,11 @@ $fm_sources = array(
 							$tt_term_ids = array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) );
 							$tt_terms    = $tt_taxonomy ? get_terms( array( 'taxonomy' => $tt_taxonomy, 'hide_empty' => false ) ) : array();
 
-							$_tax_opts = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync-pro' ) . '</option>';
+							$_tax_opts = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync' ) . '</option>';
 							foreach ( $available_taxonomies as $tax ) {
 								$_tax_opts .= '<option value="' . esc_attr( $tax->name ) . '"' . selected( $tt_taxonomy, $tax->name, false ) . '>' . esc_html( $tax->labels->singular_name ) . '</option>';
 							}
-							$_term_opts = '<option value="">' . esc_html__( '&mdash; Select term &mdash;', 'yousync-pro' ) . '</option>';
+							$_term_opts = '<option value="">' . esc_html__( '&mdash; Select term &mdash;', 'yousync' ) . '</option>';
 							if ( ! is_wp_error( $tt_terms ) ) {
 								foreach ( $tt_terms as $term ) {
 									$_term_opts .= '<option value="' . esc_attr( $term->term_id ) . '"' . ( in_array( $term->term_id, $tt_term_ids, true ) ? ' selected' : '' ) . '>' . esc_html( $term->name ) . '</option>';
@@ -242,7 +242,7 @@ $fm_sources = array(
 							<div class="ys-term-select-wrapper">
 								<select name="channels[<?php echo esc_attr( $ch_index ); ?>][default_taxonomy_terms][<?php echo esc_attr( (string) $tt_idx ); ?>][term_ids][]" class="ys-select ys-term-select"<?php echo $tt_taxonomy ? '' : ' disabled'; ?>><?php echo $_term_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
 							</div>
-							<button type="button" class="ys-remove-taxonomy-term" aria-label="<?php esc_attr_e( 'Remove', 'yousync-pro' ); ?>"></button>
+							<button type="button" class="ys-remove-taxonomy-term" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
 						</div>
 						<?php else : ?>
 						<div class="ys-taxonomy-term-row ys-taxonomy-term-row--locked">
@@ -254,20 +254,20 @@ $fm_sources = array(
 								<select class="ys-select ys-term-select" disabled><?php echo $_term_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
 								<div class="ys-tax-locked-overlay" aria-hidden="true"></div>
 							</div>
-							<button type="button" class="ys-remove-taxonomy-term-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync-pro' ); ?>"></button>
+							<button type="button" class="ys-remove-taxonomy-term-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
 						</div>
 						<?php endif;
 						endforeach; ?>
 					</div>
-					<button type="button" class="<?php echo $ys_has_taxonomy ? 'ys-add-taxonomy-term ys-channel-add-taxonomy-term' : 'ys-add-taxonomy-term-locked'; ?>"><?php esc_html_e( 'Add taxonomy term', 'yousync-pro' ); ?></button>
+					<button type="button" class="<?php echo $ys_has_taxonomy ? 'ys-add-taxonomy-term ys-channel-add-taxonomy-term' : 'ys-add-taxonomy-term-locked'; ?>"><?php esc_html_e( 'Add taxonomy term', 'yousync' ); ?></button>
 				</div>
 
 				<div class="ys-form-group ys-field-mapping-wrapper<?php echo ! $ys_has_field_mapping ? ' ys-field-mapping-locked' : ''; ?>">
 					<label class="ys-fm-mapping-label">
-						<?php esc_html_e( 'Map video details to post metadata', 'yousync-pro' ); ?>
+						<?php esc_html_e( 'Map video details to post metadata', 'yousync' ); ?>
 						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync-pro' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Store YouTube video data in custom post meta fields for all automations in this channel.', 'yousync-pro' ); ?></span>
+							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
+							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Store YouTube video data in custom post meta fields for all automations in this channel.', 'yousync' ); ?></span>
 						</span>
 					</label>
 					<div
@@ -277,7 +277,7 @@ $fm_sources = array(
 						$fm_source = $fm_row['source'] ?? '';
 						$fm_target = $fm_row['target'] ?? '';
 
-						$_src_opts = '<option value="">' . esc_html__( '— Source —', 'yousync-pro' ) . '</option>';
+						$_src_opts = '<option value="">' . esc_html__( '— Source —', 'yousync' ) . '</option>';
 						foreach ( $fm_sources as $src_val => $src_label ) {
 							$_src_opts .= '<option value="' . esc_attr( $src_val ) . '"' . selected( $fm_source, $src_val, false ) . '>' . esc_html( $src_label ) . '</option>';
 						}
@@ -285,18 +285,18 @@ $fm_sources = array(
 						if ( $ys_has_field_mapping ) : ?>
 						<div class="ys-field-mapping-row">
 							<select class="ys-select ys-rule-fm-source" name="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping][<?php echo esc_attr( (string) $fm_idx ); ?>][source]"><?php echo $_src_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-							<input type="text" class="ys-text ys-fm-meta-key" name="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping][<?php echo esc_attr( (string) $fm_idx ); ?>][target]" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync-pro' ); ?>">
-							<button type="button" class="ys-remove-field-mapping-row" aria-label="<?php esc_attr_e( 'Remove', 'yousync-pro' ); ?>"></button>
+							<input type="text" class="ys-text ys-fm-meta-key" name="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping][<?php echo esc_attr( (string) $fm_idx ); ?>][target]" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync' ); ?>">
+							<button type="button" class="ys-remove-field-mapping-row" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
 						</div>
 						<?php else : ?>
 						<div class="ys-field-mapping-row ys-field-mapping-row--locked">
 							<div class="ys-fm-locked-cell"><select class="ys-select ys-rule-fm-source" disabled><?php echo $_src_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>
-							<div class="ys-fm-locked-cell"><input type="text" class="ys-text ys-fm-meta-key" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync-pro' ); ?>" disabled readonly><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>
-							<button type="button" class="ys-remove-field-mapping-row-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync-pro' ); ?>"></button>
+							<div class="ys-fm-locked-cell"><input type="text" class="ys-text ys-fm-meta-key" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync' ); ?>" disabled readonly><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>
+							<button type="button" class="ys-remove-field-mapping-row-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
 						</div>
 						<?php endif;
 						endforeach; ?></div>
-					<button type="button" class="<?php echo $ys_has_field_mapping ? 'ys-add-field-mapping-row ys-channel-add-field-mapping-row' : 'ys-add-field-mapping-row-locked'; ?>"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php esc_html_e( 'Add video detail mapping', 'yousync-pro' ); ?></button>
+					<button type="button" class="<?php echo $ys_has_field_mapping ? 'ys-add-field-mapping-row ys-channel-add-field-mapping-row' : 'ys-add-field-mapping-row-locked'; ?>"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php esc_html_e( 'Add video detail mapping', 'yousync' ); ?></button>
 				</div>
 
 			</div>
@@ -304,20 +304,20 @@ $fm_sources = array(
 		<?php /* History tab */ ?>
 		<div class="ys-channel-tab-panel ys-hidden" data-panel="history" role="tabpanel">
 			<?php if ( empty( $history ) ) : ?>
-			<p class="ys-history-empty"><?php esc_html_e( 'No sync history yet.', 'yousync-pro' ); ?></p>
+			<p class="ys-history-empty"><?php esc_html_e( 'No sync history yet.', 'yousync' ); ?></p>
 			<?php else : ?>
 			<ul class="ys-history-list">
 				<?php
 				$action_labels = array(
-					'videos_sync_new'               => __( 'Sync new videos', 'yousync-pro' ),
-					'videos_update_all'             => __( 'Update all video metadata', 'yousync-pro' ),
-					'videos_update_specific_all'    => __( 'Update specific video metadata', 'yousync-pro' ),
-					'playlists_sync_new'            => __( 'Sync new playlists', 'yousync-pro' ),
-					'playlists_update_all'          => __( 'Update all playlist metadata', 'yousync-pro' ),
-					'playlists_update_specific_all' => __( 'Update specific playlist metadata', 'yousync-pro' ),
-					'channel_sync_new'              => __( 'Sync channel', 'yousync-pro' ),
-					'channel_update_all'            => __( 'Update all channel metadata', 'yousync-pro' ),
-					'channel_update_specific'       => __( 'Update specific channel metadata', 'yousync-pro' ),
+					'videos_sync_new'               => __( 'Sync new videos', 'yousync' ),
+					'videos_update_all'             => __( 'Update all video metadata', 'yousync' ),
+					'videos_update_specific_all'    => __( 'Update specific video metadata', 'yousync' ),
+					'playlists_sync_new'            => __( 'Sync new playlists', 'yousync' ),
+					'playlists_update_all'          => __( 'Update all playlist metadata', 'yousync' ),
+					'playlists_update_specific_all' => __( 'Update specific playlist metadata', 'yousync' ),
+					'channel_sync_new'              => __( 'Sync channel', 'yousync' ),
+					'channel_update_all'            => __( 'Update all channel metadata', 'yousync' ),
+					'channel_update_specific'       => __( 'Update specific channel metadata', 'yousync' ),
 				);
 				?>
 			<?php foreach ( $history as $entry ) :
@@ -336,13 +336,13 @@ $fm_sources = array(
 					$count_part = '';
 					if ( null !== $entry_count ) {
 						$is_sync  = str_contains( $entry_action, 'sync' );
-						$verb     = $is_sync ? __( 'synced', 'yousync-pro' ) : __( 'updated', 'yousync-pro' );
+						$verb     = $is_sync ? __( 'synced', 'yousync' ) : __( 'updated', 'yousync' );
 						if ( str_contains( $entry_action, 'playlist' ) ) {
-							$resource = _n( 'playlist', 'playlists', $entry_count, 'yousync-pro' );
+							$resource = _n( 'playlist', 'playlists', $entry_count, 'yousync' );
 						} elseif ( str_contains( $entry_action, 'channel' ) ) {
-							$resource = _n( 'channel', 'channels', $entry_count, 'yousync-pro' );
+							$resource = _n( 'channel', 'channels', $entry_count, 'yousync' );
 						} else {
-							$resource = _n( 'video', 'videos', $entry_count, 'yousync-pro' );
+							$resource = _n( 'video', 'videos', $entry_count, 'yousync' );
 						}
 						$count_part = $entry_count . ' ' . $resource . ' ' . $verb;
 					}
@@ -352,7 +352,7 @@ $fm_sources = array(
 						$pt_obj  = get_post_type_object( $entry_dest_pt );
 						$pt_name = $pt_obj ? $pt_obj->labels->name : $entry_dest_pt;
 						/* translators: %s: post type label, e.g. "Posts" */
-						$pt_part = ' ' . sprintf( __( 'to %s', 'yousync-pro' ), $pt_name );
+						$pt_part = ' ' . sprintf( __( 'to %s', 'yousync' ), $pt_name );
 					}
 
 					$terms_part = '';
@@ -360,14 +360,14 @@ $fm_sources = array(
 						$n = count( $entry_terms );
 						if ( 1 === $n ) {
 							/* translators: %s: taxonomy term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %s', 'yousync-pro' ), $entry_terms[0] );
+							$terms_part = ', ' . sprintf( __( 'assigned to %s', 'yousync' ), $entry_terms[0] );
 						} elseif ( 2 === $n ) {
 							/* translators: 1: first term name, 2: second term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %1$s and %2$s', 'yousync-pro' ), $entry_terms[0], $entry_terms[1] );
+							$terms_part = ', ' . sprintf( __( 'assigned to %1$s and %2$s', 'yousync' ), $entry_terms[0], $entry_terms[1] );
 						} else {
 							$last_term  = array_pop( $entry_terms );
 							/* translators: 1: comma-separated term names, 2: last term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %1$s, and %2$s', 'yousync-pro' ), implode( ', ', $entry_terms ), $last_term );
+							$terms_part = ', ' . sprintf( __( 'assigned to %1$s, and %2$s', 'yousync' ), implode( ', ', $entry_terms ), $last_term );
 						}
 					}
 
@@ -394,7 +394,7 @@ $fm_sources = array(
 							<?php endif; ?>
 						</span>
 						<span class="ys-history-entry-time"><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry_time ) ); ?></span>
-						<span class="ys-history-entry-duration"><?php printf( esc_html__( '%ds', 'yousync-pro' ), $entry_duration ); ?></span>
+						<span class="ys-history-entry-duration"><?php printf( esc_html__( '%ds', 'yousync' ), $entry_duration ); ?></span>
 					</div>
 				</li>
 				<?php endforeach; ?>
@@ -409,7 +409,7 @@ $fm_sources = array(
 			type="button"
 			class="ys-remove-channel"
 		>
-			<?php esc_html_e( 'Delete channel', 'yousync-pro' ); ?>
+			<?php esc_html_e( 'Delete channel', 'yousync' ); ?>
 		</button>
 	</div>
 </div>

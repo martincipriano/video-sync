@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Stateless class that evaluates a video data array against a conditions
  * array. No WordPress dependencies — pure logic.
  *
- * @package YouSyncPro
+ * @package YouSync
  */
 
-namespace YouSyncPro;
+namespace YouSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -46,7 +46,7 @@ class Condition_Evaluator {
 	 * Evaluate a single condition against a video data array.
 	 *
 	 * Routes to the correct type-specific evaluator using
-	 * yousync_pro_get_condition_field_type() from yousync.php.
+	 * yousync_get_condition_field_type() from yousync.php.
 	 *
 	 * Returns true for unknown fields (fail-open) to avoid silently
 	 * dropping videos when a new field hasn't been wired up yet.
@@ -67,8 +67,8 @@ class Condition_Evaluator {
 			return true;
 		}
 
-		$type = function_exists( 'yousync_pro_get_condition_field_type' )
-			? yousync_pro_get_condition_field_type( $field )
+		$type = function_exists( 'yousync_get_condition_field_type' )
+			? yousync_get_condition_field_type( $field )
 			: 'text';
 
 		switch ( $type ) {
