@@ -83,16 +83,18 @@ $default_post_type = $default_post_type ?? '';
 		<div class="ys-wizard-step-header">
 			<h3><?php esc_html_e( 'Where should synced items be saved?', 'yousync' ); ?></h3>
 		</div>
-		<div class="ys-form-group ys-wizard-post-type-wrapper">
-			<label for="ys-wizard-post-type-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Post Type', 'yousync' ); ?></label>
-			<select id="ys-wizard-post-type-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-post-type">
-				<option value=""><?php esc_html_e( '— Select post type —', 'yousync' ); ?></option>
-				<?php foreach ( $post_types as $pt ) : ?>
-				<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>>
-					<?php echo esc_html( $pt->labels->singular_name ); ?>
-				</option>
-				<?php endforeach; ?>
-			</select>
+		<div class="ys-2-columns ys-cols-3-1">
+			<div class="ys-form-group ys-wizard-post-type-wrapper">
+				<label for="ys-wizard-post-type-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Post Type', 'yousync' ); ?></label>
+				<select id="ys-wizard-post-type-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-post-type">
+					<option value=""><?php esc_html_e( '— Select post type —', 'yousync' ); ?></option>
+					<?php foreach ( $post_types as $pt ) : ?>
+					<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>>
+						<?php echo esc_html( $pt->labels->singular_name ); ?>
+					</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
 		</div>
 		<div class="ys-wizard-error ys-hidden"></div>
 		<div class="ys-wizard-nav">
