@@ -17,9 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$post_types         = get_post_types( array( 'public' => true ), 'objects' );
-$default_post_type  = $default_post_type ?? '';
-$has_scheduled_sync = false;
+$post_types        = get_post_types( array( 'public' => true ), 'objects' );
+$default_post_type = $default_post_type ?? '';
 ?>
 <div class="ys-wizard ys-hidden" data-channel-index="<?php echo esc_attr( $ch_index ); ?>" data-default-post-type="<?php echo esc_attr( $default_post_type ); ?>">
 
@@ -73,21 +72,12 @@ $has_scheduled_sync = false;
 		<div class="ys-wizard-step-header">
 			<h3><?php esc_html_e( 'When should this rule run?', 'yousync' ); ?></h3>
 		</div>
-		<div class="ys-form-group ys-wizard-specific-metadata-wrapper ys-hidden">
-			<label><?php esc_html_e( 'Details to update', 'yousync' ); ?></label>
-			<div class="ys-specific-metadata-rows ys-wizard-specific-metadata-rows" data-resource="video"></div>
-			<button type="button" class="ys-add-metadata-field"><?php esc_html_e( 'Add detail', 'yousync' ); ?></button>
-		</div>
 		<div class="ys-2-columns ys-cols-3-1">
 			<div class="ys-form-group">
 				<label for="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
 				<select id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-schedule-select">
-					<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => 'once', 'can_schedule' => $has_scheduled_sync ) ); ?>
+					<?php yousync_get_template_part( 'options', 'schedule' ); ?>
 				</select>
-			</div>
-			<div class="ys-form-group ys-wizard-custom-schedule-wrapper ys-hidden">
-				<label for="ys-wizard-custom-schedule-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Custom (Hours)', 'yousync' ); ?></label>
-				<input id="ys-wizard-custom-schedule-<?php echo esc_attr( $ch_index ); ?>" class="ys-number ys-wizard-custom-schedule" type="number" value="24" min="1" placeholder="24">
 			</div>
 		</div>
 		<div class="ys-wizard-nav">
