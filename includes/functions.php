@@ -56,25 +56,7 @@ function yousync_sanitize_sync_rule( $rule ) {
 			: array(),
 		'destination_post_type'      => isset( $rule['destination_post_type'] ) ? sanitize_key( $rule['destination_post_type'] ) : '',
 		'destination_taxonomy_terms' => array(),
-		'conditions'                 => array(),
 	);
-
-	if ( isset( $rule['conditions'] ) && is_array( $rule['conditions'] ) ) {
-		foreach ( $rule['conditions'] as $condition ) {
-			if ( ! is_array( $condition ) ) {
-				continue;
-			}
-			$field = isset( $condition['field'] ) ? sanitize_text_field( $condition['field'] ) : '';
-			if ( '' === $field ) {
-				continue;
-			}
-			$sanitized['conditions'][] = array(
-				'field'    => $field,
-				'operator' => isset( $condition['operator'] ) ? sanitize_text_field( $condition['operator'] ) : '',
-				'value'    => isset( $condition['value'] ) ? sanitize_text_field( $condition['value'] ) : '',
-			);
-		}
-	}
 
 	if ( isset( $rule['destination_taxonomy_terms'] ) && is_array( $rule['destination_taxonomy_terms'] ) ) {
 		foreach ( $rule['destination_taxonomy_terms'] as $tt ) {

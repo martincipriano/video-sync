@@ -97,13 +97,6 @@ class Sync_Runner {
 	private YouTube_API $api;
 
 	/**
-	 * Condition evaluator.
-	 *
-	 * @var Condition_Evaluator
-	 */
-	private Condition_Evaluator $evaluator;
-
-	/**
 	 * Video importer.
 	 *
 	 * @var Video_Importer
@@ -113,14 +106,12 @@ class Sync_Runner {
 	/**
 	 * Constructor.
 	 *
-	 * @param YouTube_API         $api       YouTube API wrapper.
-	 * @param Condition_Evaluator $evaluator Condition evaluator.
-	 * @param Video_Importer      $importer  Video importer.
+	 * @param YouTube_API    $api      YouTube API wrapper.
+	 * @param Video_Importer $importer Video importer.
 	 */
-	public function __construct( YouTube_API $api, Condition_Evaluator $evaluator, Video_Importer $importer ) {
-		$this->api       = $api;
-		$this->evaluator = $evaluator;
-		$this->importer  = $importer;
+	public function __construct( YouTube_API $api, Video_Importer $importer ) {
+		$this->api      = $api;
+		$this->importer = $importer;
 	}
 
 	// -------------------------------------------------------------------------
@@ -167,11 +158,6 @@ class Sync_Runner {
 		if ( 'once' !== $schedule ) {
 			$this->record_history_error( $source_type, $term_id, 'Scheduled sync is a Pro feature.', 'pro_only' );
 			return;
-		}
-
-		// Conditions are Pro-only — ignore any that slipped into a free rule.
-		if ( ! empty( $rule['conditions'] ) ) {
-			$rule['conditions'] = array();
 		}
 
 		// "Once" runs bypass the per-run batch cap and may import an entire
@@ -327,8 +313,6 @@ class Sync_Runner {
 	 * @throws \RuntimeException On unrecoverable API failure.
 	 */
 	private function handle_videos_sync_new( string $source_type, int $term_id, array $rule ): void {
-		$conditions                 = $rule['conditions'] ?? array();
-		$this->warn_invalid_conditions( $conditions );
 		$destination_post_type      = $rule['destination_post_type'] ?? '';
 		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
 		$field_mapping              = $this->resolve_field_mapping( $rule );
@@ -395,37 +379,22 @@ class Sync_Runner {
 
 		// Batch-fetch full video details and import.
 		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
-		$imported                = $this->batch_fetch_and_import( $new_ids, $conditions, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, $field_mapping, ! $is_once );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, $field_mapping, ! $is_once );
 		$this->current_run_count = $imported;
 
-		// Warn when candidates were available but nothing was imported.
-		// This usually means the sync conditions are too restrictive or contain a typo.
+		// Warn when candidates were available but nothing could be saved.
 		if ( 0 === $imported ) {
 			$candidate_count = count( $new_ids );
-			if ( ! empty( $conditions ) ) {
-				$message = sprintf(
-					/* translators: %d: number of candidate videos */
-					_n(
-						'No videos were imported. %d candidate was fetched but did not match the sync conditions. Check your conditions for typos.',
-						'No videos were imported. %d candidates were fetched but none matched the sync conditions. Check your conditions for typos.',
-						$candidate_count,
-						'yousync'
-					),
-					$candidate_count
-				);
-			} else {
-				$message = sprintf(
-					/* translators: %d: number of candidate videos */
-					_n(
-						'No videos were imported. %d candidate was fetched from the API but could not be saved.',
-						'No videos were imported. %d candidates were fetched from the API but none could be saved.',
-						$candidate_count,
-						'yousync'
-					),
-					$candidate_count
-				);
-			}
-
+			$message         = sprintf(
+				/* translators: %d: number of candidate videos */
+				_n(
+					'No videos were imported. %d candidate was fetched from the API but could not be saved.',
+					'No videos were imported. %d candidates were fetched from the API but none could be saved.',
+					$candidate_count,
+					'yousync'
+				),
+				$candidate_count
+			);
 			$this->accumulate_error( $source_type, $term_id, $message, 'no_results' );
 		}
 	}
@@ -503,8 +472,6 @@ class Sync_Runner {
 	private function handle_playlists_sync( int $term_id, array $rule, string $action ): void {
 		$destination_post_type      = $rule['destination_post_type'] ?? '';
 		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
-		$conditions                 = $rule['conditions'] ?? array();
-		$this->warn_invalid_conditions( $conditions );
 
 		$data = $this->get_term_meta_data( 'channel', $term_id );
 		if ( ! $data || empty( $data['channel_id'] ) ) {
@@ -540,10 +507,6 @@ class Sync_Runner {
 				continue;
 			}
 
-			if ( ! $this->evaluator->evaluate_all( $this->playlist_to_condition_data( $playlist_data ), $conditions ) ) {
-				continue;
-			}
-
 			// Create if missing in this post type.
 			$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
 			if ( ! $existing_post_id ) {
@@ -562,17 +525,15 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Fetch video details in batches of 50, evaluate conditions, and import.
+	 * Fetch video details in batches of 50 and import them.
 	 *
 	 * @param string[] $video_ids   Video IDs to process.
-	 * @param array    $conditions  Conditions array from the rule.
 	 * @param string   $source_type 'channel' or 'playlist'.
 	 * @param int      $term_id     Source term ID.
 	 * @return int Number of videos successfully imported.
 	 */
 	private function batch_fetch_and_import(
 		array $video_ids,
-		array $conditions,
 		string $source_type,
 		int $term_id,
 		string $destination_post_type = '',
@@ -605,12 +566,6 @@ class Sync_Runner {
 					return $imported;
 				}
 
-				if ( ! $this->evaluator->evaluate_all( $video_data, $conditions ) ) {
-					++$scanned;
-					$this->write_progress( min( $scanned, $total ), $total );
-					continue;
-				}
-
 				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $field_mapping );
 
 				if ( is_wp_error( $result ) ) {
@@ -626,72 +581,9 @@ class Sync_Runner {
 		return $imported;
 	}
 
-	/**
-	 * Convert a playlist data array into the shape expected by Condition_Evaluator.
-	 *
-	 * Playlist conditions use playlist_title, playlist_description,
-	 * playlist_video_count fields — which map directly from the API response.
-	 *
-	 * @param array $playlist_data Playlist data from the API.
-	 * @return array Normalised data array for evaluate_all().
-	 */
-	private function playlist_to_condition_data( array $playlist_data ): array {
-		return array(
-			'playlist_title'       => $playlist_data['playlist_title'] ?? '',
-			'playlist_description' => $playlist_data['playlist_description'] ?? '',
-			'playlist_video_count' => $playlist_data['playlist_video_count'] ?? 0,
-		);
-	}
-
 	// -------------------------------------------------------------------------
 	// Lookup helpers
 	// -------------------------------------------------------------------------
-
-	/**
-	 * Record non-fatal warnings for conditions that reference an unknown field or
-	 * an unsupported operator.
-	 *
-	 * Such conditions fail-open in the evaluator (everything passes), which can
-	 * silently import far more than intended. Warnings are added to the run so
-	 * they appear in the sync history without aborting the run.
-	 *
-	 * @param array $conditions Rule conditions.
-	 * @return void
-	 */
-	private function warn_invalid_conditions( array $conditions ): void {
-		$valid_ops = array(
-			'text'   => array( 'contains', 'not_contains', 'equals', 'not_equals', 'starts_with', 'ends_with' ),
-			'number' => array( 'greater_than', 'less_than', 'equal_to' ),
-			'date'   => array( 'before', 'after', 'on' ),
-		);
-
-		foreach ( $conditions as $condition ) {
-			$field = $condition['field'] ?? '';
-			$op    = $condition['operator'] ?? '';
-			$type  = function_exists( 'yousync_get_condition_field_type' )
-				? yousync_get_condition_field_type( $field )
-				: '';
-
-			if ( '' === $type ) {
-				$this->run_errors[] = array(
-					'timestamp' => time(),
-					/* translators: %s: condition field name */
-					'error'     => sprintf( __( 'Condition field "%s" is not recognised, so it was ignored (every item passed it). Check the rule for a typo.', 'yousync' ), $field ),
-					'code'      => 'condition_warning',
-				);
-				continue;
-			}
-
-			if ( ! in_array( $op, $valid_ops[ $type ] ?? array(), true ) ) {
-				$this->run_errors[] = array(
-					'timestamp' => time(),
-					/* translators: 1: operator, 2: field name */
-					'error'     => sprintf( __( 'Operator "%1$s" is not supported for the "%2$s" condition, so it was ignored. Check the rule for a typo.', 'yousync' ), $op, $field ),
-					'code'      => 'condition_warning',
-				);
-			}
-		}
-	}
 
 	/**
 	 * Whether a rule's destination post type is unusable (empty or not registered).

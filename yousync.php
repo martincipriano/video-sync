@@ -100,40 +100,6 @@ function yousync_return_template_part( $slug, $name = null, $args = array() ) {
 }
 
 /**
- * Get the field type for a sync rule condition field.
- *
- * Used to determine which operators and value input to render.
- *
- * @param string $field The condition field name.
- * @return string Field type: 'text', 'number', or 'date'. Empty string if unknown.
- */
-function yousync_get_condition_field_type( $field ) {
-	$map = array(
-		// Channel fields
-		'channel_title'        => 'text',
-		'channel_description'  => 'text',
-		'subscriber_count'     => 'number',
-		'video_count'          => 'number',
-		// Playlist fields
-		'playlist_title'       => 'text',
-		'playlist_description' => 'text',
-		'playlist_video_count' => 'number',
-		// Video fields
-		'video_id'             => 'text',
-		'title'                => 'text',
-		'description'          => 'text',
-		'tags'                 => 'text',
-		'duration'             => 'number',
-		'published_date'       => 'date',
-		'yousync_category'       => 'text',
-		'view_count'           => 'number',
-		'like_count'           => 'number',
-		'comment_count'        => 'number',
-	);
-	return isset( $map[ $field ] ) ? $map[ $field ] : '';
-}
-
-/**
  * Plugin activation — flag that cron events need rescheduling.
  *
  * Taxonomies are not registered during the activation hook, so the actual
@@ -176,7 +142,6 @@ require_once YOUSYNC_PLUGIN_DIR . 'includes/functions.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/settings.php';
 // Load sync engine.
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-youtube-api.php';
-require_once YOUSYNC_PLUGIN_DIR . 'includes/class-condition-evaluator.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-video-importer.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-runner.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-history.php';
@@ -193,10 +158,9 @@ require_once YOUSYNC_PLUGIN_DIR . 'includes/class-channels-page.php';
 add_action(
 	'init',
 	function () {
-		$api       = new \YouSync\YouTube_API( get_option( 'yousync_api_key', '' ) );
-		$evaluator = new \YouSync\Condition_Evaluator();
-		$importer  = new \YouSync\Video_Importer();
-		$runner    = new \YouSync\Sync_Runner( $api, $evaluator, $importer );
+		$api      = new \YouSync\YouTube_API( get_option( 'yousync_api_key', '' ) );
+		$importer = new \YouSync\Video_Importer();
+		$runner   = new \YouSync\Sync_Runner( $api, $importer );
 		new \YouSync\Sync_Scheduler( $runner );
 	},
 	5
