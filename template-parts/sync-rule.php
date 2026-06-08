@@ -36,7 +36,7 @@ $_action_labels = array(
 	'videos_sync_new'    => __( 'Sync new videos', 'yousync' ),
 );
 $rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'yousync' );
-$rule_schedule_suffix = __( 'immediately after saving', 'yousync' );
+$rule_schedule_suffix = __( 'immediately after enabling and saving', 'yousync' );
 
 $sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
 $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
@@ -153,7 +153,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 		<div class="ys-2-columns ys-cols-3-1">
 			<div class="ys-form-group">
 				<label for="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
-				<input type="text" class="ys-text" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after saving)', 'yousync' ); ?>" readonly disabled>
+				<input type="text" class="ys-text" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after enabling and saving)', 'yousync' ); ?>" readonly disabled>
 			</div>
 		</div>
 

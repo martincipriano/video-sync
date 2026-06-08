@@ -97,8 +97,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				</div>
 				<button class="button-link ys-developer-fields-toggle" type="button">
-					<span><?php esc_html_e( 'Show Developer Fields', 'yousync' ); ?></span>
 					<span><?php esc_html_e( 'Hide Developer Fields', 'yousync' ); ?></span>
+					<span><?php esc_html_e( 'Show Developer Fields', 'yousync' ); ?></span>
 				</button>
 				<?php endif; ?>
 

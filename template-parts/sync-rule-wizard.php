@@ -69,7 +69,7 @@ $default_post_type = $default_post_type ?? '';
 		<div class="ys-2-columns ys-cols-3-1">
 			<div class="ys-form-group">
 				<label for="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
-				<input type="text" class="ys-text" id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after saving)', 'yousync' ); ?>" readonly disabled>
+				<input type="text" class="ys-text" id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after enabling and saving)', 'yousync' ); ?>" readonly disabled>
 			</div>
 		</div>
 		<div class="ys-wizard-nav">
