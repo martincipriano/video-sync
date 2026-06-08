@@ -22,7 +22,6 @@ $enabled           = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
 $schedule          = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
 $custom_schedule   = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 1;
 $action            = isset( $rule['action'] ) ? $rule['action'] : '';
-$conditions        = isset( $rule['conditions'] ) ? $rule['conditions'] : array();
 $specific_metadata = isset( $rule['specific_metadata'] ) ? $rule['specific_metadata'] : array();
 
 $max_videos                 = isset( $rule['max_videos'] ) ? (int) $rule['max_videos'] : 50;
@@ -60,7 +59,6 @@ $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
 // License feature flags
 $ys_has_scheduled_sync  = false;
 $ys_has_metadata_update = false;
-$ys_has_conditions      = false;
 $ys_has_field_mapping   = false;
 $ys_has_taxonomy        = false;
 
@@ -77,9 +75,6 @@ if ( strpos( $action, 'channel' ) === 0 ) {
 // Specific metadata — show wrapper when action contains update_specific
 $show_specific_metadata = $action && strpos( $action, 'update_specific' ) !== false;
 $metadata_options_html  = $resource ? yousync_return_template_part( 'options', $resource . '-metadata' ) : '';
-
-// Field options HTML for conditions (based on resource)
-$field_options_tpl = $resource ? yousync_return_template_part( 'options', $resource . '-fields' ) : '';
 
 // Sync status line
 $rule_sync_status = $rule['sync_status'] ?? '';
@@ -387,78 +382,6 @@ $_post_type_label = 'playlists_sync_new' === $action
 		<div class="ys-field-mapping-rows ys-rule-field-mapping-rows" data-name-prefix="<?php echo $_rule_fm_name_prefix; ?>"><?php echo $_rule_fm_html; ?></div>
 		<button type="button" class="<?php echo $ys_has_field_mapping ? 'ys-add-field-mapping-row ys-rule-add-field-mapping-row' : 'ys-add-field-mapping-row-locked'; ?>"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php echo esc_html( $_fm_btn_label ); ?></button>
 	</div>
-
-		<div class="ys-form-group ys-conditions-wrapper<?php echo $ys_has_conditions ? '' : ' ys-conditions-locked'; ?><?php echo ( ! $action || str_starts_with( $action, 'channel_' ) ) ? ' ys-hidden' : ''; ?>">
-			<label class="ys-conditions-label">
-				<?php esc_html_e( 'Filter conditions', 'yousync' ); ?>
-				<span class="ys-help-wrap">
-					<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
-					<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Only sync items that match all of the following conditions.', 'yousync' ); ?></span>
-				</span>
-			</label>
-			<div class="ys-conditions" data-rule-index="<?php echo esc_attr( $rule_index ); ?>" data-resource="<?php echo esc_attr( $resource ); ?>"><?php
-			if ( ! empty( $conditions ) && is_array( $conditions ) ) :
-				foreach ( $conditions as $condition_index => $condition ) :
-					$cond_field    = isset( $condition['field'] ) ? $condition['field'] : '';
-					$cond_operator = isset( $condition['operator'] ) ? $condition['operator'] : '';
-					$cond_value    = isset( $condition['value'] ) ? $condition['value'] : '';
-
-					// Build field options with saved field pre-selected
-					$cond_field_options_html = $field_options_tpl ?: null;
-					if ( $cond_field_options_html && $cond_field ) {
-						$cond_field_options_html = str_replace(
-							'<option disabled selected value="">',
-							'<option disabled value="">',
-							$cond_field_options_html
-						);
-						$cond_field_options_html = str_replace(
-							'value="' . esc_attr( $cond_field ) . '"',
-							'value="' . esc_attr( $cond_field ) . '" selected',
-							$cond_field_options_html
-						);
-					}
-
-					// Build operator options and value input if a field is selected
-					$cond_operator_html = null;
-					$cond_value_html    = null;
-					if ( $cond_field ) {
-						$field_type = yousync_get_condition_field_type( $cond_field );
-						if ( $field_type ) {
-							$cond_operator_html = yousync_return_template_part(
-								'options',
-								$field_type . '-operators',
-								array( 'operator' => $cond_operator )
-							);
-							$cond_value_html = yousync_return_template_part(
-								'input',
-								$field_type,
-								array(
-									'rule_index'      => $rule_index,
-									'condition_index' => $condition_index,
-									'value'           => $cond_value,
-									'disabled'        => ! $ys_has_conditions,
-									'name_prefix'     => $name_prefix,
-								)
-							);
-						}
-					}
-
-					$cond_template = $ys_has_conditions ? 'condition' : 'condition-locked';
-					yousync_get_template_part( 'sync-rule', $cond_template, array(
-						'rule_index'         => $rule_index,
-						'condition_index'    => $condition_index,
-						'condition'          => $condition,
-						'field_options_html' => $cond_field_options_html,
-						'operator_html'      => $cond_operator_html,
-						'value_html'         => $cond_value_html,
-						'name_prefix'        => $name_prefix,
-					) );
-				endforeach;
-			endif;
-			?></div>
-
-			<button type="button" class="<?php echo $ys_has_conditions ? 'ys-add-condition' : 'ys-add-condition-locked'; ?>"><?php esc_html_e( 'Add condition', 'yousync' ); ?></button>
-		</div>
 
 	<?php if ( ! empty( $rule_sync_errors ) ) : ?>
 	<div class="ys-rule-errors ys-mt-3">
