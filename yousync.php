@@ -152,6 +152,26 @@ register_deactivation_hook( YOUSYNC_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'yousync_daily_license_check' );
 } );
 
+/**
+ * Stand down if YouSync Pro is active.
+ *
+ * Pro is a superset of the free plugin and owns all of the shared runtime
+ * surface: the yousync_* options, post meta, cron hooks, AJAX actions, admin
+ * menus, and the bundled license client. Bailing here — at plugin load, in every
+ * request context (admin, front-end, and WP-Cron) — guarantees the two never
+ * register the same hooks or run the same sync simultaneously. Activation and
+ * deactivation hooks above stay registered so toggling either plugin stays clean.
+ *
+ * Shared option/meta keys are intentional: they give a seamless free -> pro
+ * upgrade (channels, rules, API key, and synced posts carry over).
+ */
+if (
+	in_array( 'yousync-pro/yousync-pro.php', (array) get_option( 'active_plugins', array() ), true )
+	|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['yousync-pro/yousync-pro.php'] ) )
+) {
+	return;
+}
+
 // Load plugin files.
 require_once YOUSYNC_PLUGIN_DIR . 'includes/functions.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/settings.php';
