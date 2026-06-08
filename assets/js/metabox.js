@@ -64,12 +64,6 @@
 	}
 
 	document.addEventListener('click', function (e) {
-		var btn = e.target.closest('.ys-copy-sc-btn')
-		if (btn) {
-			copyToClipboard(btn.dataset.shortcode || '')
-			return
-		}
-
 		var field = e.target.closest('.ys-mb-input, .ys-mb-textarea')
 		if (field && !field.disabled) {
 			copyToClipboard(field.value)

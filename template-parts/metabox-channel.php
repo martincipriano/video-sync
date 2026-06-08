@@ -47,7 +47,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Channel Title', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="channel_title"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_title ); ?>" readonly>
 				</div>
@@ -57,7 +56,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="channel_description"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<textarea class="ys-mb-textarea" rows="4" readonly><?php echo esc_textarea( $channel_description ); ?></textarea>
 				</div>
@@ -67,7 +65,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Subscribers', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="subscriber_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $subscriber_count ) ); ?>" readonly>
 				</div>
@@ -77,7 +74,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Videos', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="video_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $video_count ) ); ?>" readonly>
 				</div>
@@ -96,7 +92,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></p>
-							<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="channel_id"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
 					</div>
@@ -130,7 +125,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Banner Image', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="banner_image"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $banner_image ); ?>" readonly>
 				</div>
@@ -139,7 +133,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Profile Photo', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[yousync id="' . $post_id . '" field="profile_photo"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $profile_picture ); ?>" readonly>
 				</div>
