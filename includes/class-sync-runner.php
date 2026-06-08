@@ -275,31 +275,6 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Resolve the field mapping for a rule, falling back to the per-channel mapping.
-	 *
-	 * Per-rule mapping takes precedence. If empty, the per-channel field_mapping
-	 * (stored in yousync_channel_config) is used. If that is also empty, the
-	 * importer falls back to its built-in default (title → post_title).
-	 *
-	 * @param array $rule Sync rule array.
-	 * @return array Resolved field mapping rows.
-	 */
-	private function resolve_field_mapping( array $rule ): array {
-		$per_rule = $rule['field_mapping'] ?? array();
-		if ( ! empty( $per_rule ) && is_array( $per_rule ) ) {
-			return $per_rule;
-		}
-
-		// Per-channel fallback — $this->source_data_override holds channel config.
-		$per_channel = $this->source_data_override['field_mapping'] ?? array();
-		if ( ! empty( $per_channel ) && is_array( $per_channel ) ) {
-			return $per_channel;
-		}
-
-		return array(); // Importer falls back to its built-in default (title → post_title).
-	}
-
-	/**
 	 * Handle the videos_sync_new action.
 	 *
 	 * Fetches all videos from the channel uploads playlist or playlist,
@@ -315,7 +290,6 @@ class Sync_Runner {
 	private function handle_videos_sync_new( string $source_type, int $term_id, array $rule ): void {
 		$destination_post_type      = $rule['destination_post_type'] ?? '';
 		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
-		$field_mapping              = $this->resolve_field_mapping( $rule );
 
 		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
 			$this->record_error( $source_type, $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
@@ -379,7 +353,7 @@ class Sync_Runner {
 
 		// Batch-fetch full video details and import.
 		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
-		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, $field_mapping, ! $is_once );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, ! $is_once );
 		$this->current_run_count = $imported;
 
 		// Warn when candidates were available but nothing could be saved.
@@ -425,7 +399,6 @@ class Sync_Runner {
 
 		$destination_post_type      = $rule['destination_post_type'] ?? '';
 		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
-		$field_mapping              = $this->resolve_field_mapping( $rule );
 
 		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
 			$this->record_error( 'channel', $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
@@ -447,7 +420,7 @@ class Sync_Runner {
 		}
 
 		$this->write_progress( 0, 1 );
-		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $destination_taxonomy_terms, $field_mapping );
+		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $destination_taxonomy_terms );
 
 		if ( is_wp_error( $result ) ) {
 			$this->accumulate_error( 'channel', $term_id, $result->get_error_message(), $result->get_error_code() );
@@ -539,7 +512,6 @@ class Sync_Runner {
 		string $destination_post_type = '',
 		array $destination_taxonomy_terms = array(),
 		int $max = 0,
-		array $field_mapping = array(),
 		bool $apply_cap = true
 	): int {
 		$cap     = $apply_cap ? self::BATCH_CAP : PHP_INT_MAX;
@@ -566,7 +538,7 @@ class Sync_Runner {
 					return $imported;
 				}
 
-				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $field_mapping );
+				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms );
 
 				if ( is_wp_error( $result ) ) {
 					$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );

@@ -56,27 +56,6 @@ class Video_Importer {
 	 */
 	private const THUMBNAIL_SIZE_PRIORITY = array( 'maxres', 'standard', 'high', 'medium', 'default' );
 
-	/**
-	 * Maps field mapping source keys to their corresponding _yousync_* meta keys.
-	 */
-	private const SOURCE_TO_INTERNAL_KEY = array(
-		// Video fields.
-		'title'               => '_yousync_original_title',
-		'description'         => '_yousync_original_description',
-		'duration'            => '_yousync_duration_seconds',
-		'view_count'          => '_yousync_view_count',
-		'like_count'          => '_yousync_like_count',
-		'published_at'        => '_yousync_published_at',
-		'thumbnail_url'       => '_yousync_thumbnail_url',
-		'channel_title'       => '_yousync_channel_title',
-		// Channel fields.
-		'channel_description' => '_yousync_channel_description',
-		'subscriber_count'    => '_yousync_subscriber_count',
-		'video_count'         => '_yousync_channel_video_count',
-		'profile_picture_url' => '_yousync_profile_picture',
-		'banner_image_url'    => '_yousync_banner_image',
-	);
-
 	// -------------------------------------------------------------------------
 	// Public methods
 	// -------------------------------------------------------------------------
@@ -91,10 +70,9 @@ class Video_Importer {
 	 * @param int    $source_term_id              WordPress term ID of the source channel/playlist.
 	 * @param string $post_type                   Destination post type. Required and validated by the caller (Sync_Runner); an empty/invalid value is rejected before reaching here.
 	 * @param array  $destination_taxonomy_terms  Array of ['taxonomy' => string, 'term_ids' => int[]] to assign.
-	 * @param array  $field_mapping               Field mapping rows. Stored on the post for use by future update syncs.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '', array $destination_taxonomy_terms = array(), array $field_mapping = array() ): int|\WP_Error {
+	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '', array $destination_taxonomy_terms = array() ): int|\WP_Error {
 		// 1. Create the post.
 		$post_id = wp_insert_post(
 			array(
@@ -116,11 +94,6 @@ class Video_Importer {
 
 		// 3. Save all internal _yousync_* meta keys.
 		$this->save_all_meta( $post_id, $video_data, $source_type, $source_term_id );
-		update_post_meta( $post_id, '_yousync_protected', 0 );
-
-		// 4. Store the field mapping on the post and write the initial custom meta values.
-		$this->save_field_mapping( $post_id, $field_mapping );
-		$this->apply_stored_mapping( $post_id );
 
 		return $post_id;
 	}
@@ -163,73 +136,6 @@ class Video_Importer {
 
 		$ids = $wpdb->get_col( $sql );
 		return array_values( array_filter( array_unique( $ids ) ) );
-	}
-
-	/**
-	 * Convert field mapping rows into the stored per-post structure and save it.
-	 *
-	 * The stored structure maps each _yousync_* internal key to the list of custom
-	 * meta keys that should mirror its value on every update sync:
-	 *   [ '_yousync_view_count' => ['my_view_count', 'test_view'], ... ]
-	 *
-	 * If the mapping is empty, any existing _yousync_field_mapping meta is removed.
-	 *
-	 * @param int   $post_id      Post ID.
-	 * @param array $field_mapping Field mapping rows from the sync rule.
-	 * @return void
-	 */
-	private function save_field_mapping( int $post_id, array $field_mapping ): void {
-		if ( empty( $field_mapping ) ) {
-			delete_post_meta( $post_id, '_yousync_field_mapping' );
-			return;
-		}
-
-		$stored = array();
-		foreach ( $field_mapping as $row ) {
-			$source = $row['source'] ?? '';
-			$target = $row['target'] ?? '';
-			if ( ! isset( self::SOURCE_TO_INTERNAL_KEY[ $source ] ) || '' === $target ) {
-				continue;
-			}
-			$internal_key             = self::SOURCE_TO_INTERNAL_KEY[ $source ];
-			$stored[ $internal_key ][] = sanitize_key( $target );
-		}
-
-		if ( empty( $stored ) ) {
-			delete_post_meta( $post_id, '_yousync_field_mapping' );
-		} else {
-			update_post_meta( $post_id, '_yousync_field_mapping', $stored );
-		}
-	}
-
-	/**
-	 * Copy values from _yousync_* internal keys to their mapped custom meta targets.
-	 *
-	 * Reads _yousync_field_mapping from the post (written at import time) and writes
-	 * each target key. Called after save_all_meta() so internal keys are already fresh.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return void
-	 */
-	/**
-	 * @param int      $post_id     Post ID.
-	 * @param string[] $filter_keys Only copy entries whose internal key is in this list.
-	 *                              Empty = copy all entries (used by update_all).
-	 */
-	private function apply_stored_mapping( int $post_id, array $filter_keys = [] ): void {
-		$stored = get_post_meta( $post_id, '_yousync_field_mapping', true );
-		if ( empty( $stored ) || ! is_array( $stored ) ) {
-			return;
-		}
-		foreach ( $stored as $internal_key => $targets ) {
-			if ( ! empty( $filter_keys ) && ! in_array( $internal_key, $filter_keys, true ) ) {
-				continue;
-			}
-			$value = get_post_meta( $post_id, $internal_key, true );
-			foreach ( (array) $targets as $target ) {
-				update_post_meta( $post_id, sanitize_key( $target ), $value );
-			}
-		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -471,7 +377,7 @@ class Video_Importer {
 	 * @param array  $destination_taxonomy_terms Array of ['taxonomy' => string, 'term_ids' => int[]].
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import_channel( array $channel_data, string $channel_id, string $post_type, array $destination_taxonomy_terms = array(), array $field_mapping = array() ): int|\WP_Error {
+	public function import_channel( array $channel_data, string $channel_id, string $post_type, array $destination_taxonomy_terms = array() ): int|\WP_Error {
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => sanitize_text_field( $channel_data['channel_title'] ?? $channel_id ),
@@ -490,11 +396,6 @@ class Video_Importer {
 		}
 
 		$this->save_channel_meta( $post_id, $channel_data, $channel_id );
-		update_post_meta( $post_id, '_yousync_protected', 0 );
-
-		// Apply field mapping (save the mapping on the post and write initial values).
-		$this->save_field_mapping( $post_id, $field_mapping );
-		$this->apply_stored_mapping( $post_id );
 
 		// Sideload profile picture as the featured image.
 		$pic_url = $channel_data['profile_picture']['url'] ?? '';

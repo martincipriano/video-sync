@@ -59,7 +59,6 @@ $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
 // License feature flags
 $ys_has_scheduled_sync  = false;
 $ys_has_metadata_update = false;
-$ys_has_field_mapping   = false;
 $ys_has_taxonomy        = false;
 
 // Determine the resource type from the action (used for field options and metadata options)
@@ -314,74 +313,6 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</button>
 		</div>
 
-	<?php
-	$_rule_field_mapping  = $rule['field_mapping'] ?? array();
-	$_fm_allowed_sources  = 'playlist' === $resource ? array(
-		'playlist_title'       => __( 'Title', 'yousync' ),
-		'playlist_description' => __( 'Description', 'yousync' ),
-		'playlist_video_count' => __( 'Video Count', 'yousync' ),
-		'playlist_thumbnail'   => __( 'Thumbnail URL', 'yousync' ),
-	) : array(
-		'title'         => __( 'Title', 'yousync' ),
-		'description'   => __( 'Description', 'yousync' ),
-		'duration'      => __( 'Duration (seconds)', 'yousync' ),
-		'view_count'    => __( 'View Count', 'yousync' ),
-		'like_count'    => __( 'Like Count', 'yousync' ),
-		'published_at'  => __( 'Published Date', 'yousync' ),
-		'thumbnail_url' => __( 'Thumbnail URL', 'yousync' ),
-		'channel_title' => __( 'Channel Title', 'yousync' ),
-	);
-	$_fm_btn_label = 'playlist' === $resource
-		? __( 'Add playlist detail mapping', 'yousync' )
-		: __( 'Add video detail mapping', 'yousync' );
-	$_rule_fm_html = '';
-	$_rule_fm_idx  = 0;
-	foreach ( $_rule_field_mapping as $fm_row ) {
-		$fm_source = $fm_row['source'] ?? '';
-		$fm_target = $fm_row['target'] ?? '';
-		if ( in_array( $fm_target, array( 'post_title', 'post_content', 'post_excerpt' ), true ) ) {
-			continue;
-		}
-
-		$_source_opts = '<option value="">' . esc_html__( '— Source —', 'yousync' ) . '</option>';
-		foreach ( $_fm_allowed_sources as $_src_val => $_src_label ) {
-			$_source_opts .= '<option value="' . esc_attr( $_src_val ) . '"' . selected( $fm_source, $_src_val, false ) . '>' . esc_html( $_src_label ) . '</option>';
-		}
-
-		if ( $ys_has_field_mapping ) {
-			$_fm_name_src  = esc_attr( "{$name_prefix}[{$rule_index}][field_mapping][{$_rule_fm_idx}][source]" );
-			$_fm_name_tgt  = esc_attr( "{$name_prefix}[{$rule_index}][field_mapping][{$_rule_fm_idx}][target]" );
-			$_rule_fm_html .= '<div class="ys-field-mapping-row">';
-			$_rule_fm_html .= '<select class="ys-select ys-rule-fm-source" name="' . $_fm_name_src . '">' . $_source_opts . '</select>';
-			$_rule_fm_html .= '<input type="text" class="ys-text ys-fm-meta-key" name="' . $_fm_name_tgt . '" value="' . esc_attr( $fm_target ) . '" placeholder="' . esc_attr__( 'e.g. _yousync_duration', 'yousync' ) . '">';
-			$_rule_fm_html .= '<button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button>';
-			$_rule_fm_html .= '</div>';
-		} else {
-			$_placeholder  = esc_attr__( 'e.g. _yousync_duration', 'yousync' );
-			$_rule_fm_html .= '<div class="ys-field-mapping-row ys-field-mapping-row--locked">';
-			$_rule_fm_html .= '<div class="ys-fm-locked-cell"><select class="ys-select ys-rule-fm-source" disabled>' . $_source_opts . '</select><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>';
-			$_rule_fm_html .= '<div class="ys-fm-locked-cell"><input type="text" class="ys-text ys-fm-meta-key" value="' . esc_attr( $fm_target ) . '" placeholder="' . $_placeholder . '" disabled readonly><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>';
-			$_rule_fm_html .= '<button type="button" class="ys-remove-field-mapping-row-locked" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button>';
-			$_rule_fm_html .= '</div>';
-		}
-
-		$_rule_fm_idx++;
-	}
-	$_rule_fm_name_prefix = esc_attr( "{$name_prefix}[{$rule_index}][field_mapping]" );
-	?>
-	<?php
-	$_fm_mapping_labels = array(
-		'video'    => __( 'Map video details to post metadata', 'yousync' ),
-		'playlist' => __( 'Map playlist details to post metadata', 'yousync' ),
-		'channel'  => __( 'Map channel details to post metadata', 'yousync' ),
-	);
-	$_fm_mapping_label = $_fm_mapping_labels[ $resource ] ?? __( 'Map YouTube details to post metadata', 'yousync' );
-	?>
-	<div class="ys-form-group ys-field-mapping-wrapper<?php echo ! $ys_has_field_mapping ? ' ys-field-mapping-locked' : ''; ?><?php echo ( $action && strpos( $action, '_update_' ) !== false ) ? ' ys-hidden' : ''; ?>">
-		<label class="ys-fm-mapping-label"><?php echo esc_html( $_fm_mapping_label ); ?></label>
-		<div class="ys-field-mapping-rows ys-rule-field-mapping-rows" data-name-prefix="<?php echo $_rule_fm_name_prefix; ?>"><?php echo $_rule_fm_html; ?></div>
-		<button type="button" class="<?php echo $ys_has_field_mapping ? 'ys-add-field-mapping-row ys-rule-add-field-mapping-row' : 'ys-add-field-mapping-row-locked'; ?>"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php echo esc_html( $_fm_btn_label ); ?></button>
-	</div>
 
 	<?php if ( ! empty( $rule_sync_errors ) ) : ?>
 	<div class="ys-rule-errors ys-mt-3">

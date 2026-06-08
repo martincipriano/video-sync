@@ -77,60 +77,6 @@ function yousync_sanitize_sync_rule( $rule ) {
 		}
 	}
 
-	$sanitized['field_mapping'] = yousync_sanitize_field_mapping( $rule['field_mapping'] ?? array() );
-
-	return $sanitized;
-}
-
-/**
- * Sanitize a field mapping array.
- *
- * Each row must have a whitelisted 'source' and a non-empty 'target'.
- * Standard WP post fields are validated by key; custom meta keys are sanitized.
- *
- * @param mixed $rows Raw field mapping data from $_POST or stored option.
- * @return array Sanitized array of ['source' => string, 'target' => string] rows.
- */
-function yousync_sanitize_field_mapping( $rows ): array {
-	if ( ! is_array( $rows ) ) {
-		return array();
-	}
-
-	$allowed_sources  = array( 'title', 'description', 'duration', 'view_count', 'like_count', 'published_at', 'thumbnail_url', 'channel_title', 'playlist_title', 'playlist_description', 'playlist_video_count', 'playlist_thumbnail' );
-	$wp_post_fields   = array( 'post_title', 'post_content', 'post_excerpt' );
-	$sanitized        = array();
-
-	foreach ( $rows as $row ) {
-		if ( ! is_array( $row ) ) {
-			continue;
-		}
-
-		$source = sanitize_key( $row['source'] ?? '' );
-		if ( '' === $source || ! in_array( $source, $allowed_sources, true ) ) {
-			continue;
-		}
-
-		$raw_target = $row['target'] ?? '';
-		if ( '' === $raw_target ) {
-			continue;
-		}
-
-		if ( in_array( $raw_target, $wp_post_fields, true ) ) {
-			$target = $raw_target;
-		} else {
-			$target = sanitize_text_field( $raw_target );
-		}
-
-		if ( '' === $target ) {
-			continue;
-		}
-
-		$sanitized[] = array(
-			'source' => $source,
-			'target' => $target,
-		);
-	}
-
 	return $sanitized;
 }
 

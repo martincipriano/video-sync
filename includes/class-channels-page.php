@@ -143,10 +143,7 @@ class Channels_Page {
 			'taxonomyTermRow'          => yousync_get_taxonomy_term_row_template(),
 			'tmplMetadataRow'          => '<div class="ys-specific-metadata-row"><select class="ys-select ys-specific-metadata" {{NAME}}>{{OPTIONS}}</select><button type="button" class="ys-remove-metadata-field" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
 			'tmplWizardTaxonomyRow'    => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-wizard-taxonomy-select">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-wizard-term-select" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'tmplWizardFMRow'          => '<div class="ys-field-mapping-row"><select class="ys-select ys-wizard-fm-source"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'tmplRuleFMRow'            => '<div class="ys-field-mapping-row"><select class="ys-select ys-rule-fm-source" name="{{NAME_PREFIX}}[{{IDX}}][source]"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" class="ys-text ys-fm-meta-key" name="{{NAME_PREFIX}}[{{IDX}}][target]" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
 			'tmplChannelTaxRow'        => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-channel-taxonomy-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][taxonomy]">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-channel-term-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][term_ids][]" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'tmplDefaultsFMRow'        => '<div class="ys-field-mapping-row"><select name="field_mapping[{{IDX}}][source]" class="ys-select"><option value="">&mdash; ' . esc_html__( 'Source', 'yousync' ) . ' &mdash;</option>{{OPTIONS}}</select><input type="text" name="field_mapping[{{IDX}}][target]" class="ys-text ys-fm-meta-key" placeholder="e.g. _yousync_duration"><button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
 			'fieldMappingSources'      => array(
 				'video'    => implode( '', array_map(
 					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
@@ -290,10 +287,6 @@ class Channels_Page {
 				);
 			}
 
-			// Per-channel field mapping.
-			$channel['field_mapping'] = yousync_sanitize_field_mapping(
-				wp_unslash( $ch_data['field_mapping'] ?? array() )
-			);
 
 			// Auto-fetch channel data via YouTube API if channel ID changed or data is missing.
 			if (

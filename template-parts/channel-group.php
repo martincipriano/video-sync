@@ -27,14 +27,12 @@ $channel_description = $channel['channel_description'] ?? '';
 $subscriber_count    = isset( $channel['subscriber_count'] ) ? $channel['subscriber_count'] : '';
 $sync_rules          = $channel['sync_rules'] ?? array();
 $video_count         = $channel['video_count'] ?? 0;
-$field_mapping       = $channel['field_mapping'] ?? array();
 
 $post_types             = get_post_types( array( 'public' => true ), 'objects' );
 $available_taxonomies   = get_taxonomies( array( 'public' => true ), 'objects' );
 $default_post_type      = $channel['default_post_type'] ?? '';
 $default_taxonomy_terms = $channel['default_taxonomy_terms'] ?? array();
 $ys_has_taxonomy        = false;
-$ys_has_field_mapping   = false;
 
 $profile_picture  = $channel['profile_picture'] ?? array();
 $profile_src      = '';
@@ -48,16 +46,6 @@ if ( ! $profile_src && ! empty( $profile_picture['url'] ) ) {
 
 $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 
-$fm_sources = array(
-	'title'         => __( 'Title', 'yousync' ),
-	'description'   => __( 'Description', 'yousync' ),
-	'duration'      => __( 'Duration (seconds)', 'yousync' ),
-	'view_count'    => __( 'View Count', 'yousync' ),
-	'like_count'    => __( 'Like Count', 'yousync' ),
-	'published_at'  => __( 'Published Date', 'yousync' ),
-	'thumbnail_url' => __( 'Thumbnail URL', 'yousync' ),
-	'channel_title' => __( 'Channel Title', 'yousync' ),
-);
 ?>
 
 <div class="ys-channel<?php echo $is_new_channel ? ' ys-channel--new' : ''; ?>" data-channel-index="<?php echo esc_attr( $ch_index ); ?>" data-youtube-id="<?php echo esc_attr( $youtube_id ); ?>">
@@ -180,7 +168,6 @@ $fm_sources = array(
 					'ch_index'                => $ch_index,
 					'default_post_type'       => $default_post_type,
 					'default_taxonomy_terms'  => $default_taxonomy_terms,
-					'default_field_mapping'   => $field_mapping,
 				) );
 				?>
 
@@ -258,43 +245,6 @@ $fm_sources = array(
 						endforeach; ?>
 					</div>
 					<button type="button" class="<?php echo $ys_has_taxonomy ? 'ys-add-taxonomy-term ys-channel-add-taxonomy-term' : 'ys-add-taxonomy-term-locked'; ?>"><?php esc_html_e( 'Add taxonomy term', 'yousync' ); ?></button>
-				</div>
-
-				<div class="ys-form-group ys-field-mapping-wrapper<?php echo ! $ys_has_field_mapping ? ' ys-field-mapping-locked' : ''; ?>">
-					<label class="ys-fm-mapping-label">
-						<?php esc_html_e( 'Map video details to post metadata', 'yousync' ); ?>
-						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Store YouTube video data in custom post meta fields for all automations in this channel.', 'yousync' ); ?></span>
-						</span>
-					</label>
-					<div
-						class="ys-field-mapping-rows ys-channel-field-mapping-rows"
-						data-name-prefix="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping]"
-					><?php foreach ( $field_mapping as $fm_idx => $fm_row ) :
-						$fm_source = $fm_row['source'] ?? '';
-						$fm_target = $fm_row['target'] ?? '';
-
-						$_src_opts = '<option value="">' . esc_html__( '— Source —', 'yousync' ) . '</option>';
-						foreach ( $fm_sources as $src_val => $src_label ) {
-							$_src_opts .= '<option value="' . esc_attr( $src_val ) . '"' . selected( $fm_source, $src_val, false ) . '>' . esc_html( $src_label ) . '</option>';
-						}
-
-						if ( $ys_has_field_mapping ) : ?>
-						<div class="ys-field-mapping-row">
-							<select class="ys-select ys-rule-fm-source" name="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping][<?php echo esc_attr( (string) $fm_idx ); ?>][source]"><?php echo $_src_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-							<input type="text" class="ys-text ys-fm-meta-key" name="channels[<?php echo esc_attr( $ch_index ); ?>][field_mapping][<?php echo esc_attr( (string) $fm_idx ); ?>][target]" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync' ); ?>">
-							<button type="button" class="ys-remove-field-mapping-row" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
-						</div>
-						<?php else : ?>
-						<div class="ys-field-mapping-row ys-field-mapping-row--locked">
-							<div class="ys-fm-locked-cell"><select class="ys-select ys-rule-fm-source" disabled><?php echo $_src_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>
-							<div class="ys-fm-locked-cell"><input type="text" class="ys-text ys-fm-meta-key" value="<?php echo esc_attr( $fm_target ); ?>" placeholder="<?php esc_attr_e( 'e.g. _yousync_duration', 'yousync' ); ?>" disabled readonly><div class="ys-fm-locked-overlay" aria-hidden="true"></div></div>
-							<button type="button" class="ys-remove-field-mapping-row-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
-						</div>
-						<?php endif;
-						endforeach; ?></div>
-					<button type="button" class="<?php echo $ys_has_field_mapping ? 'ys-add-field-mapping-row ys-channel-add-field-mapping-row' : 'ys-add-field-mapping-row-locked'; ?>"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php esc_html_e( 'Add video detail mapping', 'yousync' ); ?></button>
 				</div>
 
 			</div>
