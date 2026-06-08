@@ -182,7 +182,6 @@ require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-runner.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-history.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
 require_once YOUSYNC_PLUGIN_DIR . 'includes/class-channels-page.php';
-require_once YOUSYNC_PLUGIN_DIR . 'includes/class-blocks.php';
 
 /**
  * Instantiate the sync engine.
@@ -202,8 +201,6 @@ add_action(
 	},
 	5
 );
-
-new \YouSync\Blocks();
 
 
 /**
