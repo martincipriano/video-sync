@@ -138,12 +138,7 @@ class Channels_Page {
 			'addRuleNonce'             => wp_create_nonce( 'yousync_add_rule' ),
 			'syncProgressNonce'        => wp_create_nonce( 'yousync_sync_progress' ),
 			'markHistoryReadNonce'     => wp_create_nonce( 'yousync_mark_history_read' ),
-			'taxonomyOptions'          => yousync_get_taxonomy_options_html(),
-			'taxonomyOptionsByPostType' => yousync_get_taxonomy_options_by_post_type(),
-			'taxonomyTermRow'          => yousync_get_taxonomy_term_row_template(),
 			'tmplMetadataRow'          => '<div class="ys-specific-metadata-row"><select class="ys-select ys-specific-metadata" {{NAME}}>{{OPTIONS}}</select><button type="button" class="ys-remove-metadata-field" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'tmplWizardTaxonomyRow'    => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-wizard-taxonomy-select">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-wizard-term-select" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'tmplChannelTaxRow'        => '<div class="ys-taxonomy-term-row"><select class="ys-select ys-taxonomy-select ys-channel-taxonomy-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][taxonomy]">{{TAX_OPTIONS}}</select><div class="ys-term-select-wrapper"><select class="ys-select ys-term-select ys-channel-term-select" name="channels[{{CH}}][default_taxonomy_terms][{{IDX}}][term_ids][]" disabled><option value="">&mdash; ' . esc_html__( 'Select term', 'yousync' ) . ' &mdash;</option></select></div><button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
 			'fieldMappingSources'      => array(
 				'video'    => implode( '', array_map(
 					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
