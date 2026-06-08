@@ -127,15 +127,9 @@ $_post_type_label = 'playlists_sync_new' === $action
 				</label>
 				<select class="ys-select ys-action" id="ys-action-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][action]" required>
 					<option value=""><?php esc_html_e( '— Select action —', 'yousync' ); ?></option>
-					<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
-						<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
-					</optgroup>
-					<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
-						<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
-					</optgroup>
-					<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
-							<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
-					</optgroup>
+					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
+					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
+					<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
 				</select>
 				<p class="ys-quota-estimate ys-hidden"></p>
 			</div>
@@ -156,6 +150,13 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</div>
 		</div>
 
+		<div class="ys-2-columns ys-cols-3-1">
+			<div class="ys-form-group">
+				<label for="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
+				<input type="text" class="ys-text" id="ys-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after saving)', 'yousync' ); ?>" readonly disabled>
+			</div>
+		</div>
+
 		<?php $_show_post_type = in_array( $action, array( 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' ), true ); ?>
 		<div class="ys-2-columns ys-post-type-wrapper<?php echo $_show_post_type ? '' : ' ys-hidden'; ?>">
 			<div class="ys-form-group">
@@ -172,7 +173,6 @@ $_post_type_label = 'playlists_sync_new' === $action
 					<option value="<?php echo esc_attr( $pt->name ); ?>" <?php selected( $destination_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 					<?php endforeach; ?>
 				</select>
-				<p class="ys-field-note description"><?php esc_html_e( 'Required — synced items are saved as this post type. If it is left unset (or the post type is later removed), the rule will not sync and the error is logged to the sync history.', 'yousync' ); ?></p>
 			</div>
 		</div>
 

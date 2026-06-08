@@ -42,15 +42,9 @@ $default_post_type = $default_post_type ?? '';
 				<label for="ys-wizard-action-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Action', 'yousync' ); ?></label>
 				<select id="ys-wizard-action-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-action-select">
 					<option value=""><?php esc_html_e( '— Select action —', 'yousync' ); ?></option>
-					<optgroup label="<?php esc_attr_e( 'Videos', 'yousync' ); ?>">
-						<option data-resource="video" value="videos_sync_new"><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
-					</optgroup>
-					<optgroup label="<?php esc_attr_e( 'Playlists', 'yousync' ); ?>">
-						<option data-resource="playlist" value="playlists_sync_new"><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
-					</optgroup>
-					<optgroup label="<?php esc_attr_e( 'Channel', 'yousync' ); ?>">
-						<option data-resource="channel" value="channel_sync_new"><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
-					</optgroup>
+					<option data-resource="video" value="videos_sync_new"><?php esc_html_e( 'Sync new videos', 'yousync' ); ?></option>
+					<option data-resource="playlist" value="playlists_sync_new"><?php esc_html_e( 'Sync new playlists', 'yousync' ); ?></option>
+					<option data-resource="channel" value="channel_sync_new"><?php esc_html_e( 'Sync this channel', 'yousync' ); ?></option>
 				</select>
 			</div>
 			<div class="ys-form-group ys-items-per-run-wrapper">
@@ -75,9 +69,7 @@ $default_post_type = $default_post_type ?? '';
 		<div class="ys-2-columns ys-cols-3-1">
 			<div class="ys-form-group">
 				<label for="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
-				<select id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-schedule-select">
-					<?php yousync_get_template_part( 'options', 'schedule' ); ?>
-				</select>
+				<input type="text" class="ys-text" id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after saving)', 'yousync' ); ?>" readonly disabled>
 			</div>
 		</div>
 		<div class="ys-wizard-nav">
