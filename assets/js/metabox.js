@@ -70,3 +70,9 @@
 		}
 	})
 })()
+
+;(function () {
+	document.querySelector('.ys-developer-fields-toggle').addEventListener('click', function (e) {
+		document.querySelector('.ys-developer-fields').classList.toggle('ys-hidden')
+	})
+})()

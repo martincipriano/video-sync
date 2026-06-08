@@ -1698,10 +1698,6 @@
   margin: 0;
 }
 
-.ys-developer-fields .ys-mb-field {
-  margin-top: 8px;
-}
-
 .ys-channel-tab-panel[data-panel=history] {
   margin: -20px;
 }
@@ -1889,7 +1885,7 @@
   max-height: 360px;
   margin: 0;
   overflow-y: auto;
-  padding: 20px;
+  padding: 0 20px;
 }
 
 .ys-channel-tab-panel[data-panel=history] {
@@ -2041,19 +2037,18 @@
 }
 
 .ys-developer-fields {
-  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-
-.ys-developer-fields > summary {
-  color: #646970;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 6px 0;
-  user-select: none;
+.ys-developer-fields-toggle span:last-child {
+  display: none;
 }
-
-.ys-developer-fields > summary:hover {
-  color: #1d2327;
+.ys-developer-fields.ys-hidden + .ys-developer-fields-toggle span:first-child {
+  display: none;
+}
+.ys-developer-fields.ys-hidden + .ys-developer-fields-toggle span:last-child {
+  display: block;
 }
 
 /* Inline style replacements */

@@ -83,15 +83,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endif; ?>
 
 				<?php if ( $channel_id ) : ?>
-				<details class="ys-developer-fields">
-					<summary><?php esc_html_e( 'Developer Fields', 'yousync' ); ?></summary>
+				<div class="ys-developer-fields ys-hidden">
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></p>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
 					</div>
-				</details>
+				</div>
+				<button class="button-link ys-developer-fields-toggle" type="button">
+					<span><?php esc_html_e( 'Hide Developer Fields', 'yousync' ); ?></span>
+					<span><?php esc_html_e( 'Show Developer Fields', 'yousync' ); ?></span>
+				</button>
 				<?php endif; ?>
 
 			</div>
