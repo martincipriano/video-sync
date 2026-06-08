@@ -935,7 +935,7 @@ delegationRoot.addEventListener('change', function(e) {
 // ============================================================
 // Sync Rule Wizard (flat scope inside delegationRoot for function access)
 // ============================================================
-const TOTAL_STEPS    = 5
+const TOTAL_STEPS    = 3
 const SLIDE_DURATION = 220 // ms
 
 /**
@@ -1154,80 +1154,24 @@ function wizardBack(wizard, fromStep) {
 }
 
 /**
- * Collect taxonomy term rows from a container into an array of {taxonomy, term_ids} objects.
- */
-function collectWizardTaxonomyTerms(container) {
-	const rows = container.querySelectorAll('.ys-taxonomy-term-row')
-	const result = []
-	rows.forEach(row => {
-		const taxonomy = row.querySelector('.ys-taxonomy-select, .ys-wizard-taxonomy-select')?.value ?? ''
-		const termSelect = row.querySelector('.ys-term-select, .ys-wizard-term-select')
-		const termIds = termSelect ? [...termSelect.selectedOptions].map(o => +o.value).filter(Boolean) : []
-		if (taxonomy) {
-			result.push({ taxonomy, term_ids: termIds })
-		}
-	})
-	return result
-}
-
-/**
- * Collect field mapping rows from the wizard Step 5.
- */
-function collectWizardFieldMapping(wizard) {
-	const rows = wizard.querySelectorAll('.ys-wizard-field-mapping-rows .ys-field-mapping-row')
-	const result = []
-	rows.forEach(row => {
-		const source = row.querySelector('.ys-wizard-fm-source')?.value ?? ''
-		const target = (row.querySelector('.ys-fm-meta-key')?.value ?? '').trim()
-		if (source && target) result.push({ source, target })
-	})
-	return result
-}
-
-/**
- * Build the complete rule object from wizard inputs.
+ * Build the rule object from wizard inputs.
+ *
+ * Free rules carry only action, schedule (always 'once'), the per-run cap, and
+ * the destination post type. Taxonomy, field mapping, conditions and metadata
+ * updates are Pro and are not collected.
  */
 function collectWizardRule(wizard) {
-	const action       = wizard.querySelector('.ys-wizard-action-select')?.value ?? ''
-	const schedule     = wizard.querySelector('.ys-wizard-schedule-select')?.value ?? 'once'
-	const customSched  = parseInt(wizard.querySelector('.ys-wizard-custom-schedule')?.value) || 24
-	const maxVideos    = parseInt(wizard.querySelector('.ys-wizard-max-videos')?.value) || 0
+	const action    = wizard.querySelector('.ys-wizard-action-select')?.value ?? ''
+	const schedule  = wizard.querySelector('.ys-wizard-schedule-select')?.value ?? 'once'
+	const maxVideos = parseInt(wizard.querySelector('.ys-wizard-max-videos')?.value) || 0
+	const postType  = wizard.querySelector('.ys-wizard-post-type')?.value ?? ''
 
-	const rule = { action, schedule, custom_schedule: customSched, max_videos: maxVideos }
-
-	const isUpdate = wizard.dataset.isUpdate === '1'
-
-	// Step 3: destination — not applicable for update actions.
-	if (!isUpdate) {
-		const postTypeEl = wizard.querySelector('.ys-wizard-post-type')
-		rule.destination_post_type = postTypeEl?.value ?? ''
-		const taxContainer = wizard.querySelector('.ys-wizard-taxonomy-terms') ?? wizard.querySelector('.ys-taxonomy-terms')
-		rule.destination_taxonomy_terms = taxContainer ? collectWizardTaxonomyTerms(taxContainer.closest('.ys-wizard-panel') ?? wizard) : []
-	} else {
-		rule.destination_post_type      = ''
-		rule.destination_taxonomy_terms = []
+	return {
+		action,
+		schedule,
+		max_videos:            maxVideos,
+		destination_post_type: postType,
 	}
-
-	// Step 4: field mapping — not applicable for update actions.
-	rule.field_mapping = isUpdate ? [] : collectWizardFieldMapping(wizard)
-
-	// Specific metadata — only for update_specific_* actions (collected from step 2).
-	const smRows = wizard.querySelectorAll('.ys-wizard-specific-metadata-rows .ys-specific-metadata')
-	rule.specific_metadata = [...smRows].map(s => s.value).filter(Boolean)
-
-	// Step 5: conditions (always collected).
-	const condContainer = wizard.querySelector('.ys-wizard-conditions')
-	const condRows = condContainer ? condContainer.querySelectorAll('.ys-condition') : []
-	rule.conditions = []
-	condRows.forEach(row => {
-		const field    = row.querySelector('.ys-condition-field')?.value ?? ''
-		const operator = row.querySelector('.ys-condition-operator')?.value ?? ''
-		const valueEl  = row.querySelector('.ys-condition-value')
-		const value    = valueEl?.value ?? ''
-		if (field && operator) rule.conditions.push({ field, operator, value })
-	})
-
-	return rule
 }
 
 /**
@@ -1240,7 +1184,7 @@ function wizardSubmit(wizard) {
 	const finishBtn = wizard.querySelector('.ys-wizard-finish')
 	if (finishBtn) finishBtn.setAttribute('disabled', 'disabled')
 
-	const errEl = wizard.querySelector('[data-step="5"] .ys-wizard-error')
+	const errEl = wizard.querySelector('[data-step="3"] .ys-wizard-error')
 
 	// Build FormData — jQuery serializes nested objects correctly.
 	const data = {

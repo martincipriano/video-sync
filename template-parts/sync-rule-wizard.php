@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * Template part: 5-step sync rule wizard.
+ * Template part: 3-step sync rule wizard (Action → Schedule → Destination).
  *
  * Rendered once per channel group, hidden by default. JavaScript reveals it
  * when the user clicks "Add sync rule" and hides it on cancel/completion.
@@ -9,8 +9,7 @@ declare(strict_types=1);
  * @package YouSync
  *
  * Variables available in this template:
- * @var int   $ch_index              Channel index.
- * @var array $default_field_mapping Per-channel field mapping (from channel config).
+ * @var int $ch_index Channel index.
  */
 
 // Exit if accessed directly.
@@ -18,27 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$post_types           = get_post_types( array( 'public' => true ), 'objects' );
-$available_taxonomies = get_taxonomies( array( 'public' => true ), 'objects' );
-
-$default_post_type      = $default_post_type ?? '';
-$default_taxonomy_terms = $default_taxonomy_terms ?? array();
-$has_scheduled_sync  = false;
-$has_conditions      = false;
-$has_metadata_update = false;
-
-$mu = $has_metadata_update ? '' : 'disabled';
-
-$allowed_sources = array(
-	'title'         => __( 'Title', 'yousync' ),
-	'description'   => __( 'Description', 'yousync' ),
-	'duration'      => __( 'Duration (seconds)', 'yousync' ),
-	'view_count'    => __( 'View Count', 'yousync' ),
-	'like_count'    => __( 'Like Count', 'yousync' ),
-	'published_at'  => __( 'Published Date', 'yousync' ),
-	'thumbnail_url' => __( 'Thumbnail URL', 'yousync' ),
-	'channel_title' => __( 'Channel Title', 'yousync' ),
-);
+$post_types         = get_post_types( array( 'public' => true ), 'objects' );
+$default_post_type  = $default_post_type ?? '';
+$has_scheduled_sync = false;
 ?>
 <div class="ys-wizard ys-hidden" data-channel-index="<?php echo esc_attr( $ch_index ); ?>" data-default-post-type="<?php echo esc_attr( $default_post_type ); ?>">
 
@@ -48,10 +29,6 @@ $allowed_sources = array(
 		<span class="ys-wizard-step-indicator" data-step="2">2</span>
 		<span class="ys-wizard-progress-line"></span>
 		<span class="ys-wizard-step-indicator" data-step="3">3</span>
-		<span class="ys-wizard-progress-line"></span>
-		<span class="ys-wizard-step-indicator" data-step="4">4</span>
-		<span class="ys-wizard-progress-line"></span>
-		<span class="ys-wizard-step-indicator" data-step="5">5</span>
 	</div>
 
 	<div class="ys-wizard-panels">
@@ -135,113 +112,13 @@ $allowed_sources = array(
 				<?php endforeach; ?>
 			</select>
 		</div>
-		<div class="ys-form-group ys-wizard-taxonomy-terms-wrapper ys-hidden">
-			<label><?php esc_html_e( 'Assign to taxonomy terms', 'yousync' ); ?></label>
-			<div class="ys-taxonomy-terms ys-wizard-taxonomy-terms"></div>
-			<button type="button" class="ys-add-taxonomy-term ys-wizard-add-taxonomy-term">
-				<?php esc_html_e( 'Add taxonomy term', 'yousync' ); ?>
-			</button>
-		</div>
-		<div class="ys-wizard-nav">
-			<button type="button" class="button ys-wizard-back" data-step="3"><?php esc_html_e( '← Back', 'yousync' ); ?></button>
-			<button type="button" class="button button-primary ys-wizard-next" data-step="3"><?php esc_html_e( 'Next →', 'yousync' ); ?></button>
-		</div>
-	</div>
-
-	<?php /* Step 4 — Field Mapping */ ?>
-	<div class="ys-wizard-panel ys-hidden" data-step="4">
-		<div class="ys-wizard-step-header">
-			<h3><?php esc_html_e( 'Store YouTube details as custom meta', 'yousync' ); ?></h3>
-			<p class="ys-wizard-subtitle"><?php esc_html_e( 'All YouTube details are always saved under internal _yousync_* meta keys. Add rows here only if you also need the data stored under a different key name (e.g. for ACF or a custom theme template).', 'yousync' ); ?></p>
-		</div>
-		<div class="ys-form-group">
-			<label class="ys-fm-mapping-label"><?php esc_html_e( 'Map YouTube details to post metadata', 'yousync' ); ?></label>
-			<?php
-			$wiz_fm_html = '';
-			foreach ( $default_field_mapping as $fm_row ) {
-				$fm_source = $fm_row['source'] ?? '';
-				$fm_target = $fm_row['target'] ?? '';
-				if ( in_array( $fm_target, array( 'post_title', 'post_content', 'post_excerpt' ), true ) ) {
-					continue;
-				}
-				$wiz_fm_html .= '<div class="ys-field-mapping-row">';
-				$wiz_fm_html .= '<select class="ys-select ys-wizard-fm-source">';
-				$wiz_fm_html .= '<option value="">' . esc_html__( '— Source —', 'yousync' ) . '</option>';
-				foreach ( $allowed_sources as $src_val => $src_label ) {
-					$wiz_fm_html .= '<option value="' . esc_attr( $src_val ) . '"' . selected( $fm_source, $src_val, false ) . '>' . esc_html( $src_label ) . '</option>';
-				}
-				$wiz_fm_html .= '</select>';
-				$wiz_fm_html .= '<input type="text" class="ys-text ys-fm-meta-key" value="' . esc_attr( $fm_target ) . '" placeholder="' . esc_attr__( 'e.g. _yousync_duration', 'yousync' ) . '">';
-				$wiz_fm_html .= '<button type="button" class="ys-remove-field-mapping-row" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button>';
-				$wiz_fm_html .= '</div>';
-			}
-			?>
-			<div class="ys-wizard-field-mapping-rows ys-field-mapping-rows"><?php echo $wiz_fm_html; ?></div>
-			<button type="button" class="ys-add-field-mapping-row"><span class="material-icons-outlined" aria-hidden="true">account_tree</span><?php esc_html_e( 'Add video detail mapping', 'yousync' ); ?></button>
-		</div>
-		<div class="ys-wizard-nav">
-			<button type="button" class="button ys-wizard-back" data-step="4"><?php esc_html_e( '← Back', 'yousync' ); ?></button>
-			<button type="button" class="button button-primary ys-wizard-next" data-step="4"><?php esc_html_e( 'Next →', 'yousync' ); ?></button>
-		</div>
-	</div>
-
-	<?php /* Step 5 — Conditions */ ?>
-	<div class="ys-wizard-panel ys-hidden" data-step="5">
-		<div class="ys-wizard-step-header">
-			<h3><?php esc_html_e( 'Add filter conditions (optional)', 'yousync' ); ?></h3>
-			<?php if ( $has_conditions ) : ?>
-			<p class="ys-wizard-subtitle"><?php esc_html_e( 'Only sync items that match all of these conditions. Leave empty to sync everything.', 'yousync' ); ?></p>
-			<?php endif; ?>
-		</div>
-		<?php if ( ! $has_conditions ) : ?>
-		<p class="description"><?php esc_html_e( 'Filter conditions require an active Pro license.', 'yousync' ); ?></p>
-		<?php else : ?>
-		<div class="ys-wizard-conditions-wrap">
-			<div class="ys-wizard-conditions ys-conditions"></div>
-			<button type="button" class="ys-add-condition ys-wizard-add-condition"><?php esc_html_e( 'Add condition', 'yousync' ); ?></button>
-		</div>
-		<?php endif; ?>
 		<div class="ys-wizard-error ys-hidden"></div>
 		<div class="ys-wizard-nav">
-			<button type="button" class="button ys-wizard-back" data-step="5"><?php esc_html_e( '← Back', 'yousync' ); ?></button>
+			<button type="button" class="button ys-wizard-back" data-step="3"><?php esc_html_e( '← Back', 'yousync' ); ?></button>
 			<button type="button" class="button button-primary ys-wizard-finish"><?php esc_html_e( 'Add Rule', 'yousync' ); ?></button>
 		</div>
 	</div>
 
 	</div><?php /* .ys-wizard-panels */ ?>
-
-	<?php /* Hidden template: default FM rows restored on each wizard open */ ?>
-	<div class="ys-wizard-default-fm-template" hidden><?php echo $wiz_fm_html; ?></div>
-
-	<?php /* Hidden template: default taxonomy term rows restored on each wizard open */ ?>
-	<?php
-	$wiz_tax_html = '';
-	foreach ( $default_taxonomy_terms as $tt ) {
-		$tt_taxonomy = sanitize_key( $tt['taxonomy'] ?? '' );
-		$tt_term_ids = array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) );
-		if ( ! $tt_taxonomy ) continue;
-		$tt_terms     = get_terms( array( 'taxonomy' => $tt_taxonomy, 'hide_empty' => false ) );
-		$wiz_tax_html .= '<div class="ys-taxonomy-term-row">';
-		$wiz_tax_html .= '<select class="ys-select ys-taxonomy-select ys-wizard-taxonomy-select">';
-		$wiz_tax_html .= '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync' ) . '</option>';
-		foreach ( $available_taxonomies as $tax ) {
-			$wiz_tax_html .= '<option value="' . esc_attr( $tax->name ) . '"' . selected( $tt_taxonomy, $tax->name, false ) . '>' . esc_html( $tax->labels->singular_name ) . '</option>';
-		}
-		$wiz_tax_html .= '</select>';
-		$wiz_tax_html .= '<div class="ys-term-select-wrapper">';
-		$wiz_tax_html .= '<select class="ys-select ys-term-select ys-wizard-term-select">';
-		$wiz_tax_html .= '<option value="">' . esc_html__( '&mdash; Select term &mdash;', 'yousync' ) . '</option>';
-		if ( ! is_wp_error( $tt_terms ) ) {
-			foreach ( $tt_terms as $term ) {
-				$wiz_tax_html .= '<option value="' . esc_attr( $term->term_id ) . '"' . ( in_array( $term->term_id, $tt_term_ids, true ) ? ' selected' : '' ) . '>' . esc_html( $term->name ) . '</option>';
-			}
-		}
-		$wiz_tax_html .= '</select>';
-		$wiz_tax_html .= '</div>';
-		$wiz_tax_html .= '<button type="button" class="ys-remove-taxonomy-term" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button>';
-		$wiz_tax_html .= '</div>';
-	}
-	?>
-	<div class="ys-wizard-default-taxonomy-template" hidden><?php echo $wiz_tax_html; ?></div>
 
 </div>
