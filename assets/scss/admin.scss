@@ -646,11 +646,6 @@
   width: 100px;
 }
 
-/* Protected from Sync Rules column */
-.column-yousync_protected {
-  text-align: right;
-}
-
 /* Description scrollable box */
 .ys-description-box {
   margin: 0;
@@ -1378,9 +1373,6 @@
 /* Inline style replacements */
 .ys-mb-input--code{font-family:monospace!important}
 .ys-mb-input--url{font-family:monospace!important;font-size:11px!important}
-.ys-mb-field--disabled{opacity:0.6}
-.ys-toggle-row{align-items:center;display:flex;gap:8px}
-.ys-field-notice{color:#757575;font-size:12px}
 .ys-not-synced-msg{color:#757575;margin:0}
 .ys-required{color:#d63638}
 .ys-rule-errors{font-size:12px}

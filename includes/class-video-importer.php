@@ -209,9 +209,7 @@ class Video_Importer {
 	/**
 	 * Save all video data as individual post meta keys.
 	 *
-	 * Each field is stored as its own meta key for direct WP_Query filtering
-	 * and shortcode access. The _yousync_protected flag is not written here —
-	 * it is user-controlled and managed by the metabox save handler.
+	 * Each field is stored as its own meta key for direct WP_Query filtering.
 	 *
 	 * @param int    $post_id     Post ID.
 	 * @param array  $video_data  Normalised video data from YouTube_API::get_videos_by_ids().
@@ -307,7 +305,6 @@ class Video_Importer {
 		}
 
 		$this->save_playlist_meta( $post_id, $playlist_data, $channel_id );
-		update_post_meta( $post_id, '_yousync_protected', 0 );
 
 		return $post_id;
 	}

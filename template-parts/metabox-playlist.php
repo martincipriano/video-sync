@@ -6,7 +6,6 @@ declare(strict_types=1);
  * @package YouSync
  *
  * @var int    $post_id               WordPress post ID.
- * @var string $nonce_action          Nonce action for wp_nonce_field.
  * @var string $playlist_id           YouTube playlist ID.
  * @var string $channel_id            YouTube channel ID.
  * @var string $playlist_title        Playlist title.
@@ -14,7 +13,6 @@ declare(strict_types=1);
  * @var string $playlist_video_count  Number of videos in the playlist.
  * @var string $playlist_thumbnail    Thumbnail URL.
  * @var int    $last_synced           Last synced timestamp.
- * @var bool   $manual_edits          Whether protection is currently enabled.
  */
 
 // Exit if accessed directly.
@@ -22,8 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<?php wp_nonce_field( $nonce_action, 'yousync_playlist_meta_nonce' ); ?>
-
 <div class="yousync-metabox">
 	<div class="ys-channel-tabs-nav" role="tablist">
 		<button type="button" class="ys-channel-tab-btn" data-tab="details" role="tab" aria-selected="false">
@@ -125,15 +121,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- Sync -->
 		<div class="ys-channel-tab-panel ys-hidden" data-panel="sync" role="tabpanel">
 			<div class="ys-mb-fields">
-
-				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Protected from Sync Rules', 'yousync' ); ?></p>
-					<label class="ys-toggle">
-						<input type="checkbox" name="yousync_manual_edits" id="yousync_manual_edits" value="1" <?php checked( $manual_edits ); ?>>
-						<span class="ys-toggle-slider"></span>
-					</label>
-					<p class="description"><?php esc_html_e( 'When enabled, sync rules will not overwrite this post. Turn this on to preserve any manual edits you have made.', 'yousync' ); ?></p>
-				</div>
 
 				<?php if ( $last_synced ) : ?>
 				<div class="ys-mb-field">

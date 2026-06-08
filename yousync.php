@@ -195,19 +195,14 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  * @return void
  */
 function yousync_render_video_metabox( $post ) {
-	$has_video_protection = false;
-	$thumbnails           = get_post_meta( $post->ID, '_yousync_thumbnails', true );
-	$thumbnails           = is_array( $thumbnails ) ? $thumbnails : array();
+	$thumbnails = get_post_meta( $post->ID, '_yousync_thumbnails', true );
+	$thumbnails = is_array( $thumbnails ) ? $thumbnails : array();
 
 	yousync_get_template_part( 'metabox', 'video', array(
-		'nonce_action'          => 'yousync_save_video_meta',
 		'post_id'               => $post->ID,
 		'video_id'              => (string) get_post_meta( $post->ID, '_yousync_video_id', true ),
 		'video_url'             => (string) get_post_meta( $post->ID, '_yousync_video_url', true ),
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_id', true ),
-		'manual_edits'          => (bool) get_post_meta( $post->ID, '_yousync_protected', true ),
-		'manual_edits_disabled' => ! $has_video_protection,
-		'manual_edits_notice'   => $has_video_protection ? '' : __( '(Pro Only)', 'yousync' ),
 		'original_title'        => (string) get_post_meta( $post->ID, '_yousync_original_title', true ),
 		'original_description'  => (string) get_post_meta( $post->ID, '_yousync_original_description', true ),
 		'channel_title'         => (string) get_post_meta( $post->ID, '_yousync_channel_title', true ),
@@ -230,38 +225,6 @@ function yousync_render_video_metabox( $post ) {
 	) );
 }
 
-
-/**
- * Save video metabox data.
- *
- * Merges the manual_edits flag into the existing JSON meta, preserving all
- * YouTube API data previously synced. All other fields are read-only and
- * written only by the sync engine.
- *
- * @param int $post_id The current post ID.
- * @return void
- */
-function yousync_save_video_meta( $post_id ) {
-	if ( ! isset( $_POST['yousync_video_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_video_meta_nonce'] ) ), 'yousync_save_video_meta' ) ) {
-		return;
-	}
-
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-
-	if ( ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
-	}
-
-	update_post_meta(
-		$post_id,
-		'_yousync_protected',
-		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
-	);
-}
-add_action( 'save_post', 'yousync_save_video_meta' );
 
 /**
  * Fall back to the YouTube thumbnail URL when no featured image is set.
@@ -373,7 +336,6 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 function yousync_render_playlist_metabox( $post ) {
 	yousync_get_template_part( 'metabox', 'playlist', array(
 		'post_id'               => $post->ID,
-		'nonce_action'          => 'yousync_save_playlist_meta',
 		'playlist_id'           => (string) get_post_meta( $post->ID, '_yousync_playlist_id', true ),
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_id', true ),
 		'playlist_title'        => (string) get_post_meta( $post->ID, '_yousync_playlist_title', true ),
@@ -381,34 +343,8 @@ function yousync_render_playlist_metabox( $post ) {
 		'playlist_video_count'  => get_post_meta( $post->ID, '_yousync_playlist_video_count', true ),
 		'playlist_thumbnail'    => (string) get_post_meta( $post->ID, '_yousync_playlist_thumbnail', true ),
 		'last_synced'           => (int) get_post_meta( $post->ID, '_yousync_last_synced', true ),
-		'manual_edits'          => (bool) get_post_meta( $post->ID, '_yousync_protected', true ),
 	) );
 }
-
-/**
- * Save playlist metabox data (protected flag only — all other fields are read-only).
- *
- * @param int $post_id Post ID.
- * @return void
- */
-function yousync_save_playlist_meta( $post_id ) {
-	if ( ! isset( $_POST['yousync_playlist_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_playlist_meta_nonce'] ) ), 'yousync_save_playlist_meta' ) ) {
-		return;
-	}
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-	if ( ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
-	}
-	update_post_meta(
-		$post_id,
-		'_yousync_protected',
-		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
-	);
-}
-add_action( 'save_post', 'yousync_save_playlist_meta' );
 
 
 /**
@@ -441,7 +377,6 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
  */
 function yousync_render_channel_metabox( $post ) {
 	yousync_get_template_part( 'metabox', 'channel', array(
-		'nonce_action'          => 'yousync_save_channel_meta',
 		'post_id'               => $post->ID,
 		'channel_id'            => (string) get_post_meta( $post->ID, '_yousync_channel_post', true ),
 		'channel_title'         => (string) get_post_meta( $post->ID, '_yousync_channel_title', true ),
@@ -449,36 +384,10 @@ function yousync_render_channel_metabox( $post ) {
 		'subscriber_count'      => get_post_meta( $post->ID, '_yousync_subscriber_count', true ),
 		'video_count'           => get_post_meta( $post->ID, '_yousync_channel_video_count', true ),
 		'last_synced'           => (int) get_post_meta( $post->ID, '_yousync_last_synced', true ),
-		'manual_edits'          => (bool) get_post_meta( $post->ID, '_yousync_protected', true ),
 		'profile_picture'       => (string) get_post_meta( $post->ID, '_yousync_profile_picture', true ),
 		'banner_image'          => (string) get_post_meta( $post->ID, '_yousync_banner_image', true ),
 	) );
 }
-
-/**
- * Save channel metabox data (protected flag only — all other fields are read-only).
- *
- * @param int $post_id Post ID.
- * @return void
- */
-function yousync_save_channel_meta( $post_id ) {
-	if ( ! isset( $_POST['yousync_channel_meta_nonce'] ) ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_channel_meta_nonce'] ) ), 'yousync_save_channel_meta' ) ) {
-		return;
-	}
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
-	if ( ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
-	}
-	update_post_meta(
-		$post_id,
-		'_yousync_protected',
-		isset( $_POST['yousync_manual_edits'] ) && '1' === $_POST['yousync_manual_edits'] ? 1 : 0
-	);
-}
-add_action( 'save_post', 'yousync_save_channel_meta' );
 
 
 /**
@@ -607,11 +516,6 @@ add_action( 'admin_init', function (): void {
 			}
 		}
 		update_post_meta( $post_id, '_yousync_thumbnails', $thumbnails );
-
-		// Migrate manual_edits → _yousync_protected (only if not already set).
-		if ( '' === get_post_meta( $post_id, '_yousync_protected', true ) ) {
-			update_post_meta( $post_id, '_yousync_protected', (int) ( $data['manual_edits'] ?? 0 ) );
-		}
 
 		// Migrate last_modified → _yousync_last_synced (only if not already set).
 		if ( '' === get_post_meta( $post_id, '_yousync_last_synced', true ) ) {

@@ -6,13 +6,9 @@ declare(strict_types=1);
  * @package YouSync
  *
  * @var int        $post_id               WordPress post ID.
- * @var string     $nonce_action          Nonce action for wp_nonce_field.
  * @var string     $video_id              YouTube video ID.
  * @var string     $video_url             YouTube video URL.
  * @var string     $channel_id            YouTube channel ID.
- * @var bool       $manual_edits          Whether protection is currently enabled.
- * @var bool       $manual_edits_disabled Whether the protection checkbox is disabled.
- * @var string     $manual_edits_notice   Notice text beside the checkbox, or empty.
  * @var string     $original_title        Original YouTube title.
  * @var string     $original_description  Original YouTube description.
  * @var string     $channel_title         Channel name.
@@ -32,8 +28,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<?php wp_nonce_field( $nonce_action, 'yousync_video_meta_nonce' ); ?>
-
 <div class="yousync-metabox">
 	<div class="ys-channel-tabs-nav" role="tablist">
 		<button type="button" class="ys-channel-tab-btn" data-tab="details" role="tab" aria-selected="false">
@@ -206,20 +200,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- Sync -->
 		<div class="ys-channel-tab-panel ys-hidden" data-panel="sync" role="tabpanel">
 			<div class="ys-mb-fields">
-
-				<div class="ys-mb-field<?php echo $manual_edits_disabled ? ' ys-mb-field--disabled' : ''; ?>">
-					<p class="ys-mb-label"><?php esc_html_e( 'Protected from Sync Rules', 'yousync' ); ?></p>
-					<div class="ys-toggle-row">
-						<label class="ys-toggle">
-							<input type="checkbox" name="yousync_manual_edits" id="yousync_manual_edits" value="1" <?php checked( $manual_edits ); ?> <?php echo $manual_edits_disabled ? 'disabled' : ''; ?>>
-							<span class="ys-toggle-slider"></span>
-						</label>
-						<?php if ( $manual_edits_notice ) : ?>
-						<span class="ys-field-notice"><?php echo esc_html( $manual_edits_notice ); ?></span>
-						<?php endif; ?>
-					</div>
-					<p class="description"><?php esc_html_e( 'When enabled, sync rules will not overwrite this post. Turn this on to preserve any manual edits you have made.', 'yousync' ); ?></p>
-				</div>
 
 				<?php if ( $last_synced ) : ?>
 				<div class="ys-mb-field">
