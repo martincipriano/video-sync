@@ -1,103 +1,106 @@
-=== YouSync Pro ===
+=== YouSync — Sync YouTube to WordPress ===
 Contributors: martincipriano
-Tags: youtube, video, sync, channel, playlist
+Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
-Tested up to: 6.7
-Stable tag: 1.0.0
+Tested up to: 6.9
+Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-YouSync Pro — advanced YouTube sync for WordPress. Recurring schedules, metadata updates, conditional filters, and video protection.
+Sync new videos, playlists, and channel data from a YouTube channel into WordPress posts, with thumbnails and metadata.
 
 == Description ==
 
-YouSync Pro extends the free YouSync plugin with advanced sync controls for power users and agencies.
+YouSync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and YouSync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
 
-**Everything in the free version, plus:**
+Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
 
-* **Recurring Schedules** — sync automatically on hourly, daily, weekly, monthly, or custom intervals via WP-Cron
-* **More Sync Actions** — update channel metadata, playlist metadata, and video metadata (all or non-modified only)
-* **Sync Conditions & Filters** — filter what gets imported or updated using conditions on title, description, tags, duration, view count, published date, and more
-* **Video Protection** — mark individual videos to prevent YouSync from overwriting your manual edits during future syncs
+**Free features**
 
-**All free features included:**
+* Sync from a single YouTube channel
+* Three sync actions: import **new videos**, import **new playlists**, or import the **channel** itself
+* Save synced items as **any post type** you choose (Posts, or a custom post type)
+* **Run once** — each rule imports immediately when you save it
+* **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
+* **Thumbnails** imported and used as the featured image when no image is set
+* **Sync history** with the last-synced time and a per-rule error log
+* Stores all YouTube data in standard post meta (`_yousync_*`) for easy use in your theme or queries
+* Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
-* Import videos from YouTube channels or playlists as a custom post type
-* Automatic thumbnail import and featured image assignment
-* Per-rule sync history with last-synced time and error log
-* Channels and playlists managed through a familiar taxonomy-style admin interface
-* Optional archive pages for videos, channels, and playlists
-* "Delete all data on uninstall" option — your data stays unless you ask for it to be removed
+**Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
 
-**Requires a Google API key** with the YouTube Data API v3 enabled. Calls are made directly from your server to Google's API using your key.
+**Need more?**
 
-**Requires an active YouSync Pro license.** Purchase at [wpbuoy.com](https://wpbuoy.com/plugins/yousync/). Pro features are disabled if the license is inactive — the plugin continues to work as the free version.
+[YouSync Pro](https://wpbuoy.com/product/yousync/) adds power-user automation:
+
+* Unlimited channels
+* Recurring schedules (hourly, daily, weekly, monthly, or a custom interval)
+* Update metadata on existing posts, and update only the fields you choose
+* Assign synced items to categories, tags, and custom taxonomy terms
+* Map YouTube fields to custom meta keys
+* Filter conditions to sync only items that match your rules
+* Video protection to stop syncs from overwriting your manual edits
+* Gutenberg blocks and shortcodes for video metadata
 
 == Installation ==
 
-1. Upload the `yousync-pro` folder to the `/wp-content/plugins/` directory.
+1. Upload the `yousync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Go to **Videos → License** and enter your YouSync Pro license key.
-4. Go to **Videos → Settings** and enter your Google API key.
-5. Go to **Videos → Channels** and add your first YouTube channel.
-6. Set up a sync rule on the channel to start importing videos.
+3. Go to **YouSync → Settings** and enter your Google API key.
+4. Go to **YouSync → Channels** and add a YouTube channel.
+5. Add a sync rule to the channel — pick an action and a destination post type — then save to import.
 
-**Getting a Google API key:**
+**Getting a Google API key**
 
 1. Visit [Google Cloud Console](https://console.cloud.google.com/).
 2. Create a project and enable the **YouTube Data API v3**.
 3. Generate an API key under **Credentials**.
-4. Copy the key into YouSync → Settings → Google API Key.
+4. Paste the key into **YouSync → Settings**.
 
 == Frequently Asked Questions ==
 
-= Do I need the free YouSync plugin too? =
+= Does YouSync upload video files to my site? =
 
-No. YouSync Pro is a standalone plugin — it includes everything from the free version. Do not run both plugins at the same time.
+No. YouSync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Thumbnails are optionally downloaded as WordPress attachments.
 
-= What happens if my license expires? =
+= Where do synced items go? =
 
-Pro features (recurring schedules, metadata update actions, conditions, and video protection) are automatically paused. The plugin continues to work as the free version — syncing new videos with the "once" schedule and basic actions. Renew your license to restore pro features.
+You choose. Each sync rule has a destination post type, so videos, playlists, and channels are saved as the post type you select — Posts or any public custom post type.
 
-= Where do the synced videos go? =
+= How often does it sync? =
 
-Videos are saved as the `yousync_videos` custom post type. You can find them under **Videos** in the WordPress admin.
+In the free version every rule runs once, immediately after you save it. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [YouSync Pro](https://wpbuoy.com/product/yousync/).
 
-= Does YouSync Pro upload videos to my site? =
+= Why do I need a Google API key? =
 
-No. YouSync Pro imports metadata (title, description, thumbnail URL, view counts, etc.) and stores it in WordPress. Video files stay on YouTube. Thumbnails are optionally downloaded as WordPress attachments.
+YouTube data is fetched from the official YouTube Data API v3, which requires a key. The key is yours and stays on your server; YouSync never sends your data to a third party.
 
-= Is WP Cron reliable? =
+= How much API quota does a sync use? =
 
-WP Cron runs when your site receives a visitor. On low-traffic sites, scheduled syncs may be delayed. For more reliable scheduling, consider using a real cron job to trigger `wp-cron.php` on your server.
+Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. YouSync shows an estimate before you run a sync.
 
-= What happens to my data if I uninstall YouSync Pro? =
+= What happens to my data if I uninstall YouSync? =
 
-By default, your videos, channels, playlists, and settings are kept even after uninstalling. If you want everything removed, enable **Remove all YouSync data when the plugin is deleted** under Videos → Settings → Advanced before deleting the plugin.
-
-= How many API quota units does YouSync Pro use? =
-
-Each sync uses 1 quota unit per API call. Importing videos from a channel requires 2 calls minimum (1 for channel data, 1+ for playlist items), plus 1 call per 50 videos for metadata. Google provides 10,000 units per day for free.
+By default your synced posts and settings are kept. If you want everything removed, enable **Remove all YouSync data when the plugin is deleted** in **YouSync → Settings** before deleting the plugin.
 
 == Screenshots ==
 
-1. Channel management — add and configure YouTube channels with sync rules.
-2. Playlist management — sync individual playlists independently.
-3. Sync rule editor — set recurring schedules, conditions, and actions per rule.
-4. Synced video list — all imported videos with status and metadata.
-5. Video detail — metabox showing YouTube metadata and video protection toggle.
+1. Channels page — add a YouTube channel and configure its sync rules.
+2. Sync rule — choose an action, set an items-per-run limit, and pick a destination post type.
+3. Sync history — a per-channel log of what was synced and any errors.
+4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release.
-* Import videos from YouTube channels and playlists.
-* Recurring sync schedules (hourly, daily, weekly, monthly, custom).
-* Full metadata update actions for channels, playlists, and videos.
-* Sync conditions and filters on title, description, tags, duration, view count, and more.
-* Video protection — prevent YouSync from overwriting manual edits.
-* Per-rule sync history (last synced, next run, error log).
-* Thumbnail download and featured image assignment.
-* Archive page support for videos, channels, and playlists.
-* Delete-on-uninstall option.
+= 2.0.0 =
+* Sync new videos, new playlists, or channel data from a YouTube channel.
+* Choose any post type as the destination for synced items.
+* Run-once sync with a pre-sync API quota estimate.
+* Thumbnail import with featured-image fallback.
+* Per-rule sync history and error logging.
+
+== Upgrade Notice ==
+
+= 2.0.0 =
+Imports synced items as standard WordPress posts of your chosen post type, with run-once syncing and quota estimates.
