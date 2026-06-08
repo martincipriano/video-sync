@@ -63,26 +63,15 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function render_page() {
-		$config = get_option( 'yousync_channel_config', array() );
-		if ( ! is_array( $config ) ) {
-			$config = array();
+		$channel = get_option( 'yousync_channel_config', array() );
+		if ( ! is_array( $channel ) ) {
+			$channel = array();
 		}
 
-		$is_pro          = false;
-		$can_add_channel = $is_pro;
-
-		// Normalize single config to array of channels.
-		if ( isset( $config['youtube_id'] ) || empty( $config ) ) {
-			// Single channel format — wrap in array.
-			$channels = array( $config );
-		} else {
-			// Already multi-channel format.
-			$channels = array_values( $config );
-		}
-
-		// Ensure at least one empty channel.
-		if ( empty( $channels ) ) {
-			$channels = array( array() );
+		// Downgrade safety: if a Pro multi-channel array was left behind, use the
+		// first channel. Free only ever reads/writes a single flat channel.
+		if ( isset( $channel[0] ) ) {
+			$channel = is_array( $channel[0] ) ? $channel[0] : array();
 		}
 
 		$ch_errors = get_transient( 'yousync_ch_errors_' . get_current_user_id() );
@@ -93,7 +82,7 @@ class Channels_Page {
 
 		$has_api_key = ! empty( get_option( 'yousync_api_key', '' ) );
 
-		yousync_get_template_part( 'channels', 'page', compact( 'channels', 'can_add_channel', 'is_pro', 'ch_errors', 'has_api_key' ) );
+		yousync_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'has_api_key' ) );
 	}
 
 	/**
@@ -226,7 +215,10 @@ class Channels_Page {
 			$old_channels = is_array( $existing ) ? array_values( $existing ) : array();
 		}
 
-		$posted_channels = isset( $_POST['channels'] ) && is_array( $_POST['channels'] ) ? $_POST['channels'] : array();
+		// Free is single-channel — only the first posted channel is processed.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		$first_channel   = ( isset( $_POST['channels'][0] ) && is_array( $_POST['channels'][0] ) ) ? $_POST['channels'][0] : array();
+		$posted_channels = $first_channel ? array( $first_channel ) : array();
 		$api_key         = get_option( 'yousync_api_key', '' );
 		$new_channels    = array();
 		$save_errors     = array();
@@ -334,15 +326,10 @@ class Channels_Page {
 		// Drop channels with no YouTube ID.
 		$new_channels = array_values( array_filter( $new_channels, fn( $ch ) => ! empty( $ch['youtube_id'] ) ) );
 
-		// Free: save as single channel format. Pro: save as-is.
-		$is_pro = false;
-		if ( ! $is_pro || count( $new_channels ) === 1 ) {
-			update_option( 'yousync_channel_config', $new_channels[0] ?? array() );
-		} else {
-			update_option( 'yousync_channel_config', $new_channels );
-		}
+		// Persist the single flat channel.
+		update_option( 'yousync_channel_config', $new_channels[0] ?? array() );
 
-		// Schedule WP cron events for each channel's sync rules.
+		// Schedule WP cron events for the channel's sync rules.
 		do_action( 'yousync_reschedule_option_channels', $new_channels );
 
 		if ( ! empty( $save_errors ) ) {

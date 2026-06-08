@@ -284,17 +284,21 @@ class Sync_Runner {
 	 * @return void
 	 */
 	public function run_config_channel( int $ch_index, int $rule_index ): void {
-		$channels = $this->get_normalized_option_channels();
-		$ch_data  = $channels[ $ch_index ] ?? null;
+		$ch_data = get_option( 'yousync_channel_config', array() );
 
-		if ( ! $ch_data ) {
+		// Downgrade safety: use the first channel if a Pro multi-channel array was left behind.
+		if ( is_array( $ch_data ) && isset( $ch_data[0] ) ) {
+			$ch_data = is_array( $ch_data[0] ) ? $ch_data[0] : array();
+		}
+
+		if ( ! is_array( $ch_data ) || empty( $ch_data['youtube_id'] ) ) {
 			return;
 		}
 
 		// Ensure channel_id is present (option stores as youtube_id).
-		$ch_data['channel_id'] = $ch_data['youtube_id'] ?? '';
+		$ch_data['channel_id'] = $ch_data['youtube_id'];
 
-		$this->option_channel_index = $ch_index;
+		$this->option_channel_index = 0;
 		$this->source_data_override  = $ch_data;
 
 		$this->run( 'channel', 0, $rule_index );
@@ -1056,7 +1060,7 @@ class Sync_Runner {
 	 */
 	private function save_source_data( string $source_type, int $term_id, array $data ): void {
 		if ( null !== $this->option_channel_index && 'channel' === $source_type ) {
-			$this->update_option_channel( $this->option_channel_index, $data );
+			$this->update_option_channel( $data );
 			$this->source_data_override = $data;
 			return;
 		}
@@ -1065,50 +1069,20 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Return the normalized list of channels from yousync_channel_config.
+	 * Write the updated single channel back to yousync_channel_config (flat).
 	 *
-	 * Handles both the single-channel flat array and the multi-channel indexed
-	 * array format, returning a 0-indexed array of channel config arrays.
+	 * Preserves the youtube_id key (the option stores youtube_id; the runner
+	 * temporarily adds channel_id as an alias — we don't store it).
 	 *
-	 * @return array
-	 */
-	private function get_normalized_option_channels(): array {
-		return yousync_normalize_channels( get_option( 'yousync_channel_config', array() ) );
-	}
-
-	/**
-	 * Write an updated channel data array back to yousync_channel_config.
-	 *
-	 * Preserves the original youtube_id key (the option uses youtube_id;
-	 * the runner temporarily adds channel_id as an alias — we don't store it).
-	 *
-	 * @param int   $ch_index Channel index.
-	 * @param array $data     Updated channel data.
+	 * @param array $data Updated channel data.
 	 * @return void
 	 */
-	private function update_option_channel( int $ch_index, array $data ): void {
-		// Preserve youtube_id from the original option key.
+	private function update_option_channel( array $data ): void {
 		if ( ! isset( $data['youtube_id'] ) && isset( $data['channel_id'] ) ) {
 			$data['youtube_id'] = $data['channel_id'];
 		}
 
-		$config = get_option( 'yousync_channel_config', array() );
-		if ( ! is_array( $config ) ) {
-			return;
-		}
-
-		if ( isset( $config['youtube_id'] ) ) {
-			// Single-channel flat format.
-			if ( 0 === $ch_index ) {
-				update_option( 'yousync_channel_config', $data );
-			}
-		} else {
-			// Multi-channel indexed format.
-			if ( isset( $config[ $ch_index ] ) ) {
-				$config[ $ch_index ] = $data;
-				update_option( 'yousync_channel_config', $config );
-			}
-		}
+		update_option( 'yousync_channel_config', $data );
 	}
 
 	/**

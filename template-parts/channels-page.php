@@ -6,10 +6,9 @@ declare(strict_types=1);
  * @package YouSync
  *
  * Variables available in this template:
- * @var array $channels        Array of channel configurations.
- * @var bool  $can_add_channel Whether the user can add more channels (Pro).
- * @var bool  $is_pro          Whether the license has multi_channel feature.
- * @var array $ch_errors       Keyed by youtube_id — error messages from last save.
+ * @var array $channel    The single channel configuration.
+ * @var array $ch_errors  Keyed by youtube_id — error messages from last save.
+ * @var bool  $has_api_key Whether a YouTube API key is configured.
  */
 
 // Exit if accessed directly.
@@ -19,16 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wrap">
-	<h1>
-		<?php if ( $is_pro ) : ?>
-			<?php esc_html_e( 'Channels', 'yousync' ); ?>
-			<?php if ( $can_add_channel && $has_api_key ) : ?>
-				<button type="button" class="page-title-action" id="ys-add-channel"><?php esc_html_e( 'Add Channel', 'yousync' ); ?></button>
-			<?php endif; ?>
-		<?php else : ?>
-			<?php esc_html_e( 'Channel', 'yousync' ); ?>
-		<?php endif; ?>
-	</h1>
+	<h1><?php esc_html_e( 'Channel', 'yousync' ); ?></h1>
 
 	<?php if ( ! $has_api_key ) : ?>
 	<div class="ys-empty-state">
@@ -62,17 +52,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" name="action" value="yousync_save_channels">
 
 		<div id="ys-channels">
-			<?php foreach ( $channels as $ch_index => $channel ) : ?>
-				<?php
-				yousync_get_template_part( 'channel', 'group', array(
-					'channel'   => $channel,
-					'ch_index'  => $ch_index,
-					'is_pro'    => $is_pro,
-					'total'     => count( $channels ),
-					'ch_errors' => $ch_errors,
-				) );
-				?>
-			<?php endforeach; ?>
+			<?php
+			yousync_get_template_part( 'channel', 'group', array(
+				'channel'   => $channel,
+				'ch_index'  => 0,
+				'ch_errors' => $ch_errors,
+			) );
+			?>
 		</div>
 
 		<?php submit_button( __( 'Save Changes', 'yousync' ) ); ?>

@@ -7,9 +7,7 @@ declare(strict_types=1);
  *
  * Variables available in this template:
  * @var array $channel  Channel configuration data.
- * @var int   $ch_index Channel index.
- * @var bool  $is_pro   Whether the license has multi_channel feature.
- * @var int   $total    Total number of channels.
+ * @var int   $ch_index Channel index (always 0 in the free plugin).
  */
 
 // Exit if accessed directly.
@@ -404,12 +402,4 @@ $fm_sources = array(
 
 		</div><!-- .ys-channel-tabs-content -->
 	</div><!-- .ys-channel-body -->
-	<div class="ys-channel-footer">
-		<button
-			type="button"
-			class="ys-remove-channel"
-		>
-			<?php esc_html_e( 'Delete channel', 'yousync' ); ?>
-		</button>
-	</div>
 </div>
