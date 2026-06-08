@@ -28,11 +28,8 @@ $subscriber_count    = isset( $channel['subscriber_count'] ) ? $channel['subscri
 $sync_rules          = $channel['sync_rules'] ?? array();
 $video_count         = $channel['video_count'] ?? 0;
 
-$post_types             = get_post_types( array( 'public' => true ), 'objects' );
-$available_taxonomies   = get_taxonomies( array( 'public' => true ), 'objects' );
-$default_post_type      = $channel['default_post_type'] ?? '';
-$default_taxonomy_terms = $channel['default_taxonomy_terms'] ?? array();
-$ys_has_taxonomy        = false;
+$post_types        = get_post_types( array( 'public' => true ), 'objects' );
+$default_post_type = $channel['default_post_type'] ?? '';
 
 $profile_picture  = $channel['profile_picture'] ?? array();
 $profile_src      = '';
@@ -165,9 +162,8 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 				</div>
 				<?php
 				yousync_get_template_part( 'sync-rule-wizard', null, array(
-					'ch_index'                => $ch_index,
-					'default_post_type'       => $default_post_type,
-					'default_taxonomy_terms'  => $default_taxonomy_terms,
+					'ch_index'          => $ch_index,
+					'default_post_type' => $default_post_type,
 				) );
 				?>
 
@@ -196,57 +192,6 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 					</select>
 				</div>
 
-				<div class="ys-form-group ys-channel-taxonomy-terms-wrapper<?php echo ! $ys_has_taxonomy ? ' ys-taxonomy-terms-locked' : ''; ?><?php echo ( $default_post_type && ! empty( $available_taxonomies ) ) ? '' : ' ys-hidden'; ?>">
-					<label>
-						<?php esc_html_e( 'Default Taxonomy Terms', 'yousync' ); ?>
-						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Automatically apply these taxonomy terms to posts created by sync automations in this channel.', 'yousync' ); ?></span>
-						</span>
-					</label>
-					<div class="ys-taxonomy-terms ys-channel-taxonomy-terms">
-						<?php foreach ( $default_taxonomy_terms as $tt_idx => $tt ) :
-							$tt_taxonomy = sanitize_key( $tt['taxonomy'] ?? '' );
-							$tt_term_ids = array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) );
-							$tt_terms    = $tt_taxonomy ? get_terms( array( 'taxonomy' => $tt_taxonomy, 'hide_empty' => false ) ) : array();
-
-							$_tax_opts = '<option value="">' . esc_html__( '&mdash; Select taxonomy &mdash;', 'yousync' ) . '</option>';
-							foreach ( $available_taxonomies as $tax ) {
-								$_tax_opts .= '<option value="' . esc_attr( $tax->name ) . '"' . selected( $tt_taxonomy, $tax->name, false ) . '>' . esc_html( $tax->labels->singular_name ) . '</option>';
-							}
-							$_term_opts = '<option value="">' . esc_html__( '&mdash; Select term &mdash;', 'yousync' ) . '</option>';
-							if ( ! is_wp_error( $tt_terms ) ) {
-								foreach ( $tt_terms as $term ) {
-									$_term_opts .= '<option value="' . esc_attr( $term->term_id ) . '"' . ( in_array( $term->term_id, $tt_term_ids, true ) ? ' selected' : '' ) . '>' . esc_html( $term->name ) . '</option>';
-								}
-							}
-
-							if ( $ys_has_taxonomy ) : ?>
-						<div class="ys-taxonomy-term-row">
-							<select name="channels[<?php echo esc_attr( $ch_index ); ?>][default_taxonomy_terms][<?php echo esc_attr( (string) $tt_idx ); ?>][taxonomy]" class="ys-select ys-taxonomy-select ys-channel-taxonomy-select"><?php echo $_tax_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-							<div class="ys-term-select-wrapper">
-								<select name="channels[<?php echo esc_attr( $ch_index ); ?>][default_taxonomy_terms][<?php echo esc_attr( (string) $tt_idx ); ?>][term_ids][]" class="ys-select ys-term-select"<?php echo $tt_taxonomy ? '' : ' disabled'; ?>><?php echo $_term_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-							</div>
-							<button type="button" class="ys-remove-taxonomy-term" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
-						</div>
-						<?php else : ?>
-						<div class="ys-taxonomy-term-row ys-taxonomy-term-row--locked">
-							<div class="ys-tax-locked-cell">
-								<select class="ys-select ys-taxonomy-select" disabled><?php echo $_tax_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-								<div class="ys-tax-locked-overlay" aria-hidden="true"></div>
-							</div>
-							<div class="ys-tax-locked-cell ys-term-select-wrapper">
-								<select class="ys-select ys-term-select" disabled><?php echo $_term_opts; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></select>
-								<div class="ys-tax-locked-overlay" aria-hidden="true"></div>
-							</div>
-							<button type="button" class="ys-remove-taxonomy-term-locked" aria-label="<?php esc_attr_e( 'Remove', 'yousync' ); ?>"></button>
-						</div>
-						<?php endif;
-						endforeach; ?>
-					</div>
-					<button type="button" class="<?php echo $ys_has_taxonomy ? 'ys-add-taxonomy-term ys-channel-add-taxonomy-term' : 'ys-add-taxonomy-term-locked'; ?>"><?php esc_html_e( 'Add taxonomy term', 'yousync' ); ?></button>
-				</div>
-
 			</div>
 
 		<?php /* History tab */ ?>
@@ -270,10 +215,9 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 					$entry_errors   = $entry['errors'] ?? array();
 					$entry_label    = $action_labels[ $entry_action ] ?? $entry_action;
 
-					// Build conversational summary: "3 videos synced to Posts · assigned to Tutorial, Reviews, and Case Studies"
+					// Build conversational summary: "3 videos synced to Posts".
 					$entry_count   = isset( $entry['items_count'] ) ? (int) $entry['items_count'] : null;
 					$entry_dest_pt = $entry['destination_post_type'] ?? '';
-					$entry_terms   = $entry['term_names'] ?? array();
 
 					$count_part = '';
 					if ( null !== $entry_count ) {
@@ -297,23 +241,7 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 						$pt_part = ' ' . sprintf( __( 'to %s', 'yousync' ), $pt_name );
 					}
 
-					$terms_part = '';
-					if ( ! empty( $entry_terms ) ) {
-						$n = count( $entry_terms );
-						if ( 1 === $n ) {
-							/* translators: %s: taxonomy term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %s', 'yousync' ), $entry_terms[0] );
-						} elseif ( 2 === $n ) {
-							/* translators: 1: first term name, 2: second term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %1$s and %2$s', 'yousync' ), $entry_terms[0], $entry_terms[1] );
-						} else {
-							$last_term  = array_pop( $entry_terms );
-							/* translators: 1: comma-separated term names, 2: last term name */
-							$terms_part = ', ' . sprintf( __( 'assigned to %1$s, and %2$s', 'yousync' ), implode( ', ', $entry_terms ), $last_term );
-						}
-					}
-
-					$entry_summary = $count_part . $pt_part . $terms_part;
+					$entry_summary = $count_part . $pt_part;
 
 					if ( $entry_error && ! empty( $entry_errors ) ) {
 						$messages = array_values( array_filter( array_map( function ( $e ) {
