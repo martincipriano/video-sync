@@ -102,81 +102,19 @@ class Channels_Page {
 		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
 		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), YOUSYNC_VERSION, true );
 
-		// Render sync rule/condition templates with channel-specific name_prefix placeholder.
+		// Render the sync-rule template with a channel-specific name_prefix placeholder
+		// for the JS-inserted rule card.
 		$name_prefix = 'channels[{{CHANNEL_INDEX}}][sync_rules]';
 
 		wp_localize_script( 'yousync-admin', 'youSync', array(
-			'operators' => array(
-				'text'   => yousync_return_template_part( 'options', 'text-operators', array( 'operator' => '' ) ),
-				'number' => yousync_return_template_part( 'options', 'number-operators', array( 'operator' => '' ) ),
-				'date'   => yousync_return_template_part( 'options', 'date-operators', array( 'operator' => '' ) ),
-			),
-			'values'   => array(
-				'text'   => yousync_return_template_part( 'input', 'text', array( 'name_prefix' => $name_prefix ) ),
-				'number' => yousync_return_template_part( 'input', 'number', array( 'name_prefix' => $name_prefix ) ),
-				'date'   => yousync_return_template_part( 'input', 'date', array( 'name_prefix' => $name_prefix ) ),
-			),
 			'syncRule' => array(
-				'channel' => array(
-					'fieldOptions'    => yousync_return_template_part( 'options', 'channel-fields' ),
-					'metadataOptions' => yousync_return_template_part( 'options', 'channel-metadata' ),
-				),
-				'video' => array(
-					'fieldOptions'    => yousync_return_template_part( 'options', 'video-fields' ),
-					'metadataOptions' => yousync_return_template_part( 'options', 'video-metadata' ),
-				),
-				'playlist' => array(
-					'fieldOptions'    => yousync_return_template_part( 'options', 'playlist-fields' ),
-					'metadataOptions' => yousync_return_template_part( 'options', 'playlist-metadata' ),
-				),
-				'condition' => yousync_return_template_part( 'sync-rule', 'condition', array( 'name_prefix' => $name_prefix ) ),
-				'rule'      => yousync_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
+				'rule' => yousync_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
 			),
-			'isChannelsPage'           => true,
-			'ajaxUrl'                  => admin_url( 'admin-ajax.php' ),
-			'ajaxNonce'                => wp_create_nonce( 'yousync_get_terms' ),
-			'addRuleNonce'             => wp_create_nonce( 'yousync_add_rule' ),
-			'syncProgressNonce'        => wp_create_nonce( 'yousync_sync_progress' ),
-			'markHistoryReadNonce'     => wp_create_nonce( 'yousync_mark_history_read' ),
-			'tmplMetadataRow'          => '<div class="ys-specific-metadata-row"><select class="ys-select ys-specific-metadata" {{NAME}}>{{OPTIONS}}</select><button type="button" class="ys-remove-metadata-field" aria-label="' . esc_attr__( 'Remove', 'yousync' ) . '"></button></div>',
-			'fieldMappingSources'      => array(
-				'video'    => implode( '', array_map(
-					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
-					array( 'title', 'description', 'duration', 'view_count', 'like_count', 'published_at', 'thumbnail_url', 'channel_title' ),
-					array(
-						__( 'Title', 'yousync' ),
-						__( 'Description', 'yousync' ),
-						__( 'Duration (seconds)', 'yousync' ),
-						__( 'View Count', 'yousync' ),
-						__( 'Like Count', 'yousync' ),
-						__( 'Published Date', 'yousync' ),
-						__( 'Thumbnail URL', 'yousync' ),
-						__( 'Channel Title', 'yousync' ),
-					)
-				) ),
-				'playlist' => implode( '', array_map(
-					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
-					array( 'playlist_title', 'playlist_description', 'playlist_video_count', 'playlist_thumbnail' ),
-					array(
-						__( 'Title', 'yousync' ),
-						__( 'Description', 'yousync' ),
-						__( 'Video Count', 'yousync' ),
-						__( 'Thumbnail URL', 'yousync' ),
-					)
-				) ),
-				'channel' => implode( '', array_map(
-					fn( $v, $l ) => '<option value="' . esc_attr( $v ) . '">' . esc_html( $l ) . '</option>',
-					array( 'channel_title', 'channel_description', 'subscriber_count', 'video_count', 'profile_picture_url', 'banner_image_url' ),
-					array(
-						__( 'Channel Title', 'yousync' ),
-						__( 'Description', 'yousync' ),
-						__( 'Subscriber Count', 'yousync' ),
-						__( 'Video Count', 'yousync' ),
-						__( 'Profile Picture URL', 'yousync' ),
-						__( 'Banner Image URL', 'yousync' ),
-					)
-				) ),
-			),
+			'isChannelsPage'       => true,
+			'ajaxUrl'              => admin_url( 'admin-ajax.php' ),
+			'addRuleNonce'         => wp_create_nonce( 'yousync_add_rule' ),
+			'syncProgressNonce'    => wp_create_nonce( 'yousync_sync_progress' ),
+			'markHistoryReadNonce' => wp_create_nonce( 'yousync_mark_history_read' ),
 		) );
 	}
 
