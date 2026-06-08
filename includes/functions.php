@@ -12,30 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Normalize the yousync_channel_config option into a 0-indexed list of channels.
- *
- * The option is stored two ways: a single channel as a flat object (free /
- * single-channel) or multiple channels as an indexed array (pro). This is the
- * one place that distinction is decided, so the scheduler and the sync runner
- * never disagree about whether a config is flat or indexed.
- *
- * @param mixed $config Raw yousync_channel_config option value.
- * @return array<int, array> 0-indexed list of channel config arrays.
- */
-function yousync_normalize_channels( $config ): array {
-	if ( ! is_array( $config ) ) {
-		return array();
-	}
-
-	// Flat single-channel object — has channel-level keys rather than integer indices.
-	if ( isset( $config['youtube_id'] ) || isset( $config['sync_rules'] ) ) {
-		return array( $config );
-	}
-
-	return array_values( $config );
-}
-
-/**
  * Sanitize a single sync rule from form input.
  *
  * Shared by Channel, Playlist, and Channels_Page save handlers.
@@ -48,8 +24,8 @@ function yousync_sanitize_sync_rule( $rule ) {
 		'enabled'           => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
 		'title'             => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
 		'max_videos'        => isset( $rule['max_videos'] ) ? absint( $rule['max_videos'] ) : 50,
-		'schedule'          => isset( $rule['schedule'] ) ? sanitize_text_field( $rule['schedule'] ) : 'daily',
-		'custom_schedule'   => isset( $rule['custom_schedule'] ) ? absint( $rule['custom_schedule'] ) : 24,
+		// Free runs every rule as a one-time sync; recurring schedules are Pro.
+		'schedule'          => 'once',
 		'action'            => isset( $rule['action'] ) ? sanitize_text_field( $rule['action'] ) : '',
 		'specific_metadata' => isset( $rule['specific_metadata'] ) && is_array( $rule['specific_metadata'] )
 			? array_values( array_filter( array_map( 'sanitize_text_field', $rule['specific_metadata'] ) ) )

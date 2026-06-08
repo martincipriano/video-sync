@@ -153,23 +153,14 @@ class Sync_Runner {
 
 		$action  = $rule['action'] ?? '';
 
-		// Free supports the 'once' schedule only — recurring schedules are Pro.
-		$schedule = $rule['schedule'] ?? 'once';
-		if ( 'once' !== $schedule ) {
-			$this->record_history_error( $source_type, $term_id, 'Scheduled sync is a Pro feature.', 'pro_only' );
-			return;
+		// Free runs every rule as a one-time sync. These runs bypass the per-run
+		// batch cap and may import an entire channel in a single execution — lift
+		// PHP limits so a large back-catalog completes instead of timing out
+		// mid-import. The imported set is unchanged; this only prevents truncation.
+		if ( function_exists( 'set_time_limit' ) ) {
+			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}
-
-		// "Once" runs bypass the per-run batch cap and may import an entire
-		// channel in a single execution — lift PHP limits so a large back-catalog
-		// completes instead of timing out mid-import. The imported set is
-		// unchanged; this only prevents truncation.
-		if ( 'once' === $schedule ) {
-			if ( function_exists( 'set_time_limit' ) ) {
-				@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-			}
-			wp_raise_memory_limit( 'admin' );
-		}
+		wp_raise_memory_limit( 'admin' );
 
 		$this->mark_syncing( $source_type, $term_id, $rule_index );
 		$this->write_progress( 0, 0 ); // Reset any stale progress from a previous run.
@@ -847,27 +838,6 @@ class Sync_Runner {
 	 */
 	private function record_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
 		$this->accumulate_error( $source_type, $term_id, $error, $code );
-		$this->append_history( $source_type, $term_id, true );
-	}
-
-	/**
-	 * Record an error in sync history only — does NOT write to the rule's inline sync_errors meta.
-	 *
-	 * Use for license-gate errors where the rule UI already communicates the locked state,
-	 * so the inline error display would be redundant and confusing.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param string $error       Human-readable error message.
-	 * @param string $code        Error code string.
-	 * @return void
-	 */
-	private function record_history_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
-		$this->run_errors[] = array(
-			'timestamp' => time(),
-			'error'     => $error,
-			'code'      => $code,
-		);
 		$this->append_history( $source_type, $term_id, true );
 	}
 
