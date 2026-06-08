@@ -105,7 +105,7 @@ $allowed_sources = array(
 			<div class="ys-form-group">
 				<label for="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Sync schedule', 'yousync' ); ?></label>
 				<select id="ys-wizard-schedule-<?php echo esc_attr( $ch_index ); ?>" class="ys-select ys-wizard-schedule-select">
-					<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => 'daily', 'can_schedule' => $has_scheduled_sync ) ); ?>
+					<?php yousync_get_template_part( 'options', 'schedule', array( 'selected' => 'once', 'can_schedule' => $has_scheduled_sync ) ); ?>
 				</select>
 			</div>
 			<div class="ys-form-group ys-wizard-custom-schedule-wrapper ys-hidden">

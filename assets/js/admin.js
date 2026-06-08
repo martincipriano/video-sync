@@ -1189,7 +1189,7 @@ function collectWizardFieldMapping(wizard) {
  */
 function collectWizardRule(wizard) {
 	const action       = wizard.querySelector('.ys-wizard-action-select')?.value ?? ''
-	const schedule     = wizard.querySelector('.ys-wizard-schedule-select')?.value ?? 'daily'
+	const schedule     = wizard.querySelector('.ys-wizard-schedule-select')?.value ?? 'once'
 	const customSched  = parseInt(wizard.querySelector('.ys-wizard-custom-schedule')?.value) || 24
 	const maxVideos    = parseInt(wizard.querySelector('.ys-wizard-max-videos')?.value) || 0
 
