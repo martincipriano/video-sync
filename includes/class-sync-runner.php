@@ -288,8 +288,7 @@ class Sync_Runner {
 	 * @throws \RuntimeException On unrecoverable API failure.
 	 */
 	private function handle_videos_sync_new( string $source_type, int $term_id, array $rule ): void {
-		$destination_post_type      = $rule['destination_post_type'] ?? '';
-		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$destination_post_type = $rule['destination_post_type'] ?? '';
 
 		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
 			$this->record_error( $source_type, $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
@@ -353,7 +352,7 @@ class Sync_Runner {
 
 		// Batch-fetch full video details and import.
 		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
-		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms, $max, ! $is_once );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $max, ! $is_once );
 		$this->current_run_count = $imported;
 
 		// Warn when candidates were available but nothing could be saved.
@@ -397,8 +396,7 @@ class Sync_Runner {
 
 		$channel_id = $data['channel_id'];
 
-		$destination_post_type      = $rule['destination_post_type'] ?? '';
-		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$destination_post_type = $rule['destination_post_type'] ?? '';
 
 		if ( $this->invalid_destination_post_type( $destination_post_type ) ) {
 			$this->record_error( 'channel', $term_id, $this->invalid_post_type_message( $destination_post_type ), 'invalid_post_type' );
@@ -420,7 +418,7 @@ class Sync_Runner {
 		}
 
 		$this->write_progress( 0, 1 );
-		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $destination_taxonomy_terms );
+		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type );
 
 		if ( is_wp_error( $result ) ) {
 			$this->accumulate_error( 'channel', $term_id, $result->get_error_message(), $result->get_error_code() );
@@ -443,8 +441,7 @@ class Sync_Runner {
 	 * @throws \RuntimeException On missing channel ID.
 	 */
 	private function handle_playlists_sync( int $term_id, array $rule, string $action ): void {
-		$destination_post_type      = $rule['destination_post_type'] ?? '';
-		$destination_taxonomy_terms = $rule['destination_taxonomy_terms'] ?? array();
+		$destination_post_type = $rule['destination_post_type'] ?? '';
 
 		$data = $this->get_term_meta_data( 'channel', $term_id );
 		if ( ! $data || empty( $data['channel_id'] ) ) {
@@ -483,7 +480,7 @@ class Sync_Runner {
 			// Create if missing in this post type.
 			$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
 			if ( ! $existing_post_id ) {
-				$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $destination_taxonomy_terms );
+				$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type );
 				++$processed;
 			}
 			++$scanned_pl;
@@ -510,7 +507,6 @@ class Sync_Runner {
 		string $source_type,
 		int $term_id,
 		string $destination_post_type = '',
-		array $destination_taxonomy_terms = array(),
 		int $max = 0,
 		bool $apply_cap = true
 	): int {
@@ -538,7 +534,7 @@ class Sync_Runner {
 					return $imported;
 				}
 
-				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $destination_taxonomy_terms );
+				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type );
 
 				if ( is_wp_error( $result ) ) {
 					$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
@@ -740,21 +736,6 @@ class Sync_Runner {
 		$data = $this->get_term_meta_data( $source_type, $term_id );
 		$rule = $data['sync_rules'][ $this->current_rule_index ] ?? array();
 
-		// Resolve taxonomy term names now so they survive future term deletions/renames.
-		$terms_config = $rule['destination_taxonomy_terms'] ?? array();
-		$term_names   = array();
-		foreach ( $terms_config as $tt ) {
-			foreach ( array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) ) as $tid ) {
-				if ( ! $tid ) {
-					continue;
-				}
-				$term = get_term( $tid );
-				if ( $term && ! is_wp_error( $term ) ) {
-					$term_names[] = $term->name;
-				}
-			}
-		}
-
 		Sync_History::append( $youtube_id, array(
 			'timestamp'             => time(),
 			'rule_action'           => $rule['action'] ?? '',
@@ -764,7 +745,6 @@ class Sync_Runner {
 			'errors'                => $this->run_errors,
 			'items_count'           => $this->current_run_count,
 			'destination_post_type' => $rule['destination_post_type'] ?? '',
-			'term_names'            => $term_names,
 		) );
 	}
 

@@ -271,23 +271,6 @@ class Channels_Page {
 				? sanitize_key( wp_unslash( $ch_data['default_post_type'] ) )
 				: '';
 
-			$raw_tax_terms                       = is_array( $ch_data['default_taxonomy_terms'] ?? null ) ? wp_unslash( $ch_data['default_taxonomy_terms'] ) : array();
-			$channel['default_taxonomy_terms']   = array();
-			foreach ( $raw_tax_terms as $tt ) {
-				$taxonomy = isset( $tt['taxonomy'] ) ? sanitize_key( $tt['taxonomy'] ) : '';
-				if ( '' === $taxonomy ) {
-					continue;
-				}
-				$term_ids                              = isset( $tt['term_ids'] ) && is_array( $tt['term_ids'] )
-					? array_values( array_filter( array_map( 'absint', $tt['term_ids'] ) ) )
-					: array();
-				$channel['default_taxonomy_terms'][] = array(
-					'taxonomy' => $taxonomy,
-					'term_ids' => $term_ids,
-				);
-			}
-
-
 			// Auto-fetch channel data via YouTube API if channel ID changed or data is missing.
 			if (
 				$api_key &&

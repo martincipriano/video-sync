@@ -26,32 +26,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Video_Importer {
 
 	/**
-	 * Hardcoded YouTube category ID → human-readable name map.
-	 *
-	 * Avoids an extra API call to videoCategories.list (which also
-	 * requires a region code). These category IDs are stable.
-	 */
-	private const YOUTUBE_CATEGORIES = array(
-		'1'  => 'Film & Animation',
-		'2'  => 'Autos & Vehicles',
-		'10' => 'Music',
-		'15' => 'Pets & Animals',
-		'17' => 'Sports',
-		'18' => 'Short Movies',
-		'19' => 'Travel & Events',
-		'20' => 'Gaming',
-		'21' => 'Videoblogging',
-		'22' => 'People & Blogs',
-		'23' => 'Comedy',
-		'24' => 'Entertainment',
-		'25' => 'News & Politics',
-		'26' => 'Howto & Style',
-		'27' => 'Education',
-		'28' => 'Science & Technology',
-		'29' => 'Nonprofits & Activism',
-	);
-
-	/**
 	 * Thumbnail size preference order (largest first).
 	 */
 	private const THUMBNAIL_SIZE_PRIORITY = array( 'maxres', 'standard', 'high', 'medium', 'default' );
@@ -69,10 +43,9 @@ class Video_Importer {
 	 * @param string $source_type                 'channel' or 'playlist'.
 	 * @param int    $source_term_id              WordPress term ID of the source channel/playlist.
 	 * @param string $post_type                   Destination post type. Required and validated by the caller (Sync_Runner); an empty/invalid value is rejected before reaching here.
-	 * @param array  $destination_taxonomy_terms  Array of ['taxonomy' => string, 'term_ids' => int[]] to assign.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '', array $destination_taxonomy_terms = array() ): int|\WP_Error {
+	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '' ): int|\WP_Error {
 		// 1. Create the post.
 		$post_id = wp_insert_post(
 			array(
@@ -87,12 +60,7 @@ class Video_Importer {
 			return $post_id;
 		}
 
-		// 2. Assign destination taxonomy terms from the sync rule (replace, not merge).
-		if ( ! empty( $destination_taxonomy_terms ) ) {
-			$this->assign_destination_taxonomy_terms( $post_id, $destination_taxonomy_terms );
-		}
-
-		// 3. Save all internal _yousync_* meta keys.
+		// 2. Save all internal _yousync_* meta keys.
 		$this->save_all_meta( $post_id, $video_data, $source_type, $source_term_id );
 
 		return $post_id;
@@ -141,70 +109,6 @@ class Video_Importer {
 	// -------------------------------------------------------------------------
 	// Private methods
 	// -------------------------------------------------------------------------
-
-	/**
-	 * Assign destination taxonomy terms from a sync rule to a post.
-	 *
-	 * Replaces existing terms on each taxonomy — does not merge.
-	 * Only taxonomies explicitly listed in the rule are touched.
-	 *
-	 * @param int   $post_id                    Post ID.
-	 * @param array $destination_taxonomy_terms Array of ['taxonomy' => string, 'term_ids' => int[]].
-	 * @return void
-	 */
-	private function assign_destination_taxonomy_terms( int $post_id, array $destination_taxonomy_terms ): void {
-		foreach ( $destination_taxonomy_terms as $tt ) {
-			$taxonomy = $tt['taxonomy'] ?? '';
-			$term_ids = array_filter( array_map( 'absint', (array) ( $tt['term_ids'] ?? array() ) ) );
-
-			if ( ! $taxonomy || empty( $term_ids ) || ! taxonomy_exists( $taxonomy ) ) {
-				continue;
-			}
-
-			wp_set_object_terms( $post_id, array_values( $term_ids ), $taxonomy );
-		}
-	}
-
-	/**
-	 * Assign video tags to a post.
-	 *
-	 * Creates terms in the yousync_tag taxonomy if they don't yet exist.
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param string[] $tags    Tag strings from YouTube.
-	 * @return void
-	 */
-	private function assign_video_tags( int $post_id, array $tags ): void {
-		wp_set_object_terms( $post_id, $tags, 'yousync_tag' );
-	}
-
-	/**
-	 * Assign a video category to a post from a YouTube category ID.
-	 *
-	 * Uses the hardcoded YOUTUBE_CATEGORIES map so no extra API call is needed.
-	 * Term slug = numeric category ID; term name = human-readable label.
-	 *
-	 * @param int    $post_id     Post ID.
-	 * @param string $category_id YouTube category ID (e.g. '10' for Music).
-	 * @return void
-	 */
-	private function assign_video_category( int $post_id, string $category_id ): void {
-		$term_name = self::YOUTUBE_CATEGORIES[ $category_id ] ?? "Category {$category_id}";
-
-		$term = get_term_by( 'slug', $category_id, 'yousync_category' );
-
-		if ( ! $term ) {
-			$result = wp_insert_term( $term_name, 'yousync_category', array( 'slug' => $category_id ) );
-			if ( is_wp_error( $result ) ) {
-				return;
-			}
-			$term_id = $result['term_id'];
-		} else {
-			$term_id = $term->term_id;
-		}
-
-		wp_set_object_terms( $post_id, array( $term_id ), 'yousync_category' );
-	}
 
 	/**
 	 * Save all video data as individual post meta keys.
@@ -283,10 +187,9 @@ class Video_Importer {
 	 * @param array  $playlist_data             Normalised playlist data from YouTube_API::get_channel_playlists().
 	 * @param string $channel_id                YouTube channel ID.
 	 * @param string $post_type                 Destination post type.
-	 * @param array  $destination_taxonomy_terms Array of ['taxonomy' => string, 'term_ids' => int[]].
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import_playlist( array $playlist_data, string $channel_id, string $post_type, array $destination_taxonomy_terms = array() ): int|\WP_Error {
+	public function import_playlist( array $playlist_data, string $channel_id, string $post_type ): int|\WP_Error {
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => sanitize_text_field( $playlist_data['playlist_title'] ?: $playlist_data['playlist_id'] ),
@@ -298,10 +201,6 @@ class Video_Importer {
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
-		}
-
-		if ( ! empty( $destination_taxonomy_terms ) ) {
-			$this->assign_destination_taxonomy_terms( $post_id, $destination_taxonomy_terms );
 		}
 
 		$this->save_playlist_meta( $post_id, $playlist_data, $channel_id );
@@ -371,10 +270,9 @@ class Video_Importer {
 	 * @param array  $channel_data              Channel data from YouTube_API::get_channel_data().
 	 * @param string $channel_id                YouTube channel ID.
 	 * @param string $post_type                 Destination post type.
-	 * @param array  $destination_taxonomy_terms Array of ['taxonomy' => string, 'term_ids' => int[]].
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import_channel( array $channel_data, string $channel_id, string $post_type, array $destination_taxonomy_terms = array() ): int|\WP_Error {
+	public function import_channel( array $channel_data, string $channel_id, string $post_type ): int|\WP_Error {
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => sanitize_text_field( $channel_data['channel_title'] ?? $channel_id ),
@@ -386,10 +284,6 @@ class Video_Importer {
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
-		}
-
-		if ( ! empty( $destination_taxonomy_terms ) ) {
-			$this->assign_destination_taxonomy_terms( $post_id, $destination_taxonomy_terms );
 		}
 
 		$this->save_channel_meta( $post_id, $channel_data, $channel_id );

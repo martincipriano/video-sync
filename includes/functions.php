@@ -55,27 +55,7 @@ function yousync_sanitize_sync_rule( $rule ) {
 			? array_values( array_filter( array_map( 'sanitize_text_field', $rule['specific_metadata'] ) ) )
 			: array(),
 		'destination_post_type'      => isset( $rule['destination_post_type'] ) ? sanitize_key( $rule['destination_post_type'] ) : '',
-		'destination_taxonomy_terms' => array(),
 	);
-
-	if ( isset( $rule['destination_taxonomy_terms'] ) && is_array( $rule['destination_taxonomy_terms'] ) ) {
-		foreach ( $rule['destination_taxonomy_terms'] as $tt ) {
-			if ( ! is_array( $tt ) ) {
-				continue;
-			}
-			$taxonomy = isset( $tt['taxonomy'] ) ? sanitize_key( $tt['taxonomy'] ) : '';
-			if ( '' === $taxonomy ) {
-				continue;
-			}
-			$term_ids = isset( $tt['term_ids'] ) && is_array( $tt['term_ids'] )
-				? array_values( array_filter( array_map( 'absint', $tt['term_ids'] ) ) )
-				: array();
-			$sanitized['destination_taxonomy_terms'][] = array(
-				'taxonomy' => $taxonomy,
-				'term_ids' => $term_ids,
-			);
-		}
-	}
 
 	return $sanitized;
 }
