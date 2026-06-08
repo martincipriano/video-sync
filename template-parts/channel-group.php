@@ -172,24 +172,26 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 			<?php /* Settings tab */ ?>
 			<div class="ys-channel-tab-panel ys-hidden" data-panel="settings" role="tabpanel">
 
-				<div class="ys-form-group">
-					<label for="ys-default-post-type-<?php echo esc_attr( $ch_index ); ?>">
-						<?php esc_html_e( 'Default Post Type', 'yousync' ); ?>
-						<span class="ys-help-wrap">
-							<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
-							<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'yousync' ); ?></span>
-						</span>
-					</label>
-					<select
-						id="ys-default-post-type-<?php echo esc_attr( $ch_index ); ?>"
-						name="channels[<?php echo esc_attr( $ch_index ); ?>][default_post_type]"
-						class="ys-select ys-channel-default-post-type"
-					>
-						<option value=""><?php esc_html_e( '— Select post type —', 'yousync' ); ?></option>
-						<?php foreach ( $post_types as $pt ) : ?>
-						<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
-						<?php endforeach; ?>
-					</select>
+				<div class="ys-2-columns ys-cols-3-1">
+					<div class="ys-form-group">
+						<label for="ys-default-post-type-<?php echo esc_attr( $ch_index ); ?>">
+							<?php esc_html_e( 'Default Post Type', 'yousync' ); ?>
+							<span class="ys-help-wrap">
+								<button type="button" class="ys-help-btn" aria-label="<?php esc_attr_e( 'More info', 'yousync' ); ?>">?</button>
+								<span class="ys-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'yousync' ); ?></span>
+							</span>
+						</label>
+						<select
+							id="ys-default-post-type-<?php echo esc_attr( $ch_index ); ?>"
+							name="channels[<?php echo esc_attr( $ch_index ); ?>][default_post_type]"
+							class="ys-select ys-channel-default-post-type"
+						>
+							<option value=""><?php esc_html_e( '— Select post type —', 'yousync' ); ?></option>
+							<?php foreach ( $post_types as $pt ) : ?>
+							<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
 				</div>
 
 			</div>
