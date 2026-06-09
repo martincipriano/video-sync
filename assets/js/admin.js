@@ -25,7 +25,7 @@ function updateRuleLabel(rule) {
 	rule.classList.remove('ys-rule--no-action')
 
 	const actionText = selectedAction.textContent.trim()
-	label.textContent = actionText
+	label.textContent = actionText + ' immediately after enabling and saving.'
 }
 
 // Init labels on load
