@@ -28,26 +28,10 @@
 })()
 
 /**
- * Metabox — copy to clipboard and toast notification.
+ * Metabox — copy a field value or shortcode to the clipboard, confirming with
+ * a brief checkmark on the clicked button.
  */
 ;(function () {
-
-	var toastEl    = null
-	var toastTimer = null
-
-	function showToast() {
-		if (!toastEl) {
-			toastEl = document.createElement('div')
-			toastEl.id = 'ys-copy-toast'
-			toastEl.textContent = '✓  Copied!'
-			document.body.appendChild(toastEl)
-		}
-		toastEl.classList.add('ys-copy-toast--visible')
-		clearTimeout(toastTimer)
-		toastTimer = setTimeout(function () {
-			toastEl.classList.remove('ys-copy-toast--visible')
-		}, 1500)
-	}
 
 	function copyToClipboard(text) {
 		navigator.clipboard.writeText(text).catch(function () {
@@ -60,13 +44,29 @@
 			document.execCommand('copy')
 			document.body.removeChild(ta)
 		})
-		showToast()
+	}
+
+	function flashCopied(btn) {
+		btn.classList.add('ys-copied')
+		setTimeout(function () {
+			btn.classList.remove('ys-copied')
+		}, 1000)
 	}
 
 	document.addEventListener('click', function (e) {
-		var field = e.target.closest('.ys-mb-input, .ys-mb-textarea')
-		if (field && !field.disabled) {
-			copyToClipboard(field.value)
+		var valBtn = e.target.closest('.ys-copy-val-btn')
+		if (valBtn) {
+			var wrap  = valBtn.closest('.ys-mb-field')
+			var input = wrap ? wrap.querySelector('.ys-mb-input, .ys-mb-textarea') : null
+			copyToClipboard(input ? input.value : '')
+			flashCopied(valBtn)
+			return
+		}
+
+		var scBtn = e.target.closest('.ys-copy-sc-btn')
+		if (scBtn) {
+			copyToClipboard(scBtn.dataset.shortcode || '')
+			flashCopied(scBtn)
 		}
 	})
 })()

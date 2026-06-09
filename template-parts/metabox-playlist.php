@@ -45,6 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Playlist Title', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $playlist_title ); ?>" readonly>
 				</div>
@@ -54,6 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<textarea class="ys-mb-textarea" rows="4" readonly><?php echo esc_textarea( $playlist_description ); ?></textarea>
 				</div>
@@ -63,6 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Video Count', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $playlist_video_count ) ); ?>" readonly>
 				</div>
@@ -81,6 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Playlist ID', 'yousync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $playlist_id ); ?>" readonly>
 					</div>
@@ -90,6 +94,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
 					</div>

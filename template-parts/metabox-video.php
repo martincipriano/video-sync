@@ -53,6 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Original Title', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $original_title ); ?>" readonly>
 				</div>
@@ -62,6 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<textarea class="ys-mb-textarea" rows="4" readonly><?php echo esc_textarea( $original_description ); ?></textarea>
 				</div>
@@ -71,6 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Channel', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_title ); ?>" readonly>
 				</div>
@@ -80,6 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Published Date', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $published_date ); ?>" readonly>
 				</div>
@@ -97,6 +101,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Duration', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $duration_fmt ); ?>" readonly>
 				</div>
@@ -106,6 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'View Count', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $view_count ) ); ?>" readonly>
 				</div>
@@ -115,6 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Like Count', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $like_count ) ); ?>" readonly>
 				</div>
@@ -124,6 +131,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
 						<p class="ys-mb-label"><?php esc_html_e( 'Comment Count', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $comment_count ) ); ?>" readonly>
 				</div>
@@ -142,6 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Video ID', 'yousync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $video_id ); ?>" readonly>
 					</div>
@@ -151,6 +160,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Embed Code', 'yousync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_id . '" frameborder="0" allowfullscreen></iframe>' ); ?>" readonly class="ys-mb-input ys-mb-input--url">
 					</div>
@@ -160,6 +170,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
 					</div>
@@ -191,6 +202,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php echo esc_html( $thumbnail_size_labels[ $size ] ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $thumbnails[ $size ]['url'] ); ?>" readonly>
 					</div>
