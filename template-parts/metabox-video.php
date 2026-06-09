@@ -139,7 +139,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<?php if ( $video_url ) : ?>
 				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Video Link', 'yousync' ); ?></p>
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Video Link', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $video_url ); ?>" readonly>
 				</div>
 				<?php endif; ?>

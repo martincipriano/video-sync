@@ -73,7 +73,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<?php if ( $playlist_id ) : ?>
 				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Playlist Link', 'yousync' ); ?></p>
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Playlist Link', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( 'https://www.youtube.com/playlist?list=' . $playlist_id ); ?>" readonly>
 				</div>
 				<?php endif; ?>
@@ -118,7 +121,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<div class="ys-mb-fields">
 				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Thumbnail URL', 'yousync' ); ?></p>
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Thumbnail URL', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+					</div>
 					<input type="text" class="ys-mb-input ys-mb-input--url" value="<?php echo esc_attr( $playlist_thumbnail ); ?>" readonly>
 				</div>
 			</div>

@@ -81,7 +81,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<?php if ( $channel_id ) : ?>
 				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Channel Link', 'yousync' ); ?></p>
+					<div class="ys-mb-label-row">
+						<p class="ys-mb-label"><?php esc_html_e( 'Channel Link', 'yousync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( 'https://www.youtube.com/channel/' . $channel_id ); ?>" readonly>
 				</div>
 				<?php endif; ?>
