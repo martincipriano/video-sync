@@ -268,6 +268,7 @@ class Channels_Page {
 			: array();
 
 		$rule                  = yousync_sanitize_sync_rule( $raw_rule );
+		$rule['enabled']       = true; // A rule created via the wizard is active and runs on save.
 		$rule['scheduled_at']  = time();
 		$rule['sync_status']   = '';
 		$rule['last_synced']   = 0;
@@ -292,12 +293,18 @@ class Channels_Page {
 		update_option( 'yousync_channel_config', $is_single ? $channels[0] : $channels );
 		do_action( 'yousync_reschedule_option_channels', $channels );
 
+		// Re-read so the rendered card reflects the scheduler's state — an enabled
+		// once rule is marked 'syncing' and runs immediately after this save.
+		$fresh          = get_option( 'yousync_channel_config', array() );
+		$fresh_channels = isset( $fresh['youtube_id'] ) ? array( $fresh ) : array_values( (array) $fresh );
+		$render_rule    = $fresh_channels[ $ch_index ]['sync_rules'][ $rule_index ] ?? $rule;
+
 		// Render the accordion card for the new rule.
 		$name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 		ob_start();
 		yousync_get_template_part( 'sync-rule', null, array(
 			'index'              => $rule_index,
-			'rule'               => $rule,
+			'rule'               => $render_rule,
 			'term_id'            => 0,
 			'source_type'        => 'channel',
 			'name_prefix'        => $name_prefix,

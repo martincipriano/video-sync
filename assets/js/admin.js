@@ -555,6 +555,11 @@ function wizardSubmit(wizard) {
 				applyRuleActionVisibility(newRule)
 				updateRuleDynamicLabels(newRule)
 				updateRuleLabel(newRule)
+				// An enabled once rule runs immediately on save — start polling its
+				// progress (the load-time scan won't see this freshly-inserted card).
+				if (newRule.classList.contains('ys-rule--syncing')) {
+					newRule.dispatchEvent(new CustomEvent('yousync:poll-rule', { bubbles: true }))
+				}
 				newRule.scrollIntoView({ behavior: 'smooth', block: 'start' })
 			}
 		}
@@ -1083,6 +1088,12 @@ delegationRoot.addEventListener('click', function(e) {
 	// Start polling any rules already syncing at page load.
 	container.querySelectorAll('.ys-rule--syncing').forEach(function (ruleEl) {
 		startPollingRule(ruleEl)
+	})
+
+	// Start polling a rule that started syncing after load (e.g. added via the wizard).
+	container.addEventListener('yousync:poll-rule', function (e) {
+		const ruleEl = e.target.closest('.ys-rule')
+		if (ruleEl) startPollingRule(ruleEl)
 	})
 
 	function startPollingRule(ruleEl) {
