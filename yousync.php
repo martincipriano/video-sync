@@ -166,7 +166,6 @@ add_action(
 	5
 );
 
-
 /**
  * Add video metabox to YouSync Videos post type.
  *
@@ -224,7 +223,6 @@ function yousync_render_video_metabox( $post ) {
 		'preview_thumb'         => \YouSync\Video_Importer::get_best_thumbnail( $thumbnails ),
 	) );
 }
-
 
 /**
  * Fall back to the YouTube thumbnail URL when no featured image is set.
@@ -307,7 +305,6 @@ function yousync_admin_post_thumbnail_html( string $content, int $post_id, $thum
 }
 add_filter( 'admin_post_thumbnail_html', 'yousync_admin_post_thumbnail_html', 10, 3 );
 
-
 /**
  * Add playlist metabox to posts that were synced from a YouTube playlist.
  *
@@ -345,7 +342,6 @@ function yousync_render_playlist_metabox( $post ) {
 		'last_synced'           => (int) get_post_meta( $post->ID, '_yousync_last_synced', true ),
 	) );
 }
-
 
 /**
  * Add channel metabox to posts that were synced as a YouTube channel.
@@ -389,7 +385,6 @@ function yousync_render_channel_metabox( $post ) {
 	) );
 }
 
-
 /**
  * Enqueue assets on post edit screens where the post has YouSync video meta.
  *
@@ -426,32 +421,6 @@ function yousync_enqueue_video_list_assets(): void {
 	);
 }
 add_action( 'admin_enqueue_scripts', 'yousync_enqueue_video_list_assets' );
-
-add_action( 'wp_ajax_yousync_get_terms', 'yousync_ajax_get_terms' );
-
-/**
- * AJAX handler — fetch terms for a given public taxonomy.
- *
- * @return void
- */
-function yousync_ajax_get_terms() {
-	check_ajax_referer( 'yousync_get_terms', 'nonce' );
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( 'Forbidden', 403 );
-	}
-	$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_key( $_GET['taxonomy'] ) : '';
-	if ( ! taxonomy_exists( $taxonomy ) ) {
-		wp_send_json_error( 'Invalid taxonomy' );
-	}
-	$terms = get_terms( [ 'taxonomy' => $taxonomy, 'hide_empty' => false ] );
-	if ( is_wp_error( $terms ) ) {
-		wp_send_json_error( $terms->get_error_message() );
-	}
-	wp_send_json_success(
-		array_map( fn( $t ) => [ 'id' => $t->term_id, 'name' => $t->name ], $terms )
-	);
-}
-
 
 /**
  * One-time migration: convert _yousync_video JSON blob to individual flat meta keys.
