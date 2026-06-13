@@ -13,3 +13,5 @@
 /phpcs.xml.dist    export-ignore
 /composer.json     export-ignore
 /composer.lock     export-ignore
+/assets/scss        export-ignore
+*.map               export-ignore
