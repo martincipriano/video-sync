@@ -1,9 +1,9 @@
-=== YouSync — Sync YouTube to WordPress ===
+=== YouSync ===
 Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
-Tested up to: 6.9
-Stable tag: 2.0.0
+Tested up to: 7.0
+Stable tag: 2.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,12 @@ By default your synced posts and settings are kept. If you want everything remov
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.1.0 =
+* New: In-plugin Help tabs linking to the YouSync knowledge base on every admin screen.
+* New: Pro-only sync rules are preserved (not deleted) when the plugin runs as the free version, so re-activating Pro restores them.
+* Improved: WordPress.org coding-standards compliance — prepared SQL statements, output escaping, and translator comments.
+* Improved: Tested up to WordPress 7.0.
 
 = 2.0.0 =
 * Sync new videos, new playlists, or channel data from a YouTube channel.

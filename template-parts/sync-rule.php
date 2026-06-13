@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to yousync_get_template_part()'s extract()/include scope, not globals.
+
 $term_id     = isset( $term_id ) ? (int) $term_id : 0;
 $source_type = isset( $source_type ) ? $source_type : 'channel';
 $name_prefix = isset( $name_prefix ) ? $name_prefix : 'sync_rules';

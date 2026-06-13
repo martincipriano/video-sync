@@ -136,6 +136,12 @@ class Sync_Runner {
 			return;
 		}
 
+		// Defense in depth: never run a Pro-only rule preserved from a prior Pro
+		// install (recurring schedule, update action, conditions, mapping, taxonomy).
+		if ( yousync_rule_is_unsupported( $rule ) ) {
+			return;
+		}
+
 		// Concurrency guard (option-based channels): stop a second cron tick or a
 		// manual trigger from running the same rule while it is already in flight.
 		// A dedicated transient is used rather than the sync_status field, which
@@ -158,7 +164,7 @@ class Sync_Runner {
 		// PHP limits so a large back-catalog completes instead of timing out
 		// mid-import. The imported set is unchanged; this only prevents truncation.
 		if ( function_exists( 'set_time_limit' ) ) {
-			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required so a large back-catalog import completes in one run instead of timing out.
 		}
 		wp_raise_memory_limit( 'admin' );
 
@@ -305,7 +311,7 @@ class Sync_Runner {
 
 			$playlist_id = $channel_data['uploads_playlist_id'] ?? '';
 			if ( empty( $playlist_id ) ) {
-				throw new \RuntimeException( "Could not retrieve uploads playlist ID for channel '{$meta['channel_id']}'." );
+				throw new \RuntimeException( esc_html( "Could not retrieve uploads playlist ID for channel '{$meta['channel_id']}'." ) );
 			}
 		} else {
 			// Playlists: playlist ID is stored directly in term meta.

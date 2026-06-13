@@ -82,8 +82,11 @@ class Video_Importer {
 	public function get_imported_video_ids( string $post_type = '' ): array {
 		global $wpdb;
 		$statuses     = array( 'publish', 'draft', 'private', 'trash' );
-		$status_in    = "'" . implode( "','", $statuses ) . "'";
+		$placeholders = implode( ',', array_fill( 0, count( $statuses ), '%s' ) );
 
+		// $placeholders is a generated list of %s tokens (one per status) bound through
+		// $wpdb->prepare() below; the values are a fixed, non-user list.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		if ( '' !== $post_type ) {
 			$sql = $wpdb->prepare(
 				"SELECT pm.meta_value
@@ -91,17 +94,24 @@ class Video_Importer {
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 				 WHERE pm.meta_key = '_yousync_video_id'
 				   AND p.post_type = %s
-				   AND p.post_status IN ( {$status_in} )",
-				$post_type
+				   AND p.post_status IN ( $placeholders )",
+				array_merge( array( $post_type ), $statuses )
 			);
 		} else {
-			$sql = "SELECT pm.meta_value
+			$sql = $wpdb->prepare(
+				"SELECT pm.meta_value
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 				 WHERE pm.meta_key = '_yousync_video_id'
-				   AND p.post_status IN ( {$status_in} )";
+				   AND p.post_status IN ( $placeholders )",
+				$statuses
+			);
 		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
+		// $sql is built via $wpdb->prepare() in both branches above; a dedup lookup must
+		// reflect just-imported posts in the same run, so caching is not applicable.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$ids = $wpdb->get_col( $sql );
 		return array_values( array_filter( array_unique( $ids ) ) );
 	}
@@ -169,6 +179,7 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _yousync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
 						'key'   => '_yousync_playlist_id',
@@ -248,6 +259,7 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _yousync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
 						'key'   => '_yousync_channel_post',

@@ -94,8 +94,17 @@ class Sync_Scheduler {
 
 		$immediate = array();
 		foreach ( $channels as $ch_index => $channel ) {
+			// Free manages a single channel; any extra channels are preserved Pro
+			// data and must never be scheduled or run here.
+			if ( 0 !== (int) $ch_index ) {
+				continue;
+			}
 			foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
 				if ( empty( $rule['enabled'] ) ) {
+					continue;
+				}
+				// Pro-only rules preserved from a prior Pro install — never scheduled in free.
+				if ( yousync_rule_is_unsupported( $rule ) ) {
 					continue;
 				}
 				$args = array( (int) $ch_index, (int) $rule_index );

@@ -1,0 +1,22 @@
+# Files and folders excluded from the distributed plugin package
+# (used by `wp dist-archive` and the WordPress.org deploy workflow).
+# These exist only in the development checkout and must not ship.
+
+/.git
+/.github
+/.gitignore
+/.distignore
+/.env
+/.editorconfig
+.DS_Store
+/node_modules
+/tests
+/test-results
+/claude
+/playwright.config.js
+/package.json
+/package-lock.json
+/composer.json
+/composer.lock
+/phpcs.xml
+/phpcs.xml.dist

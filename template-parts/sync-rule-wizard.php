@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to yousync_get_template_part()'s extract()/include scope, not globals.
+
 $post_types        = get_post_types( array( 'public' => true ), 'objects' );
 $default_post_type = $default_post_type ?? '';
 ?>

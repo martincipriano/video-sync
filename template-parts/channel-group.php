@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to yousync_get_template_part()'s extract()/include scope, not globals.
+
 $youtube_id          = $channel['youtube_id'] ?? '';
 $ch_errors           = isset( $ch_errors ) && is_array( $ch_errors ) ? $ch_errors : array();
 $channel_error       = $channel['_api_error'] ?? $ch_errors[ $youtube_id ] ?? '';
@@ -60,7 +62,7 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 				echo esc_html( $channel_title );
 			} else {
 				/* translators: %d: channel number */
-				printf( esc_html__( 'Channel %d', 'yousync' ), $ch_index + 1 );
+				printf( esc_html__( 'Channel %d', 'yousync' ), absint( $ch_index + 1 ) );
 			}
 			?>
 		</h2>
@@ -81,7 +83,10 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 			<button type="button" class="ys-channel-tab-btn" data-tab="history" role="tab" aria-selected="false">
 				<?php esc_html_e( 'History', 'yousync' ); ?>
 				<?php if ( $has_errors ) : ?>
-				<span class="ys-history-badge" aria-label="<?php echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'yousync' ), $error_count ) ); ?>"><?php echo (int) $error_count; ?></span>
+				<span class="ys-history-badge" aria-label="<?php
+					/* translators: %d: number of sync errors */
+					echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'yousync' ), $error_count ) );
+				?>"><?php echo (int) $error_count; ?></span>
 				<?php endif; ?>
 			</button>
 		</div>
@@ -148,6 +153,11 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 				<div class="ys-rules ys-rules--init" data-video-count="<?php echo (int) $video_count; ?>">
 					<?php
 					foreach ( $sync_rules as $index => $rule ) {
+						// Pro-only rules (preserved from a prior Pro install) are kept in the
+						// DB but not shown or editable in the free plugin.
+						if ( yousync_rule_is_unsupported( $rule ) ) {
+							continue;
+						}
 						yousync_get_template_part( 'sync-rule', null, array(
 							'index'              => $index,
 							'rule'               => $rule,
@@ -266,7 +276,10 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 							<?php endif; ?>
 						</span>
 						<span class="ys-history-entry-time"><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry_time ) ); ?></span>
-						<span class="ys-history-entry-duration"><?php printf( esc_html__( '%ds', 'yousync' ), $entry_duration ); ?></span>
+						<span class="ys-history-entry-duration"><?php
+							/* translators: %d: sync run duration in seconds */
+							printf( esc_html__( '%ds', 'yousync' ), absint( $entry_duration ) );
+						?></span>
 					</div>
 				</li>
 				<?php endforeach; ?>

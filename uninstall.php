@@ -16,116 +16,129 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-global $wpdb;
+/**
+ * Remove YouSync data on uninstall.
+ *
+ * Wrapped in a function so its working variables stay out of the global scope —
+ * uninstall.php is executed by WordPress at global scope.
+ *
+ * @return void
+ */
+function yousync_run_uninstall(): void {
+	global $wpdb;
 
-// -------------------------------------------------------------------------
-// Always: unschedule all sync cron events.
-// -------------------------------------------------------------------------
-wp_unschedule_hook( 'yousync_sync_rule' );
+	// Uninstall is a one-time teardown: direct, uncached deletes are required to
+	// remove data, and the IN() clauses bind generated %s/%d placeholders via
+	// $wpdb->prepare(). The WordPress.DB advisory rules do not apply here.
+	// phpcs:disable WordPress.DB
 
-// -------------------------------------------------------------------------
-// Always: remove dismissed-notice user meta.
-// -------------------------------------------------------------------------
-$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'yousync_cron_notice_dismissed' ) );
+	// ---------------------------------------------------------------------
+	// Always: unschedule all sync cron events.
+	// ---------------------------------------------------------------------
+	wp_unschedule_hook( 'yousync_sync_rule' );
 
-// -------------------------------------------------------------------------
-// Conditionally: remove all plugin content if the user opted in.
-// -------------------------------------------------------------------------
-if ( get_option( 'yousync_delete_on_uninstall' ) ) {
+	// ---------------------------------------------------------------------
+	// Always: remove dismissed-notice user meta.
+	// ---------------------------------------------------------------------
+	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'yousync_cron_notice_dismissed' ) );
 
-	// --- Delete all yousync_videos posts and their meta ---
-	$post_ids = $wpdb->get_col(
-		"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'yousync_videos'"
-	);
+	// ---------------------------------------------------------------------
+	// Conditionally: remove all plugin content if the user opted in.
+	// ---------------------------------------------------------------------
+	if ( get_option( 'yousync_delete_on_uninstall' ) ) {
 
-	if ( ! empty( $post_ids ) ) {
-		foreach ( $post_ids as $post_id ) {
-			$post_id = (int) $post_id;
-			$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
-			$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+		// --- Delete all yousync_videos posts and their meta ---
+		$post_ids = $wpdb->get_col(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'yousync_videos'"
+		);
+
+		if ( ! empty( $post_ids ) ) {
+			foreach ( $post_ids as $post_id ) {
+				$post_id = (int) $post_id;
+				$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
+				$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+			}
 		}
-	}
 
-	// --- Delete all terms for YouSync taxonomies ---
-	$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'yousync_tag', 'yousync_category' );
+		// --- Delete all terms for YouSync taxonomies ---
+		$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'yousync_tag', 'yousync_category' );
 
-	// Collect term IDs and term_taxonomy IDs for bulk deletion.
-	$placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
+		// Collect term IDs and term_taxonomy IDs for bulk deletion.
+		$placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
 
-	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-	$term_taxonomy_ids = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-			$taxonomies
-		)
-	);
+		$term_taxonomy_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
+				$taxonomies
+			)
+		);
 
-	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-	$term_ids = $wpdb->get_col(
-		$wpdb->prepare(
-			"SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-			$taxonomies
-		)
-	);
+		$term_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
+				$taxonomies
+			)
+		);
 
-	if ( ! empty( $term_taxonomy_ids ) ) {
-		$tt_placeholders = implode( ', ', array_fill( 0, count( $term_taxonomy_ids ), '%d' ) );
+		if ( ! empty( $term_taxonomy_ids ) ) {
+			$tt_placeholders = implode( ', ', array_fill( 0, count( $term_taxonomy_ids ), '%d' ) );
 
-		// Delete object relationships (post ↔ term).
-		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+			// Delete object relationships (post ↔ term).
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ($tt_placeholders)",
+					$term_taxonomy_ids
+				)
+			);
+		}
+
+		if ( ! empty( $term_ids ) ) {
+			$term_placeholders = implode( ', ', array_fill( 0, count( $term_ids ), '%d' ) );
+
+			// Delete term meta.
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->termmeta} WHERE term_id IN ($term_placeholders)",
+					$term_ids
+				)
+			);
+
+			// Delete terms.
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->terms} WHERE term_id IN ($term_placeholders)",
+					$term_ids
+				)
+			);
+		}
+
+		// Delete term_taxonomy entries.
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ($tt_placeholders)",
-				$term_taxonomy_ids
+				"DELETE FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
+				$taxonomies
 			)
 		);
 	}
 
-	if ( ! empty( $term_ids ) ) {
-		$term_placeholders = implode( ', ', array_fill( 0, count( $term_ids ), '%d' ) );
+	// ---------------------------------------------------------------------
+	// Always: delete plugin options.
+	// ---------------------------------------------------------------------
+	$options = array(
+		'yousync_api_key',
+		'yousync_active_archives',
+		'yousync_delete_on_uninstall',
+		'yousync_reschedule_on_activation',
+		'yousync_sync_log',
+	);
 
-		// Delete term meta.
-		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->termmeta} WHERE term_id IN ($term_placeholders)",
-				$term_ids
-			)
-		);
-
-		// Delete terms.
-		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->terms} WHERE term_id IN ($term_placeholders)",
-				$term_ids
-			)
-		);
+	foreach ( $options as $option ) {
+		delete_option( $option );
 	}
 
-	// Delete term_taxonomy entries.
-	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-	$wpdb->query(
-		$wpdb->prepare(
-			"DELETE FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-			$taxonomies
-		)
-	);
+	delete_transient( 'yousync_flush_rewrite_rules' );
+
+	// phpcs:enable WordPress.DB
 }
 
-// -------------------------------------------------------------------------
-// Always: delete plugin options.
-// -------------------------------------------------------------------------
-$options = array(
-	'yousync_api_key',
-	'yousync_active_archives',
-	'yousync_delete_on_uninstall',
-	'yousync_reschedule_on_activation',
-	'yousync_sync_log',
-);
-
-foreach ( $options as $option ) {
-	delete_option( $option );
-}
-
-delete_transient( 'yousync_flush_rewrite_rules' );
+yousync_run_uninstall();

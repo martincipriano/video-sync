@@ -1,0 +1,775 @@
+# Copyright (C) 2026 Martin Cipriano
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: YouSync 2.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/yousync\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-13T02:38:03+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: yousync\n"
+
+#. Plugin Name of the plugin
+#: yousync.php
+#: includes/class-channels-page.php:133
+#: includes/class-channels-page.php:134
+msgid "YouSync"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: yousync.php
+msgid "https://wpbuoy.com/product/yousync/"
+msgstr ""
+
+#. Description of the plugin
+#: yousync.php
+msgid "Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails."
+msgstr ""
+
+#. Author of the plugin
+#: yousync.php
+msgid "Martin Cipriano"
+msgstr ""
+
+#. Author URI of the plugin
+#: yousync.php
+msgid "https://martincipriano.com"
+msgstr ""
+
+#: includes/class-channels-page.php:54
+#: includes/class-channels-page.php:56
+msgid "Getting Started"
+msgstr ""
+
+#: includes/class-channels-page.php:58
+msgid "How YouSync works"
+msgstr ""
+
+#: includes/class-channels-page.php:59
+msgid "What's the difference between Free and Pro?"
+msgstr ""
+
+#: includes/class-channels-page.php:60
+msgid "Sync actions explained"
+msgstr ""
+
+#: includes/class-channels-page.php:61
+msgid "Minimum requirements"
+msgstr ""
+
+#: includes/class-channels-page.php:62
+msgid "Getting your Google API key"
+msgstr ""
+
+#: includes/class-channels-page.php:63
+msgid "How to install"
+msgstr ""
+
+#: includes/class-channels-page.php:64
+msgid "Initial configuration"
+msgstr ""
+
+#: includes/class-channels-page.php:65
+msgid "Will syncing affect my site?"
+msgstr ""
+
+#: includes/class-channels-page.php:66
+msgid "Privacy and data collection"
+msgstr ""
+
+#: includes/class-channels-page.php:72
+#: includes/class-channels-page.php:74
+msgid "Connecting to YouTube"
+msgstr ""
+
+#: includes/class-channels-page.php:76
+msgid "How to get a Google API key"
+msgstr ""
+
+#: includes/class-channels-page.php:77
+msgid "API key vs OAuth — which does YouSync use?"
+msgstr ""
+
+#: includes/class-channels-page.php:78
+msgid "Keeping your API key secure"
+msgstr ""
+
+#: includes/class-channels-page.php:79
+msgid "Understanding your YouTube API quota"
+msgstr ""
+
+#: includes/class-channels-page.php:80
+msgid "The pre-sync quota estimate"
+msgstr ""
+
+#: includes/class-channels-page.php:81
+msgid "Conserving quota"
+msgstr ""
+
+#: includes/class-channels-page.php:82
+msgid "Requesting a higher quota"
+msgstr ""
+
+#: includes/class-channels-page.php:83
+msgid "Fixing API key and quota errors"
+msgstr ""
+
+#: includes/class-channels-page.php:89
+#: includes/class-channels-page.php:91
+msgid "Features & Usage"
+msgstr ""
+
+#: includes/class-channels-page.php:93
+msgid "Choosing what to import"
+msgstr ""
+
+#: includes/class-channels-page.php:94
+msgid "Destination post type"
+msgstr ""
+
+#: includes/class-channels-page.php:95
+msgid "Run-once vs recurring schedules"
+msgstr ""
+
+#: includes/class-channels-page.php:96
+msgid "Thumbnails and featured images"
+msgstr ""
+
+#: includes/class-channels-page.php:97
+msgid "Sync history and error logs"
+msgstr ""
+
+#: includes/class-channels-page.php:98
+msgid "The post metabox and copy buttons"
+msgstr ""
+
+#: includes/class-channels-page.php:99
+msgid "Post meta reference"
+msgstr ""
+
+#: includes/class-channels-page.php:100
+msgid "Compatibility"
+msgstr ""
+
+#: includes/class-channels-page.php:106
+#: includes/class-channels-page.php:108
+msgid "Troubleshooting"
+msgstr ""
+
+#: includes/class-channels-page.php:110
+msgid "API key or quota errors"
+msgstr ""
+
+#: includes/class-channels-page.php:111
+msgid "The channel can't be found"
+msgstr ""
+
+#: includes/class-channels-page.php:112
+msgid "I'm seeing duplicate posts"
+msgstr ""
+
+#: includes/class-channels-page.php:113
+msgid "I can't activate my license"
+msgstr ""
+
+#: includes/class-channels-page.php:114
+msgid "How to get support"
+msgstr ""
+
+#: includes/class-channels-page.php:119
+msgid "For more information:"
+msgstr ""
+
+#: includes/class-channels-page.php:120
+msgid "Knowledge Base"
+msgstr ""
+
+#: includes/class-channels-page.php:121
+msgid "Support"
+msgstr ""
+
+#: includes/class-channels-page.php:145
+#: includes/class-channels-page.php:146
+msgid "Channels"
+msgstr ""
+
+#: includes/class-channels-page.php:222
+msgid "Security check failed."
+msgstr ""
+
+#: includes/class-channels-page.php:226
+msgid "You do not have permission to do this."
+msgstr ""
+
+#. translators: %d: number of candidate videos
+#: includes/class-sync-runner.php:360
+#, php-format
+msgid "No videos were imported. %d candidate was fetched from the API but could not be saved."
+msgid_plural "No videos were imported. %d candidates were fetched from the API but none could be saved."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-sync-runner.php:574
+msgid "No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved."
+msgstr ""
+
+#. translators: %s: post type slug
+#: includes/class-sync-runner.php:578
+#, php-format
+msgid "The destination post type \"%s\" is no longer registered. Choose a valid post type for this rule."
+msgstr ""
+
+#: includes/settings.php:37
+#: template-parts/settings-page.php:15
+msgid "YouSync Settings"
+msgstr ""
+
+#: includes/settings.php:38
+#: template-parts/channel-group.php:81
+msgid "Settings"
+msgstr ""
+
+#: includes/settings.php:70
+msgid "API Settings"
+msgstr ""
+
+#: includes/settings.php:77
+msgid "Google API Key"
+msgstr ""
+
+#: includes/settings.php:85
+msgid "Advanced"
+msgstr ""
+
+#: includes/settings.php:92
+msgid "Uninstall Data"
+msgstr ""
+
+#: includes/settings.php:119
+msgid "API key cannot be empty."
+msgstr ""
+
+#: includes/settings.php:135
+msgid "Could not connect to YouTube API."
+msgstr ""
+
+#. translators: %s: Error message from YouTube API
+#: includes/settings.php:148
+#, php-format
+msgid "YouTube API error: %s"
+msgstr ""
+
+#: includes/settings.php:155
+msgid "API key saved successfully!"
+msgstr ""
+
+#: includes/settings.php:171
+msgid "Remove all YouSync data when the plugin is deleted"
+msgstr ""
+
+#: includes/settings.php:174
+msgid "When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later."
+msgstr ""
+
+#. translators: %d: channel number
+#: template-parts/channel-group.php:65
+#, php-format
+msgid "Channel %d"
+msgstr ""
+
+#: template-parts/channel-group.php:75
+msgid "Info"
+msgstr ""
+
+#: template-parts/channel-group.php:78
+#: template-parts/metabox-channel.php:32
+#: template-parts/metabox-playlist.php:34
+#: template-parts/metabox-video.php:44
+msgid "Sync"
+msgstr ""
+
+#: template-parts/channel-group.php:84
+msgid "History"
+msgstr ""
+
+#. translators: %d: number of sync errors
+#: template-parts/channel-group.php:88
+#, php-format
+msgid "%d sync error"
+msgid_plural "%d sync errors"
+msgstr[0] ""
+msgstr[1] ""
+
+#: template-parts/channel-group.php:101
+#: template-parts/metabox-channel.php:96
+#: template-parts/metabox-playlist.php:99
+#: template-parts/metabox-video.php:177
+msgid "Channel ID"
+msgstr ""
+
+#: template-parts/channel-group.php:108
+msgid "e.g. UCuAXFkgsw1L7xaCfnd5JJOw"
+msgstr ""
+
+#: template-parts/channel-group.php:118
+msgid "Title"
+msgstr ""
+
+#: template-parts/channel-group.php:125
+#: template-parts/metabox-channel.php:65
+msgid "Subscribers"
+msgstr ""
+
+#: template-parts/channel-group.php:132
+#: template-parts/metabox-channel.php:75
+msgid "Videos"
+msgstr ""
+
+#: template-parts/channel-group.php:139
+#: template-parts/metabox-channel.php:55
+#: template-parts/metabox-playlist.php:57
+#: template-parts/metabox-video.php:67
+msgid "Description"
+msgstr ""
+
+#: template-parts/channel-group.php:151
+msgid "Add sync rule"
+msgstr ""
+
+#: template-parts/channel-group.php:188
+msgid "Default Post Type"
+msgstr ""
+
+#: template-parts/channel-group.php:190
+#: template-parts/sync-rule.php:126
+#: template-parts/sync-rule.php:142
+#: template-parts/sync-rule.php:168
+msgid "More info"
+msgstr ""
+
+#: template-parts/channel-group.php:191
+msgid "Assign synced videos and playlists from this channel to this post type by default."
+msgstr ""
+
+#: template-parts/channel-group.php:199
+#: template-parts/sync-rule-wizard.php:92
+#: template-parts/sync-rule.php:173
+msgid "— Select post type —"
+msgstr ""
+
+#: template-parts/channel-group.php:212
+msgid "No sync history yet."
+msgstr ""
+
+#: template-parts/channel-group.php:217
+#: template-parts/sync-rule-wizard.php:47
+#: template-parts/sync-rule.php:38
+#: template-parts/sync-rule.php:132
+msgid "Sync new videos"
+msgstr ""
+
+#: template-parts/channel-group.php:218
+#: template-parts/sync-rule-wizard.php:48
+#: template-parts/sync-rule.php:37
+#: template-parts/sync-rule.php:133
+msgid "Sync new playlists"
+msgstr ""
+
+#: template-parts/channel-group.php:219
+msgid "Sync channel"
+msgstr ""
+
+#: template-parts/channel-group.php:237
+msgid "synced"
+msgstr ""
+
+#: template-parts/channel-group.php:237
+msgid "updated"
+msgstr ""
+
+#: template-parts/channel-group.php:239
+msgid "playlist"
+msgid_plural "playlists"
+msgstr[0] ""
+msgstr[1] ""
+
+#: template-parts/channel-group.php:241
+msgid "channel"
+msgid_plural "channels"
+msgstr[0] ""
+msgstr[1] ""
+
+#: template-parts/channel-group.php:243
+msgid "video"
+msgid_plural "videos"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: post type label, e.g. "Posts"
+#: template-parts/channel-group.php:253
+#, php-format
+msgid "to %s"
+msgstr ""
+
+#. translators: %d: sync run duration in seconds
+#: template-parts/channel-group.php:281
+#, php-format
+msgid "%ds"
+msgstr ""
+
+#: template-parts/channels-page.php:21
+#: template-parts/metabox-video.php:77
+msgid "Channel"
+msgstr ""
+
+#: template-parts/channels-page.php:26
+msgid "API key required"
+msgstr ""
+
+#. translators: 1: Google Cloud Console link, 2: YouTube Data API overview link
+#: template-parts/channels-page.php:31
+#, php-format
+msgid "Add a YouTube Data API key before setting up channels. You can create one in the %1$s by following the guide in the %2$s."
+msgstr ""
+
+#: template-parts/channels-page.php:32
+msgid "Google Cloud Console"
+msgstr ""
+
+#: template-parts/channels-page.php:33
+msgid "YouTube Data API overview"
+msgstr ""
+
+#: template-parts/channels-page.php:38
+msgid "Go to Settings"
+msgstr ""
+
+#: template-parts/channels-page.php:46
+msgid "Channel configuration saved."
+msgstr ""
+
+#: template-parts/channels-page.php:64
+msgid "Save Changes"
+msgstr ""
+
+#: template-parts/metabox-channel.php:26
+#: template-parts/metabox-playlist.php:26
+#: template-parts/metabox-video.php:36
+msgid "Details"
+msgstr ""
+
+#: template-parts/metabox-channel.php:29
+#: template-parts/metabox-playlist.php:30
+#: template-parts/metabox-video.php:40
+msgid "Images"
+msgstr ""
+
+#: template-parts/metabox-channel.php:45
+msgid "Channel Title"
+msgstr ""
+
+#: template-parts/metabox-channel.php:46
+#: template-parts/metabox-channel.php:56
+#: template-parts/metabox-channel.php:66
+#: template-parts/metabox-channel.php:76
+#: template-parts/metabox-channel.php:86
+#: template-parts/metabox-channel.php:97
+#: template-parts/metabox-channel.php:135
+#: template-parts/metabox-channel.php:144
+#: template-parts/metabox-playlist.php:48
+#: template-parts/metabox-playlist.php:58
+#: template-parts/metabox-playlist.php:68
+#: template-parts/metabox-playlist.php:78
+#: template-parts/metabox-playlist.php:90
+#: template-parts/metabox-playlist.php:100
+#: template-parts/metabox-playlist.php:126
+#: template-parts/metabox-video.php:58
+#: template-parts/metabox-video.php:68
+#: template-parts/metabox-video.php:78
+#: template-parts/metabox-video.php:88
+#: template-parts/metabox-video.php:106
+#: template-parts/metabox-video.php:116
+#: template-parts/metabox-video.php:126
+#: template-parts/metabox-video.php:136
+#: template-parts/metabox-video.php:146
+#: template-parts/metabox-video.php:158
+#: template-parts/metabox-video.php:168
+#: template-parts/metabox-video.php:178
+#: template-parts/metabox-video.php:210
+msgid "Copy value"
+msgstr ""
+
+#: template-parts/metabox-channel.php:85
+msgid "Channel Link"
+msgstr ""
+
+#: template-parts/metabox-channel.php:103
+#: template-parts/metabox-playlist.php:108
+#: template-parts/metabox-video.php:186
+msgid "Hide Developer Fields"
+msgstr ""
+
+#: template-parts/metabox-channel.php:104
+#: template-parts/metabox-playlist.php:109
+#: template-parts/metabox-video.php:187
+msgid "Show Developer Fields"
+msgstr ""
+
+#: template-parts/metabox-channel.php:134
+msgid "Banner Image"
+msgstr ""
+
+#: template-parts/metabox-channel.php:143
+msgid "Profile Photo"
+msgstr ""
+
+#: template-parts/metabox-channel.php:152
+msgid "No images synced yet."
+msgstr ""
+
+#: template-parts/metabox-channel.php:162
+#: template-parts/metabox-playlist.php:140
+#: template-parts/metabox-video.php:225
+msgid "Last Synced"
+msgstr ""
+
+#: template-parts/metabox-channel.php:166
+msgid "This channel has not been synced yet."
+msgstr ""
+
+#: template-parts/metabox-playlist.php:47
+msgid "Playlist Title"
+msgstr ""
+
+#: template-parts/metabox-playlist.php:67
+msgid "Video Count"
+msgstr ""
+
+#: template-parts/metabox-playlist.php:77
+msgid "Playlist Link"
+msgstr ""
+
+#: template-parts/metabox-playlist.php:89
+msgid "Playlist ID"
+msgstr ""
+
+#: template-parts/metabox-playlist.php:125
+msgid "Thumbnail URL"
+msgstr ""
+
+#: template-parts/metabox-playlist.php:144
+msgid "This playlist has not been synced yet."
+msgstr ""
+
+#: template-parts/metabox-video.php:57
+msgid "Original Title"
+msgstr ""
+
+#: template-parts/metabox-video.php:87
+msgid "Published Date"
+msgstr ""
+
+#: template-parts/metabox-video.php:105
+msgid "Duration"
+msgstr ""
+
+#: template-parts/metabox-video.php:115
+msgid "View Count"
+msgstr ""
+
+#: template-parts/metabox-video.php:125
+msgid "Like Count"
+msgstr ""
+
+#: template-parts/metabox-video.php:135
+msgid "Comment Count"
+msgstr ""
+
+#: template-parts/metabox-video.php:145
+msgid "Video Link"
+msgstr ""
+
+#: template-parts/metabox-video.php:157
+msgid "Video ID"
+msgstr ""
+
+#: template-parts/metabox-video.php:167
+msgid "Embed Code"
+msgstr ""
+
+#: template-parts/metabox-video.php:229
+msgid "This video has not been synced yet."
+msgstr ""
+
+#. translators: %s: Link to YouTube Data API documentation
+#: template-parts/settings-field-api-key.php:26
+#, php-format
+msgid "This key allows YouSync to access public data from any YouTube channel. You can create an API key in the Google Cloud Console by following the guide in the %s."
+msgstr ""
+
+#: template-parts/settings-field-api-key.php:27
+msgid "YouTube Data API Overview"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:27
+msgid "Wizard progress"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:40
+msgid "What should this rule do?"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:44
+#: template-parts/sync-rule.php:124
+msgid "Action"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:46
+#: template-parts/sync-rule.php:131
+msgid "— Select action —"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:49
+#: template-parts/sync-rule.php:36
+#: template-parts/sync-rule.php:134
+msgid "Sync this channel"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:53
+#: template-parts/sync-rule.php:76
+msgid "Items per run"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:56
+#: template-parts/sync-rule.php:148
+msgid "Unlimited — click to set a limit"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:61
+msgid "Cancel"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:62
+#: template-parts/sync-rule-wizard.php:79
+msgid "Next →"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:69
+msgid "When should this rule run?"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:73
+#: template-parts/sync-rule.php:157
+msgid "Sync schedule"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:74
+#: template-parts/sync-rule.php:158
+msgid "Once (run immediately after enabling and saving)"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:78
+#: template-parts/sync-rule-wizard.php:103
+msgid "← Back"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:86
+msgid "Where should synced items be saved?"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:90
+msgid "Post Type"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:104
+msgid "Add Rule"
+msgstr ""
+
+#: template-parts/sync-rule.php:40
+msgid "New rule"
+msgstr ""
+
+#: template-parts/sync-rule.php:41
+msgid "immediately after enabling and saving"
+msgstr ""
+
+#: template-parts/sync-rule.php:73
+msgid "Videos per run"
+msgstr ""
+
+#: template-parts/sync-rule.php:75
+msgid "Playlists per run"
+msgstr ""
+
+#: template-parts/sync-rule.php:79
+msgid "Save synced playlists as post type"
+msgstr ""
+
+#: template-parts/sync-rule.php:81
+msgid "Save synced channel as post type"
+msgstr ""
+
+#: template-parts/sync-rule.php:82
+msgid "Save synced videos as post type"
+msgstr ""
+
+#: template-parts/sync-rule.php:90
+msgid "Syncing..."
+msgstr ""
+
+#: template-parts/sync-rule.php:98
+msgid "This rule is disabled and won't run until re-enabled."
+msgstr ""
+
+#: template-parts/sync-rule.php:108
+msgid "Sync schedule info"
+msgstr ""
+
+#: template-parts/sync-rule.php:110
+msgid "Created:"
+msgstr ""
+
+#: template-parts/sync-rule.php:111
+msgid "Last Sync:"
+msgstr ""
+
+#: template-parts/sync-rule.php:127
+msgid "Choose what to sync from your YouTube channel."
+msgstr ""
+
+#: template-parts/sync-rule.php:143
+msgid "Maximum number of items to process per run. Set to 0 for unlimited."
+msgstr ""
+
+#: template-parts/sync-rule.php:169
+msgid "The WordPress post type that synced items will be created as."
+msgstr ""
+
+#: template-parts/sync-rule.php:203
+msgid "Remove sync rule"
+msgstr ""
+
+#: yousync.php:180
+msgid "YouSync Video Details"
+msgstr ""
+
+#: yousync.php:297
+msgid "Click to set a custom featured image"
+msgstr ""
+
+#: yousync.php:301
+msgid "Click the YouTube thumbnail to edit or update"
+msgstr ""
+
+#: yousync.php:319
+msgid "YouSync Playlist Details"
+msgstr ""
+
+#: yousync.php:360
+msgid "YouSync Channel Details"
+msgstr ""

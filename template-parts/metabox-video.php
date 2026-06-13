@@ -27,6 +27,8 @@ declare(strict_types=1);
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to yousync_get_template_part()'s extract()/include scope, not globals.
 ?>
 <div class="yousync-metabox">
 	<div class="ys-channel-tabs-nav" role="tablist">

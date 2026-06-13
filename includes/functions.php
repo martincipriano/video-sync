@@ -12,6 +12,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Whether a stored sync rule uses features the free plugin cannot represent or run.
+ *
+ * A rule belongs to YouSync Pro when it has a recurring schedule, an update action
+ * (anything other than the three "sync new" actions), or any filter conditions,
+ * field mapping, or taxonomy-term assignment. The free plugin leaves such rules in
+ * the database untouched — it does not render, schedule, or run them — so that
+ * re-activating Pro restores the full configuration. This is a data-shape check
+ * only; it executes no Pro feature.
+ *
+ * @param mixed $rule Stored sync rule.
+ * @return bool True if the rule is Pro-only and should be preserved but ignored.
+ */
+function yousync_rule_is_unsupported( $rule ): bool {
+	if ( ! is_array( $rule ) ) {
+		return false;
+	}
+	if ( 'once' !== ( $rule['schedule'] ?? 'once' ) ) {
+		return true;
+	}
+	$free_actions = array( '', 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' );
+	if ( ! in_array( $rule['action'] ?? '', $free_actions, true ) ) {
+		return true;
+	}
+	if ( ! empty( $rule['conditions'] ) || ! empty( $rule['field_mapping'] ) || ! empty( $rule['destination_taxonomy_terms'] ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * Sanitize a single sync rule from form input.
  *
  * Shared by Channel, Playlist, and Channels_Page save handlers.

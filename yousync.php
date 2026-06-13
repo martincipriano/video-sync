@@ -4,7 +4,7 @@ declare(strict_types=1);
  * Plugin Name: YouSync
  * Plugin URI: https://wpbuoy.com/product/yousync/
  * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: Martin Cipriano
  * Author URI: https://martincipriano.com
  * License: GPLv2 or later
@@ -13,7 +13,7 @@ declare(strict_types=1);
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP: 7.4
- * Tested up to: 6.9
+ * Tested up to: 7.0
  *
  * @package YouSync
  */
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'YOUSYNC_VERSION', '2.0.0' );
+define( 'YOUSYNC_VERSION', '2.1.0' );
 define( 'YOUSYNC_PLUGIN_FILE', __FILE__ );
 define( 'YOUSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -439,6 +439,7 @@ add_action( 'admin_init', function (): void {
 		'posts_per_page' => 50,
 		'fields'         => 'ids',
 		'no_found_rows'  => false,
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _yousync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 		'meta_query'     => array(
 			array(
 				'key'     => '_yousync_video',
