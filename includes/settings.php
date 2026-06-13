@@ -113,7 +113,15 @@ class YouSyncSettings {
 	 * @return string The validated API key.
 	 */
 	public function validate_api_key( $input ) {
-		$input = sanitize_text_field( $input );
+		$input  = sanitize_text_field( $input );
+		$stored = get_option( 'yousync_api_key', '' );
+
+		// Unchanged key — this save likely only touches other settings (e.g. the
+		// uninstall toggle). Skip the YouTube API round-trip and confirm generically.
+		if ( $input === $stored ) {
+			$this->add_settings_saved_notice();
+			return $input;
+		}
 
 		if ( empty( $input ) ) {
 			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
@@ -150,12 +158,21 @@ class YouSyncSettings {
 			return get_option( 'yousync_api_key', '' );
 		}
 
-		$existing = wp_list_pluck( get_settings_errors( 'yousync_api_key' ), 'code' );
-		if ( ! in_array( 'valid_api_key', $existing, true ) ) {
-			add_settings_error( 'yousync_api_key', 'valid_api_key', __( 'API key saved successfully!', 'yousync' ), 'updated' );
-		}
+		$this->add_settings_saved_notice();
 
 		return $input;
+	}
+
+	/**
+	 * Add a generic "Settings saved." success notice (deduplicated so it shows once).
+	 *
+	 * @return void
+	 */
+	private function add_settings_saved_notice() {
+		$existing = wp_list_pluck( get_settings_errors( 'yousync_api_key' ), 'code' );
+		if ( ! in_array( 'yousync_settings_saved', $existing, true ) ) {
+			add_settings_error( 'yousync_api_key', 'yousync_settings_saved', __( 'Settings saved.', 'yousync' ), 'updated' );
+		}
 	}
 
 	/**
