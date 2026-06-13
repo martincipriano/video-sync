@@ -252,6 +252,18 @@ class Channels_Page {
 			$old_youtube_id = $old_ch['youtube_id'] ?? '';
 			$new_youtube_id = isset( $ch_data['youtube_id'] ) ? sanitize_text_field( wp_unslash( $ch_data['youtube_id'] ) ) : '';
 
+			// Accept a channel URL or @handle: resolve anything that isn't already a
+			// channel ID. On failure, keep the previous ID and surface the error.
+			if ( '' !== $new_youtube_id && ! preg_match( '#^UC[A-Za-z0-9_-]{22}$#', $new_youtube_id ) ) {
+				$resolved = ( new YouTube_API( $api_key ) )->resolve_channel_id( $new_youtube_id );
+				if ( is_wp_error( $resolved ) ) {
+					$save_errors[ $new_youtube_id ] = $resolved->get_error_message();
+					$new_youtube_id                 = $old_youtube_id;
+				} else {
+					$new_youtube_id = $resolved;
+				}
+			}
+
 			$channel = array(
 				'youtube_id'    => $new_youtube_id,
 				'channel_title' => $old_ch['channel_title'] ?? '',

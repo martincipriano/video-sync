@@ -98,14 +98,14 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 
 				<div class="ys-mb-fields">
 					<div class="ys-mb-field<?php echo $channel_error ? ' ys-form-group--error' : ''; ?>">
-						<label class="ys-mb-label" for="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Channel ID', 'yousync' ); ?> <span class="ys-required" aria-hidden="true">*</span></label>
+						<label class="ys-mb-label" for="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"><?php esc_html_e( 'Channel (channel URL or ID)', 'yousync' ); ?> <span class="ys-required" aria-hidden="true">*</span></label>
 						<input
 							type="text"
 							id="ys-youtube-id-<?php echo esc_attr( $ch_index ); ?>"
 							name="channels[<?php echo esc_attr( $ch_index ); ?>][youtube_id]"
 							value="<?php echo esc_attr( $youtube_id ); ?>"
 							class="ys-text"
-							placeholder="<?php esc_attr_e( 'e.g. UCuAXFkgsw1L7xaCfnd5JJOw', 'yousync' ); ?>"
+							placeholder="<?php esc_attr_e( 'e.g. youtube.com/@channel or UCuAXFkgsw1L7xaCfnd5JJOw', 'yousync' ); ?>"
 							required
 						>
 						<?php if ( $channel_error ) : ?>

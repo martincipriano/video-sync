@@ -109,6 +109,143 @@ class YouTube_API {
 	}
 
 	/**
+	 * Resolve a user-supplied channel reference to a channel ID (UC…).
+	 *
+	 * Accepts a raw ID; a /channel/, /@handle, /user/, /c/, or video URL; a bare
+	 * @handle; or a custom name. Uses the Data API where possible (1 quota unit) and
+	 * falls back to reading the channel page's canonical channel ID (no quota) for
+	 * legacy /c/ custom URLs or when no API key is configured.
+	 *
+	 * @param string $input Raw value the user entered.
+	 * @return string|\WP_Error Channel ID on success, WP_Error if it cannot be resolved.
+	 */
+	public function resolve_channel_id( string $input ): string|\WP_Error {
+		$input = trim( $input );
+		if ( '' === $input ) {
+			return new \WP_Error( 'yousync_channel_empty', __( 'Enter a channel URL or ID.', 'yousync' ) );
+		}
+
+		// Already a channel ID.
+		if ( preg_match( '#^UC[A-Za-z0-9_-]{22}$#', $input ) ) {
+			return $input;
+		}
+
+		// A /channel/UC… URL — the ID is embedded.
+		if ( preg_match( '#/channel/(UC[A-Za-z0-9_-]{22})#', $input, $m ) ) {
+			return $m[1];
+		}
+
+		// Data API resolution (needs a key) — 1 quota unit each.
+		if ( '' !== $this->api_key ) {
+			if ( preg_match( '#(?:^|/)@([A-Za-z0-9._-]+)#', $input, $m ) ) {
+				$id = $this->lookup_channel( array( 'forHandle' => '@' . $m[1] ) );
+				if ( ! is_wp_error( $id ) ) {
+					return $id;
+				}
+			}
+			if ( preg_match( '#/user/([A-Za-z0-9._-]+)#', $input, $m ) ) {
+				$id = $this->lookup_channel( array( 'forUsername' => $m[1] ) );
+				if ( ! is_wp_error( $id ) ) {
+					return $id;
+				}
+			}
+			if ( preg_match( '#(?:v=|youtu\.be/|/shorts/|/embed/)([A-Za-z0-9_-]{11})#', $input, $m ) ) {
+				$id = $this->channel_id_from_video( $m[1] );
+				if ( ! is_wp_error( $id ) ) {
+					return $id;
+				}
+			}
+		}
+
+		// Fallback: read the channel page's canonical ID (no quota). Handles legacy
+		// /c/ custom URLs and works without an API key.
+		$id = $this->channel_id_from_page( $input );
+		if ( ! is_wp_error( $id ) ) {
+			return $id;
+		}
+
+		return new \WP_Error(
+			'yousync_channel_unresolved',
+			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'yousync' )
+		);
+	}
+
+	/**
+	 * Look up a channel ID via channels.list (forHandle / forUsername).
+	 *
+	 * @param array $params e.g. [ 'forHandle' => '@name' ] or [ 'forUsername' => 'name' ].
+	 * @return string|\WP_Error
+	 */
+	private function lookup_channel( array $params ): string|\WP_Error {
+		$data = $this->request( $this->api_url( 'channels', array_merge( array( 'part' => 'id' ), $params ) ) );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+		$id = $data['items'][0]['id'] ?? '';
+		return $id ?: new \WP_Error( 'yousync_channel_not_found', __( 'No channel matched that link.', 'yousync' ) );
+	}
+
+	/**
+	 * Resolve a video ID to its owning channel ID via videos.list.
+	 *
+	 * @param string $video_id YouTube video ID.
+	 * @return string|\WP_Error
+	 */
+	private function channel_id_from_video( string $video_id ): string|\WP_Error {
+		$data = $this->request( $this->api_url( 'videos', array( 'part' => 'snippet', 'id' => $video_id ) ) );
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
+		$id = $data['items'][0]['snippet']['channelId'] ?? '';
+		return $id ?: new \WP_Error( 'yousync_channel_not_found', __( 'No channel matched that video.', 'yousync' ) );
+	}
+
+	/**
+	 * Read a channel's canonical ID from its public page (no API quota).
+	 *
+	 * Fetches the channel URL (or builds one from a handle/custom name) and extracts
+	 * the UC… ID from the page's channelId / canonical markup. Used only as a fallback.
+	 *
+	 * @param string $input A channel URL, @handle, or custom name.
+	 * @return string|\WP_Error
+	 */
+	private function channel_id_from_page( string $input ): string|\WP_Error {
+		if ( preg_match( '#^https?://#i', $input ) ) {
+			$url = $input;
+		} elseif ( false !== strpos( $input, 'youtube.com' ) || false !== strpos( $input, 'youtu.be' ) ) {
+			$url = 'https://' . ltrim( $input, '/' );
+		} elseif ( '@' === $input[0] ) {
+			$url = 'https://www.youtube.com/' . $input;
+		} else {
+			$url = 'https://www.youtube.com/' . ltrim( $input, '/' );
+		}
+
+		$response = wp_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error( 'yousync_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'yousync' ) );
+		}
+		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return new \WP_Error( 'yousync_channel_not_found', __( 'No channel matched that link.', 'yousync' ) );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		// Only markers that identify the PAGE'S OWN channel — a generic "channelId"
+		// or "/channel/" match would catch recommended/featured channels on the page.
+		$patterns = array(
+			'#<link[^>]+rel="canonical"[^>]+href="[^"]*?/channel/(UC[A-Za-z0-9_-]{22})"#',
+			'#<meta[^>]+property="og:url"[^>]+content="[^"]*?/channel/(UC[A-Za-z0-9_-]{22})"#',
+			'#"externalId":"(UC[A-Za-z0-9_-]{22})"#',
+		);
+		foreach ( $patterns as $pattern ) {
+			if ( preg_match( $pattern, $body, $m ) ) {
+				return $m[1];
+			}
+		}
+
+		return new \WP_Error( 'yousync_channel_not_found', __( 'No channel matched that link.', 'yousync' ) );
+	}
+
+	/**
 	 * Get all items from a playlist (paginated).
 	 *
 	 * Uses playlistItems.list?part=snippet — 1 quota unit per page of 50.

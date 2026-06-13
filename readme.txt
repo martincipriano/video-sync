@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,10 @@ By default your synced posts and settings are kept. If you want everything remov
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.2.0 =
+* New: Paste a channel URL or @handle in the Channel field — YouSync resolves it to the channel ID automatically (supports channel URLs, @handles, /user/ and /c/ URLs, and video links).
+* Improved: The Settings page shows a generic "Settings saved." notice and no longer re-validates the API key when it hasn't changed.
 
 = 2.1.0 =
 * New: In-plugin Help tabs linking to the YouSync knowledge base on every admin screen.
