@@ -268,7 +268,7 @@ $name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 				?>
 				<li class="ys-history-entry<?php echo $entry_error ? ' ys-history-entry--error' : ''; ?>">
 					<div class="ys-history-entry-header">
-						<span class="ys-history-entry-status material-icons-outlined" aria-hidden="true"><?php echo $entry_error ? 'error' : 'check_circle'; ?></span>
+						<span class="ys-history-entry-status" aria-hidden="true"></span>
 						<span class="ys-history-entry-action">
 							<?php echo esc_html( $entry_label ); ?>
 							<?php if ( $entry_summary ) : ?>

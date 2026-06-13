@@ -189,7 +189,6 @@ class Channels_Page {
 			return;
 		}
 
-		wp_enqueue_style( 'material-icons-outlined', 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined', array(), YOUSYNC_VERSION );
 		wp_enqueue_style( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
 		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), YOUSYNC_VERSION );
 		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
