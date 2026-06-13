@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -84,6 +84,19 @@ Each API call costs 1 quota unit. Importing from a channel needs at least 2 call
 
 By default your synced posts and settings are kept. If you want everything removed, enable **Remove all YouSync data when the plugin is deleted** in **YouSync → Settings** before deleting the plugin.
 
+== External services ==
+
+YouSync connects to the **YouTube Data API v3**, a service provided by Google, to fetch the public metadata it imports into WordPress.
+
+**What it is used for:** retrieving public information about the YouTube channels, playlists, and videos you choose to sync — such as titles, descriptions, thumbnail URLs, view counts, publish dates, and channel/playlist/video IDs.
+
+**What data is sent and when:** requests are made only when you save a channel, run a sync (manually or on a schedule you configure), or use the pre-sync quota estimate. Each request is sent directly from your own server to Google's API endpoint (`https://www.googleapis.com/youtube/v3/`) and includes the Google API key you provide and the channel, playlist, or video identifier being synced. No personal data about your site's visitors or users is sent, and no data passes through any service operated by the plugin author or a third party.
+
+This service is provided by Google. By using it you agree to Google's terms and privacy policy:
+
+* YouTube API Services Terms of Service: https://developers.google.com/youtube/terms/api-services-terms-of-service
+* Google Privacy Policy: https://policies.google.com/privacy
+
 == Screenshots ==
 
 1. Channels page — add a YouTube channel and configure its sync rules.
@@ -92,6 +105,9 @@ By default your synced posts and settings are kept. If you want everything remov
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.2.2 =
+* Improved: Added an "External services" section to the readme documenting the YouTube Data API v3 usage, in line with WordPress.org plugin guidelines.
 
 = 2.2.1 =
 * Fixed: Sync history status icons now render as inline SVG and no longer load an external font, removing the Google Fonts (Material Icons) dependency for full WordPress.org compliance.

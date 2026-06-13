@@ -4,7 +4,7 @@ declare(strict_types=1);
  * Plugin Name: YouSync
  * Plugin URI: https://wpbuoy.com/product/yousync/
  * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
- * Version: 2.2.1
+ * Version: 2.2.2
  * Author: Martin Cipriano
  * Author URI: https://martincipriano.com
  * License: GPLv2 or later
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'YOUSYNC_VERSION', '2.2.1' );
+define( 'YOUSYNC_VERSION', '2.2.2' );
 define( 'YOUSYNC_PLUGIN_FILE', __FILE__ );
 define( 'YOUSYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'YOUSYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
