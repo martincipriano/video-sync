@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 /**
- * YouSync Settings Class
+ * WPBuoy Video Sync Settings Class
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
-namespace YouSync;
+namespace WPBuoyVideoSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,9 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * YouSync Settings Class
+ * WPBuoy Video Sync Settings Class
  */
-class YouSyncSettings {
+class WPBuoyVideoSyncSettings {
 
 	/**
 	 * Constructor.
@@ -33,11 +33,11 @@ class YouSyncSettings {
 	 */
 	public function add_settings_submenu() {
 		add_submenu_page(
-			'yousync',
-			__( 'YouSync Settings', 'yousync'),
-			__( 'Settings', 'yousync'),
+			'wpbuoy-video-sync',
+			__( 'WPBuoy Video Sync Settings', 'wpbuoy-video-sync'),
+			__( 'Settings', 'wpbuoy-video-sync'),
 			'manage_options',
-			'yousync_settings',
+			'wpbuoy_video_sync_settings',
 			array( $this, 'settings_html' )
 		);
 	}
@@ -49,16 +49,16 @@ class YouSyncSettings {
 	 */
 	public function register_settings() {
 		register_setting(
-			'yousync_settings_group',
-			'yousync_api_key',
+			'wpbuoy_video_sync_settings_group',
+			'wpbuoy_video_sync_api_key',
 			array(
 				'sanitize_callback' => array( $this, 'validate_api_key' ),
 			)
 		);
 
 		register_setting(
-			'yousync_settings_group',
-			'yousync_delete_on_uninstall',
+			'wpbuoy_video_sync_settings_group',
+			'wpbuoy_video_sync_delete_on_uninstall',
 			array(
 				'sanitize_callback' => 'absint',
 				'default'           => 0,
@@ -66,33 +66,33 @@ class YouSyncSettings {
 		);
 
 		add_settings_section(
-			'yousync_api_settings',
-			__( 'API Settings', 'yousync'),
+			'wpbuoy_video_sync_api_settings',
+			__( 'API Settings', 'wpbuoy-video-sync'),
 			null,
-			'yousync_settings'
+			'wpbuoy_video_sync_settings'
 		);
 
 		add_settings_field(
-			'yousync_api_key',
-			__( 'Google API Key', 'yousync'),
+			'wpbuoy_video_sync_api_key',
+			__( 'Google API Key', 'wpbuoy-video-sync'),
 			array( $this, 'api_key_html' ),
-			'yousync_settings',
-			'yousync_api_settings'
+			'wpbuoy_video_sync_settings',
+			'wpbuoy_video_sync_api_settings'
 		);
 
 		add_settings_section(
-			'yousync_advanced_settings',
-			__( 'Advanced', 'yousync'),
+			'wpbuoy_video_sync_advanced_settings',
+			__( 'Advanced', 'wpbuoy-video-sync'),
 			null,
-			'yousync_settings'
+			'wpbuoy_video_sync_settings'
 		);
 
 		add_settings_field(
-			'yousync_delete_on_uninstall',
-			__( 'Uninstall Data', 'yousync'),
+			'wpbuoy_video_sync_delete_on_uninstall',
+			__( 'Uninstall Data', 'wpbuoy-video-sync'),
 			array( $this, 'delete_on_uninstall_html' ),
-			'yousync_settings',
-			'yousync_advanced_settings'
+			'wpbuoy_video_sync_settings',
+			'wpbuoy_video_sync_advanced_settings'
 		);
 	}
 
@@ -102,8 +102,8 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	public function api_key_html() {
-		$value = get_option( 'yousync_api_key', '' );
-		yousync_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
+		$value = get_option( 'wpbuoy_video_sync_api_key', '' );
+		wpbuoy_video_sync_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class YouSyncSettings {
 	 */
 	public function validate_api_key( $input ) {
 		$input  = sanitize_text_field( $input );
-		$stored = get_option( 'yousync_api_key', '' );
+		$stored = get_option( 'wpbuoy_video_sync_api_key', '' );
 
 		// Unchanged key — this save likely only touches other settings (e.g. the
 		// uninstall toggle). Skip the YouTube API round-trip and confirm generically.
@@ -124,8 +124,8 @@ class YouSyncSettings {
 		}
 
 		if ( empty( $input ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_empty', __( 'API key cannot be empty.', 'yousync' ) );
-			return get_option( 'yousync_api_key', '' );
+			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_api_key_empty', __( 'API key cannot be empty.', 'wpbuoy-video-sync' ) );
+			return get_option( 'wpbuoy_video_sync_api_key', '' );
 		}
 
 		$response = wp_remote_get(
@@ -140,8 +140,8 @@ class YouSyncSettings {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_api_key_request_error', __( 'Could not connect to YouTube API.', 'yousync') );
-			return get_option( 'yousync_api_key', '' );
+			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_api_key_request_error', __( 'Could not connect to YouTube API.', 'wpbuoy-video-sync') );
+			return get_option( 'wpbuoy_video_sync_api_key', '' );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
@@ -150,12 +150,12 @@ class YouSyncSettings {
 		if ( 200 !== $code ) {
 			$error_msg = isset( $data['error']['message'] ) ? $data['error']['message'] : 'Unknown error';
 			add_settings_error(
-				'yousync_api_key',
-				'yousync_api_key_invalid',
+				'wpbuoy_video_sync_api_key',
+				'wpbuoy_video_sync_api_key_invalid',
 				/* translators: %s: Error message from YouTube API */
-				sprintf( __( 'YouTube API error: %s', 'yousync'), esc_html( $error_msg ) )
+				sprintf( __( 'YouTube API error: %s', 'wpbuoy-video-sync'), esc_html( $error_msg ) )
 			);
-			return get_option( 'yousync_api_key', '' );
+			return get_option( 'wpbuoy_video_sync_api_key', '' );
 		}
 
 		$this->add_settings_saved_notice();
@@ -169,9 +169,9 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	private function add_settings_saved_notice() {
-		$existing = wp_list_pluck( get_settings_errors( 'yousync_api_key' ), 'code' );
-		if ( ! in_array( 'yousync_settings_saved', $existing, true ) ) {
-			add_settings_error( 'yousync_api_key', 'yousync_settings_saved', __( 'Settings saved.', 'yousync' ), 'updated' );
+		$existing = wp_list_pluck( get_settings_errors( 'wpbuoy_video_sync_api_key' ), 'code' );
+		if ( ! in_array( 'wpbuoy_video_sync_settings_saved', $existing, true ) ) {
+			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_settings_saved', __( 'Settings saved.', 'wpbuoy-video-sync' ), 'updated' );
 		}
 	}
 
@@ -181,14 +181,14 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	public function delete_on_uninstall_html() {
-		$checked = (bool) get_option( 'yousync_delete_on_uninstall', 0 );
+		$checked = (bool) get_option( 'wpbuoy_video_sync_delete_on_uninstall', 0 );
 		?>
 		<label>
-			<input type="checkbox" name="yousync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
-			<?php esc_html_e( 'Remove all YouSync data when the plugin is deleted', 'yousync'); ?>
+			<input type="checkbox" name="wpbuoy_video_sync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
+			<?php esc_html_e( 'Remove all WPBuoy Video Sync data when the plugin is deleted', 'wpbuoy-video-sync'); ?>
 		</label>
 		<p class="description">
-			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'yousync'); ?>
+			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'wpbuoy-video-sync'); ?>
 		</p>
 		<?php
 	}
@@ -199,9 +199,9 @@ class YouSyncSettings {
 	 * @return void
 	 */
 	public function settings_html() {
-		yousync_get_template_part( 'settings', 'page' );
+		wpbuoy_video_sync_get_template_part( 'settings', 'page' );
 	}
 
 }
 
-new YouSyncSettings();
+new WPBuoyVideoSyncSettings();

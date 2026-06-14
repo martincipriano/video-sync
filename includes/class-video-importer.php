@@ -8,10 +8,10 @@ declare(strict_types=1);
  * The post_thumbnail_html filter in yousync.php serves the YouTube URL when
  * no featured image is explicitly set by the user.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
-namespace YouSync;
+namespace WPBuoyVideoSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,7 +60,7 @@ class Video_Importer {
 			return $post_id;
 		}
 
-		// 2. Save all internal _yousync_* meta keys.
+		// 2. Save all internal _wpbuoy_video_sync_* meta keys.
 		$this->save_all_meta( $post_id, $video_data, $source_type, $source_term_id );
 
 		return $post_id;
@@ -92,7 +92,7 @@ class Video_Importer {
 				"SELECT pm.meta_value
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-				 WHERE pm.meta_key = '_yousync_video_id'
+				 WHERE pm.meta_key = '_wpbuoy_video_sync_video_id'
 				   AND p.post_type = %s
 				   AND p.post_status IN ( $placeholders )",
 				array_merge( array( $post_type ), $statuses )
@@ -102,7 +102,7 @@ class Video_Importer {
 				"SELECT pm.meta_value
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-				 WHERE pm.meta_key = '_yousync_video_id'
+				 WHERE pm.meta_key = '_wpbuoy_video_sync_video_id'
 				   AND p.post_status IN ( $placeholders )",
 				$statuses
 			);
@@ -141,24 +141,24 @@ class Video_Importer {
 			);
 		}
 
-		update_post_meta( $post_id, '_yousync_video_id',             $video_data['video_id'] );
-		update_post_meta( $post_id, '_yousync_video_url',            'https://www.youtube.com/watch?v=' . $video_data['video_id'] );
-		update_post_meta( $post_id, '_yousync_channel_id',           $video_data['channel_id'] ?? '' );
-		update_post_meta( $post_id, '_yousync_channel_title',        $video_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_yousync_etag',                 $video_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_yousync_source_type',          $source_type );
-		update_post_meta( $post_id, '_yousync_source_id',            $source_id );
-		update_post_meta( $post_id, '_yousync_original_title',       $video_data['title'] ?? '' );
-		update_post_meta( $post_id, '_yousync_original_description', $video_data['description'] ?? '' );
-		update_post_meta( $post_id, '_yousync_published_at',         $video_data['published_at'] ?? '' );
-		update_post_meta( $post_id, '_yousync_duration_seconds',     (int) ( $video_data['duration_seconds'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_view_count',           (int) ( $video_data['view_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_like_count',           (int) ( $video_data['like_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_comment_count',        (int) ( $video_data['comment_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_video_id',             $video_data['video_id'] );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_video_url',            'https://www.youtube.com/watch?v=' . $video_data['video_id'] );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_id',           $video_data['channel_id'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_title',        $video_data['channel_title'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_etag',                 $video_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_source_type',          $source_type );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_source_id',            $source_id );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_original_title',       $video_data['title'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_original_description', $video_data['description'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_published_at',         $video_data['published_at'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_duration_seconds',     (int) ( $video_data['duration_seconds'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_view_count',           (int) ( $video_data['view_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_like_count',           (int) ( $video_data['like_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_comment_count',        (int) ( $video_data['comment_count'] ?? 0 ) );
 		$best_thumb = static::get_best_thumbnail( $thumbnails );
-		update_post_meta( $post_id, '_yousync_thumbnails',           $thumbnails );
-		update_post_meta( $post_id, '_yousync_thumbnail_url',        $best_thumb['url'] ?? '' );
-		update_post_meta( $post_id, '_yousync_last_synced',          time() );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_thumbnails',           $thumbnails );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_thumbnail_url',        $best_thumb['url'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',          time() );
 	}
 
 	// -------------------------------------------------------------------------
@@ -179,10 +179,10 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _yousync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _wpbuoy_video_sync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
-						'key'   => '_yousync_playlist_id',
+						'key'   => '_wpbuoy_video_sync_playlist_id',
 						'value' => $playlist_id,
 					),
 				),
@@ -228,14 +228,14 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_playlist_meta( int $post_id, array $playlist_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_yousync_playlist_id',          $playlist_data['playlist_id'] );
-		update_post_meta( $post_id, '_yousync_channel_id',           $channel_id );
-		update_post_meta( $post_id, '_yousync_playlist_title',       $playlist_data['playlist_title'] ?? '' );
-		update_post_meta( $post_id, '_yousync_playlist_description', $playlist_data['playlist_description'] ?? '' );
-		update_post_meta( $post_id, '_yousync_playlist_video_count', (int) ( $playlist_data['playlist_video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
-		update_post_meta( $post_id, '_yousync_etag',                 $playlist_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_yousync_last_synced',          time() );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_id',          $playlist_data['playlist_id'] );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_id',           $channel_id );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_title',       $playlist_data['playlist_title'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_description', $playlist_data['playlist_description'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_video_count', (int) ( $playlist_data['playlist_video_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_etag',                 $playlist_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',          time() );
 	}
 
 	// -------------------------------------------------------------------------
@@ -245,7 +245,7 @@ class Video_Importer {
 	/**
 	 * Find an existing post by its YouTube channel ID.
 	 *
-	 * Uses _yousync_channel_post as the dedup key (distinct from _yousync_channel_id,
+	 * Uses _wpbuoy_video_sync_channel_post as the dedup key (distinct from _wpbuoy_video_sync_channel_id,
 	 * which stores the source channel ID on video/playlist posts).
 	 *
 	 * @param string $channel_id YouTube channel ID.
@@ -259,10 +259,10 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _yousync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _wpbuoy_video_sync_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
-						'key'   => '_yousync_channel_post',
+						'key'   => '_wpbuoy_video_sync_channel_post',
 						'value' => $channel_id,
 					),
 				),
@@ -275,7 +275,7 @@ class Video_Importer {
 	/**
 	 * Import a YouTube channel as a new WordPress post.
 	 *
-	 * Deduplication key: _yousync_channel_post. The channel profile picture is
+	 * Deduplication key: _wpbuoy_video_sync_channel_post. The channel profile picture is
 	 * sideloaded as the post's featured image (fallback: user-set image takes
 	 * precedence on the frontend via the post_thumbnail_html filter).
 	 *
@@ -318,17 +318,17 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_channel_meta( int $post_id, array $channel_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_yousync_channel_post',        $channel_id );
-		update_post_meta( $post_id, '_yousync_channel_id',          $channel_id );
-		update_post_meta( $post_id, '_yousync_channel_title',       $channel_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_yousync_channel_description', $channel_data['channel_description'] ?? '' );
-		update_post_meta( $post_id, '_yousync_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_yousync_etag',                $channel_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_yousync_profile_picture',    $channel_data['profile_picture']['url'] ?? '' );
-		update_post_meta( $post_id, '_yousync_banner_image',       $channel_data['banner_image']['url'] ?? '' );
-		update_post_meta( $post_id, '_yousync_source_type',         'channel' );
-		update_post_meta( $post_id, '_yousync_last_synced',         time() );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_post',        $channel_id );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_id',          $channel_id );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_title',       $channel_data['channel_title'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_description', $channel_data['channel_description'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_etag',                $channel_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_profile_picture',    $channel_data['profile_picture']['url'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_banner_image',       $channel_data['banner_image']['url'] ?? '' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_source_type',         'channel' );
+		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',         time() );
 	}
 
 	/**
@@ -365,7 +365,7 @@ class Video_Importer {
 		if ( get_post_thumbnail_id( $post_id ) ) {
 			return;
 		}
-		$url = (string) get_post_meta( $post_id, '_yousync_profile_picture', true );
+		$url = (string) get_post_meta( $post_id, '_wpbuoy_video_sync_profile_picture', true );
 		if ( $url ) {
 			$this->sideload_as_featured_image( $post_id, $url );
 		}
@@ -376,7 +376,7 @@ class Video_Importer {
 	 *
 	 * Used by the post_thumbnail_html filter in yousync.php.
 	 *
-	 * @param array $thumbnails Thumbnails array from _yousync_video meta.
+	 * @param array $thumbnails Thumbnails array from _wpbuoy_video_sync_video meta.
 	 * @return array|null Thumbnail array (url, width, height) or null if none found.
 	 */
 	public static function get_best_thumbnail( array $thumbnails ): ?array {

@@ -37,7 +37,7 @@ delegationRoot.querySelectorAll('.ys-rule').forEach(updateRuleLabel)
 function getRuleStorageKey(rule) {
 	const channel = rule.closest('.ys-channel')
 	const chIdx   = channel ? channel.dataset.channelIndex : 'single'
-	return `yousync_accordion_ch${chIdx}_rule${rule.dataset.ruleIndex}`
+	return `wpbuoy_video_sync_accordion_ch${chIdx}_rule${rule.dataset.ruleIndex}`
 }
 
 /**
@@ -524,7 +524,7 @@ function wizardSubmit(wizard) {
 
 	// Build FormData — jQuery serializes nested objects correctly.
 	const data = {
-		action:        'yousync_add_rule',
+		action:        'wpbuoy_video_sync_add_rule',
 		nonce:         youSync.addRuleNonce,
 		channel_index: chIndex,
 		rule:          rule,
@@ -970,7 +970,7 @@ delegationRoot.addEventListener('click', function(e) {
 				const youtubeId = card.dataset.youtubeId
 				if (youtubeId && youSync.markHistoryReadNonce) {
 					const fd = new FormData()
-					fd.append('action', 'yousync_mark_history_read')
+					fd.append('action', 'wpbuoy_video_sync_mark_history_read')
 					fd.append('nonce', youSync.markHistoryReadNonce)
 					fd.append('youtube_id', youtubeId)
 					navigator.sendBeacon(youSync.ajaxUrl, fd)
@@ -1120,7 +1120,7 @@ delegationRoot.addEventListener('click', function(e) {
 
 	function poll(chIndex, ruleIndex, ruleEl, key) {
 		const body = new URLSearchParams({
-			action:     'yousync_sync_progress',
+			action:     'wpbuoy_video_sync_sync_progress',
 			nonce:      youSync.syncProgressNonce,
 			ch_index:   chIndex,
 			rule_index: ruleIndex,

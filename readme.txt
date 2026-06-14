@@ -1,4 +1,4 @@
-=== YouSync ===
+=== WPBuoy Video Sync ===
 Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
@@ -12,7 +12,7 @@ Sync new videos, playlists, and channel data from a YouTube channel into WordPre
 
 == Description ==
 
-YouSync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and YouSync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
+WPBuoy Video Sync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and WPBuoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
 
 Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
 
@@ -25,14 +25,14 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
 * **Thumbnails** imported and used as the featured image when no image is set
 * **Sync history** with the last-synced time and a per-rule error log
-* Stores all YouTube data in standard post meta (`_yousync_*`) for easy use in your theme or queries
+* Stores all YouTube data in standard post meta (`_wpbuoy_video_sync_*`) for easy use in your theme or queries
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
 
 **Need more?**
 
-[YouSync Pro](https://wpbuoy.com/product/yousync/) adds power-user automation:
+[WPBuoy Video Sync Pro](https://wpbuoy.com/product/video-sync) adds power-user automation:
 
 * Unlimited channels
 * Recurring schedules (hourly, daily, weekly, monthly, or a custom interval)
@@ -45,10 +45,10 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 
 == Installation ==
 
-1. Upload the `yousync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
+1. Upload the `wpbuoy-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Go to **YouSync → Settings** and enter your Google API key.
-4. Go to **YouSync → Channels** and add a YouTube channel.
+3. Go to **WPBuoy Video Sync → Settings** and enter your Google API key.
+4. Go to **WPBuoy Video Sync → Channels** and add a YouTube channel.
 5. Add a sync rule to the channel — pick an action and a destination post type — then save to import.
 
 **Getting a Google API key**
@@ -56,13 +56,13 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 1. Visit [Google Cloud Console](https://console.cloud.google.com/).
 2. Create a project and enable the **YouTube Data API v3**.
 3. Generate an API key under **Credentials**.
-4. Paste the key into **YouSync → Settings**.
+4. Paste the key into **WPBuoy Video Sync → Settings**.
 
 == Frequently Asked Questions ==
 
-= Does YouSync upload video files to my site? =
+= Does WPBuoy Video Sync upload video files to my site? =
 
-No. YouSync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Thumbnails are optionally downloaded as WordPress attachments.
+No. WPBuoy Video Sync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Thumbnails are optionally downloaded as WordPress attachments.
 
 = Where do synced items go? =
 
@@ -70,23 +70,23 @@ You choose. Each sync rule has a destination post type, so videos, playlists, an
 
 = How often does it sync? =
 
-In the free version every rule runs once, immediately after you save it. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [YouSync Pro](https://wpbuoy.com/product/yousync/).
+In the free version every rule runs once, immediately after you save it. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [WPBuoy Video Sync Pro](https://wpbuoy.com/product/video-sync).
 
 = Why do I need a Google API key? =
 
-YouTube data is fetched from the official YouTube Data API v3, which requires a key. The key is yours and stays on your server; YouSync never sends your data to a third party.
+YouTube data is fetched from the official YouTube Data API v3, which requires a key. The key is yours and stays on your server; WPBuoy Video Sync never sends your data to a third party.
 
 = How much API quota does a sync use? =
 
-Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. YouSync shows an estimate before you run a sync.
+Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. WPBuoy Video Sync shows an estimate before you run a sync.
 
-= What happens to my data if I uninstall YouSync? =
+= What happens to my data if I uninstall WPBuoy Video Sync? =
 
-By default your synced posts and settings are kept. If you want everything removed, enable **Remove all YouSync data when the plugin is deleted** in **YouSync → Settings** before deleting the plugin.
+By default your synced posts and settings are kept. If you want everything removed, enable **Remove all WPBuoy Video Sync data when the plugin is deleted** in **WPBuoy Video Sync → Settings** before deleting the plugin.
 
 == External services ==
 
-YouSync connects to the **YouTube Data API v3**, a service provided by Google, to fetch the public metadata it imports into WordPress.
+WPBuoy Video Sync connects to the **YouTube Data API v3**, a service provided by Google, to fetch the public metadata it imports into WordPress.
 
 **What it is used for:** retrieving public information about the YouTube channels, playlists, and videos you choose to sync — such as titles, descriptions, thumbnail URLs, view counts, publish dates, and channel/playlist/video IDs.
 
@@ -113,11 +113,11 @@ This service is provided by Google. By using it you agree to Google's terms and 
 * Fixed: Sync history status icons now render as inline SVG and no longer load an external font, removing the Google Fonts (Material Icons) dependency for full WordPress.org compliance.
 
 = 2.2.0 =
-* New: Paste a channel URL or @handle in the Channel field — YouSync resolves it to the channel ID automatically (supports channel URLs, @handles, /user/ and /c/ URLs, and video links).
+* New: Paste a channel URL or @handle in the Channel field — WPBuoy Video Sync resolves it to the channel ID automatically (supports channel URLs, @handles, /user/ and /c/ URLs, and video links).
 * Improved: The Settings page shows a generic "Settings saved." notice and no longer re-validates the API key when it hasn't changed.
 
 = 2.1.0 =
-* New: In-plugin Help tabs linking to the YouSync knowledge base on every admin screen.
+* New: In-plugin Help tabs linking to the WPBuoy Video Sync knowledge base on every admin screen.
 * New: Pro-only sync rules are preserved (not deleted) when the plugin runs as the free version, so re-activating Pro restores them.
 * Improved: WordPress.org coding-standards compliance — prepared SQL statements, output escaping, and translator comments.
 * Improved: Tested up to WordPress 7.0.

@@ -3,16 +3,16 @@ declare(strict_types=1);
 /**
  * Sync scheduler.
  *
- * Manages WP Cron events for YouSync sync rules.
+ * Manages WP Cron events for WPBuoy Video Sync sync rules.
  *
  * The free plugin runs every rule as a one-time, immediate sync. Each enabled
- * rule fires a single 'yousync_channel_config_sync_rule' event with args
+ * rule fires a single 'wpbuoy_video_sync_channel_config_sync_rule' event with args
  * [ $ch_index, $rule_index ]; the runner auto-disables the rule once it has run.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
-namespace YouSync;
+namespace WPBuoyVideoSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,7 +30,7 @@ class Sync_Scheduler {
 	 * Cron hook name used for option-based channel sync rules (Channels Page).
 	 * Args: [ $ch_index, $rule_index ] — no term ID needed.
 	 */
-	private const CRON_HOOK_CONFIG = 'yousync_channel_config_sync_rule';
+	private const CRON_HOOK_CONFIG = 'wpbuoy_video_sync_channel_config_sync_rule';
 
 	/**
 	 * Sync runner instance.
@@ -51,7 +51,7 @@ class Sync_Scheduler {
 		add_action( self::CRON_HOOK_CONFIG, array( $this, 'dispatch_config_sync' ), 10, 2 );
 
 		// Reschedule option-based channel events when the Channels Page is saved.
-		add_action( 'yousync_reschedule_option_channels', array( $this, 'reschedule_option_channels' ), 10, 1 );
+		add_action( 'wpbuoy_video_sync_reschedule_option_channels', array( $this, 'reschedule_option_channels' ), 10, 1 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -61,9 +61,9 @@ class Sync_Scheduler {
 	/**
 	 * Dispatch a sync rule for an option-based channel when the cron event fires.
 	 *
-	 * Called by WP Cron via the 'yousync_channel_config_sync_rule' hook.
+	 * Called by WP Cron via the 'wpbuoy_video_sync_channel_config_sync_rule' hook.
 	 *
-	 * @param int $ch_index   Channel index in yousync_channel_config.
+	 * @param int $ch_index   Channel index in wpbuoy_video_sync_channel_config.
 	 * @param int $rule_index Rule index within that channel's sync_rules.
 	 * @return void
 	 */
@@ -78,7 +78,7 @@ class Sync_Scheduler {
 	/**
 	 * (Re)schedule cron events for all option-based channels.
 	 *
-	 * Called via the 'yousync_reschedule_option_channels' action, which is
+	 * Called via the 'wpbuoy_video_sync_reschedule_option_channels' action, which is
 	 * fired by Channels_Page::save_channels() after updating the option.
 	 *
 	 * Every enabled rule fires a single immediate event. Rules that fire are
@@ -104,7 +104,7 @@ class Sync_Scheduler {
 					continue;
 				}
 				// Pro-only rules preserved from a prior Pro install — never scheduled in free.
-				if ( yousync_rule_is_unsupported( $rule ) ) {
+				if ( wpbuoy_video_sync_rule_is_unsupported( $rule ) ) {
 					continue;
 				}
 				$args = array( (int) $ch_index, (int) $rule_index );
@@ -116,7 +116,7 @@ class Sync_Scheduler {
 		if ( ! empty( $immediate ) ) {
 			// Read the option as-is to preserve the flat vs indexed format that
 			// save_channels() chose — do not overwrite the whole structure.
-			$config  = get_option( 'yousync_channel_config', array() );
+			$config  = get_option( 'wpbuoy_video_sync_channel_config', array() );
 			$is_flat = is_array( $config ) && isset( $config['youtube_id'] );
 
 			foreach ( $immediate as [ $ch_idx, $rule_idx ] ) {
@@ -129,7 +129,7 @@ class Sync_Scheduler {
 				}
 			}
 
-			update_option( 'yousync_channel_config', $config );
+			update_option( 'wpbuoy_video_sync_channel_config', $config );
 		}
 	}
 
@@ -138,7 +138,7 @@ class Sync_Scheduler {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Unschedule every existing yousync_channel_config_sync_rule event.
+	 * Unschedule every existing wpbuoy_video_sync_channel_config_sync_rule event.
 	 *
 	 * Sweeps the live cron array and removes all events for this hook, whatever
 	 * their [ ch_index, rule_index ] args. This also clears orphaned events left

@@ -7,10 +7,10 @@ declare(strict_types=1);
  * calls the YouTube API, evaluates conditions, imports videos, and
  * writes results back to term meta.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
-namespace YouSync;
+namespace WPBuoyVideoSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -73,7 +73,7 @@ class Sync_Runner {
 
 	/**
 	 * When running an option-based channel (Channels Page), holds the channel
-	 * index within yousync_channel_config. Null for term-based channels.
+	 * index within wpbuoy_video_sync_channel_config. Null for term-based channels.
 	 *
 	 * @var int|null
 	 */
@@ -138,7 +138,7 @@ class Sync_Runner {
 
 		// Defense in depth: never run a Pro-only rule preserved from a prior Pro
 		// install (recurring schedule, update action, conditions, mapping, taxonomy).
-		if ( yousync_rule_is_unsupported( $rule ) ) {
+		if ( wpbuoy_video_sync_rule_is_unsupported( $rule ) ) {
 			return;
 		}
 
@@ -148,7 +148,7 @@ class Sync_Runner {
 		// the Channels page pre-sets to 'syncing' before the cron fires.
 		$lock_key = null;
 		if ( null !== $this->option_channel_index ) {
-			$lock_key = 'yousync_lock_' . $this->option_channel_index . '_' . $rule_index;
+			$lock_key = 'wpbuoy_video_sync_lock_' . $this->option_channel_index . '_' . $rule_index;
 			if ( get_transient( $lock_key ) ) {
 				return;
 			}
@@ -203,7 +203,7 @@ class Sync_Runner {
 
 				default:
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					error_log( "YouSync: unknown action '{$action}' (term {$term_id}, rule {$rule_index})." );
+					error_log( "WPBuoy Video Sync: unknown action '{$action}' (term {$term_id}, rule {$rule_index})." );
 					return;
 			}
 
@@ -230,21 +230,21 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Execute a sync rule for an option-based channel (Channels Page / yousync_channel_config).
+	 * Execute a sync rule for an option-based channel (Channels Page / wpbuoy_video_sync_channel_config).
 	 *
 	 * Sets up the source data override so that get_term_meta_data() and
 	 * save_source_data() transparently read/write wp_options instead of
 	 * term meta, then delegates to the standard run() method with term_id = 0.
 	 *
 	 * Called by Sync_Scheduler::dispatch_config_sync() when a
-	 * yousync_channel_config_sync_rule cron event fires.
+	 * wpbuoy_video_sync_channel_config_sync_rule cron event fires.
 	 *
-	 * @param int $ch_index   0-based channel index in yousync_channel_config.
+	 * @param int $ch_index   0-based channel index in wpbuoy_video_sync_channel_config.
 	 * @param int $rule_index 0-based rule index within that channel's sync_rules.
 	 * @return void
 	 */
 	public function run_config_channel( int $ch_index, int $rule_index ): void {
-		$ch_data = get_option( 'yousync_channel_config', array() );
+		$ch_data = get_option( 'wpbuoy_video_sync_channel_config', array() );
 
 		// Downgrade safety: use the first channel if a Pro multi-channel array was left behind.
 		if ( is_array( $ch_data ) && isset( $ch_data[0] ) ) {
@@ -361,7 +361,7 @@ class Sync_Runner {
 					'No videos were imported. %d candidate was fetched from the API but could not be saved.',
 					'No videos were imported. %d candidates were fetched from the API but none could be saved.',
 					$candidate_count,
-					'yousync'
+					'wpbuoy-video-sync'
 				),
 				$candidate_count
 			);
@@ -377,7 +377,7 @@ class Sync_Runner {
 	 * Handle the channel_sync_new action.
 	 *
 	 * Fetches fresh channel data from the API and creates a WordPress post for the channel.
-	 * If a post for this channel already exists (deduped by _yousync_channel_post), nothing
+	 * If a post for this channel already exists (deduped by _wpbuoy_video_sync_channel_post), nothing
 	 * is done — channel update actions handle refreshing an existing post.
 	 *
 	 * @param int   $term_id Channel term ID (0 for option-based channels).
@@ -571,11 +571,11 @@ class Sync_Runner {
 	 */
 	private function invalid_post_type_message( string $post_type ): string {
 		if ( '' === $post_type ) {
-			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'yousync' );
+			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'wpbuoy-video-sync' );
 		}
 		return sprintf(
 			/* translators: %s: post type slug */
-			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'yousync' ),
+			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'wpbuoy-video-sync' ),
 			$post_type
 		);
 	}
@@ -658,7 +658,7 @@ class Sync_Runner {
 
 	/**
 	 * Persist source data to term meta or, for option-based channels, to
-	 * yousync_channel_config and the in-memory override.
+	 * wpbuoy_video_sync_channel_config and the in-memory override.
 	 *
 	 * Replaces direct update_term_meta() calls for the channel JSON blob so
 	 * that all write paths work for both term-based and option-based channels.
@@ -679,7 +679,7 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Write the updated single channel back to yousync_channel_config (flat).
+	 * Write the updated single channel back to wpbuoy_video_sync_channel_config (flat).
 	 *
 	 * Preserves the youtube_id key (the option stores youtube_id; the runner
 	 * temporarily adds channel_id as an alias — we don't store it).
@@ -692,7 +692,7 @@ class Sync_Runner {
 			$data['youtube_id'] = $data['channel_id'];
 		}
 
-		update_option( 'yousync_channel_config', $data );
+		update_option( 'wpbuoy_video_sync_channel_config', $data );
 	}
 
 	/**
@@ -948,7 +948,7 @@ class Sync_Runner {
 			return;
 		}
 		set_transient(
-			'yousync_prog_' . $this->option_channel_index . '_' . $this->current_rule_index,
+			'wpbuoy_video_sync_prog_' . $this->option_channel_index . '_' . $this->current_rule_index,
 			array( 'current' => $current, 'total' => $total ),
 			1800
 		);

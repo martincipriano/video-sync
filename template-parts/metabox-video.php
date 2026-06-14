@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Video metabox template.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  *
  * @var int        $post_id               WordPress post ID.
  * @var string     $video_id              YouTube video ID.
@@ -28,20 +28,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to yousync_get_template_part()'s extract()/include scope, not globals.
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are local to wpbuoy_video_sync_get_template_part()'s extract()/include scope, not globals.
 ?>
 <div class="yousync-metabox">
 	<div class="ys-channel-tabs-nav" role="tablist">
 		<button type="button" class="ys-channel-tab-btn" data-tab="details" role="tab" aria-selected="false">
-			<?php esc_html_e( 'Details', 'yousync' ); ?>
+			<?php esc_html_e( 'Details', 'wpbuoy-video-sync' ); ?>
 		</button>
 		<?php if ( ! empty( $thumbnails ) ) : ?>
 		<button type="button" class="ys-channel-tab-btn" data-tab="thumbnails" role="tab" aria-selected="false">
-			<?php esc_html_e( 'Images', 'yousync' ); ?>
+			<?php esc_html_e( 'Images', 'wpbuoy-video-sync' ); ?>
 		</button>
 		<?php endif; ?>
 		<button type="button" class="ys-channel-tab-btn" data-tab="sync" role="tab" aria-selected="false">
-			<?php esc_html_e( 'Sync', 'yousync' ); ?>
+			<?php esc_html_e( 'Sync', 'wpbuoy-video-sync' ); ?>
 		</button>
 	</div>
 
@@ -54,8 +54,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $original_title ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Original Title', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Original Title', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $original_title ); ?>" readonly>
 				</div>
@@ -64,8 +64,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $original_description ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Description', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<textarea class="ys-mb-textarea" rows="4" readonly><?php echo esc_textarea( $original_description ); ?></textarea>
 				</div>
@@ -74,8 +74,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $channel_title ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Channel', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Channel', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $channel_title ); ?>" readonly>
 				</div>
@@ -84,8 +84,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $published_date ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Published Date', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Published Date', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $published_date ); ?>" readonly>
 				</div>
@@ -102,8 +102,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Duration', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Duration', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $duration_fmt ); ?>" readonly>
 				</div>
@@ -112,8 +112,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $view_count !== '' ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'View Count', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'View Count', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $view_count ) ); ?>" readonly>
 				</div>
@@ -122,8 +122,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $like_count !== '' ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Like Count', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Like Count', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $like_count ) ); ?>" readonly>
 				</div>
@@ -132,8 +132,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $comment_count !== '' ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Comment Count', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Comment Count', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( number_format( (int) $comment_count ) ); ?>" readonly>
 				</div>
@@ -142,8 +142,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( $video_url ) : ?>
 				<div class="ys-mb-field">
 					<div class="ys-mb-label-row">
-						<p class="ys-mb-label"><?php esc_html_e( 'Video Link', 'yousync' ); ?></p>
-						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+						<p class="ys-mb-label"><?php esc_html_e( 'Video Link', 'wpbuoy-video-sync' ); ?></p>
+						<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $video_url ); ?>" readonly>
 				</div>
@@ -154,8 +154,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php if ( $video_id ) : ?>
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
-							<p class="ys-mb-label"><?php esc_html_e( 'Video ID', 'yousync' ); ?></p>
-							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+							<p class="ys-mb-label"><?php esc_html_e( 'Video ID', 'wpbuoy-video-sync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $video_id ); ?>" readonly>
 					</div>
@@ -164,8 +164,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php if ( $video_id ) : ?>
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
-							<p class="ys-mb-label"><?php esc_html_e( 'Embed Code', 'yousync' ); ?></p>
-							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+							<p class="ys-mb-label"><?php esc_html_e( 'Embed Code', 'wpbuoy-video-sync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_id . '" frameborder="0" allowfullscreen></iframe>' ); ?>" readonly class="ys-mb-input ys-mb-input--url">
 					</div>
@@ -174,8 +174,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php if ( $channel_id ) : ?>
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
-							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'yousync' ); ?></p>
-							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+							<p class="ys-mb-label"><?php esc_html_e( 'Channel ID', 'wpbuoy-video-sync' ); ?></p>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input ys-mb-input--code" value="<?php echo esc_attr( $channel_id ); ?>" readonly>
 					</div>
@@ -183,8 +183,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				</div>
 				<button class="button-link ys-developer-fields-toggle" type="button">
-					<span><?php esc_html_e( 'Hide Developer Fields', 'yousync' ); ?></span>
-					<span><?php esc_html_e( 'Show Developer Fields', 'yousync' ); ?></span>
+					<span><?php esc_html_e( 'Hide Developer Fields', 'wpbuoy-video-sync' ); ?></span>
+					<span><?php esc_html_e( 'Show Developer Fields', 'wpbuoy-video-sync' ); ?></span>
 				</button>
 				<?php endif; ?>
 
@@ -207,7 +207,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="ys-mb-field">
 						<div class="ys-mb-label-row">
 							<p class="ys-mb-label"><?php echo esc_html( $thumbnail_size_labels[ $size ] ); ?></p>
-							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'yousync' ); ?></button>
+							<button type="button" class="ys-copy-val-btn"><?php esc_html_e( 'Copy value', 'wpbuoy-video-sync' ); ?></button>
 						</div>
 						<input type="text" class="ys-mb-input" value="<?php echo esc_attr( $thumbnails[ $size ]['url'] ); ?>" readonly>
 					</div>
@@ -222,11 +222,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				<?php if ( $last_synced ) : ?>
 				<div class="ys-mb-field">
-					<p class="ys-mb-label"><?php esc_html_e( 'Last Synced', 'yousync' ); ?></p>
+					<p class="ys-mb-label"><?php esc_html_e( 'Last Synced', 'wpbuoy-video-sync' ); ?></p>
 					<input type="text" class="ys-mb-input" value="<?php echo esc_attr( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_synced ) ); ?>" readonly disabled>
 				</div>
 				<?php else : ?>
-				<p class="ys-not-synced-msg"><?php esc_html_e( 'This video has not been synced yet.', 'yousync' ); ?></p>
+				<p class="ys-not-synced-msg"><?php esc_html_e( 'This video has not been synced yet.', 'wpbuoy-video-sync' ); ?></p>
 				<?php endif; ?>
 
 			</div>

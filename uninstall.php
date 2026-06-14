@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 /**
- * YouSync Uninstall
+ * WPBuoy Video Sync Uninstall
  *
  * Runs when the plugin is deleted from the WordPress admin.
  * Always removes plugin options and cron events.
  * Only removes content (videos, channels, playlists) when the
- * "Remove all YouSync data on uninstall" setting is enabled.
+ * "Remove all WPBuoy Video Sync data on uninstall" setting is enabled.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
 // Security check — WordPress sets this constant before calling uninstall.php.
@@ -17,14 +17,14 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 /**
- * Remove YouSync data on uninstall.
+ * Remove WPBuoy Video Sync data on uninstall.
  *
  * Wrapped in a function so its working variables stay out of the global scope —
  * uninstall.php is executed by WordPress at global scope.
  *
  * @return void
  */
-function yousync_run_uninstall(): void {
+function wpbuoy_video_sync_run_uninstall(): void {
 	global $wpdb;
 
 	// Uninstall is a one-time teardown: direct, uncached deletes are required to
@@ -35,17 +35,17 @@ function yousync_run_uninstall(): void {
 	// ---------------------------------------------------------------------
 	// Always: unschedule all sync cron events.
 	// ---------------------------------------------------------------------
-	wp_unschedule_hook( 'yousync_sync_rule' );
+	wp_unschedule_hook( 'wpbuoy_video_sync_sync_rule' );
 
 	// ---------------------------------------------------------------------
 	// Always: remove dismissed-notice user meta.
 	// ---------------------------------------------------------------------
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'yousync_cron_notice_dismissed' ) );
+	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'wpbuoy_video_sync_cron_notice_dismissed' ) );
 
 	// ---------------------------------------------------------------------
 	// Conditionally: remove all plugin content if the user opted in.
 	// ---------------------------------------------------------------------
-	if ( get_option( 'yousync_delete_on_uninstall' ) ) {
+	if ( get_option( 'wpbuoy_video_sync_delete_on_uninstall' ) ) {
 
 		// --- Delete all yousync_videos posts and their meta ---
 		$post_ids = $wpdb->get_col(
@@ -60,7 +60,7 @@ function yousync_run_uninstall(): void {
 			}
 		}
 
-		// --- Delete all terms for YouSync taxonomies ---
+		// --- Delete all terms for WPBuoy Video Sync taxonomies ---
 		$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'yousync_tag', 'yousync_category' );
 
 		// Collect term IDs and term_taxonomy IDs for bulk deletion.
@@ -125,20 +125,20 @@ function yousync_run_uninstall(): void {
 	// Always: delete plugin options.
 	// ---------------------------------------------------------------------
 	$options = array(
-		'yousync_api_key',
-		'yousync_active_archives',
-		'yousync_delete_on_uninstall',
-		'yousync_reschedule_on_activation',
-		'yousync_sync_log',
+		'wpbuoy_video_sync_api_key',
+		'wpbuoy_video_sync_active_archives',
+		'wpbuoy_video_sync_delete_on_uninstall',
+		'wpbuoy_video_sync_reschedule_on_activation',
+		'wpbuoy_video_sync_sync_log',
 	);
 
 	foreach ( $options as $option ) {
 		delete_option( $option );
 	}
 
-	delete_transient( 'yousync_flush_rewrite_rules' );
+	delete_transient( 'wpbuoy_video_sync_flush_rewrite_rules' );
 
 	// phpcs:enable WordPress.DB
 }
 
-yousync_run_uninstall();
+wpbuoy_video_sync_run_uninstall();

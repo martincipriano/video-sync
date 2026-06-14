@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 /**
- * Channels admin page — top-level YouSync menu.
+ * Channels admin page — top-level WPBuoy Video Sync menu.
  *
- * @package YouSync
+ * @package WPBuoyVideoSync
  */
 
-namespace YouSync;
+namespace WPBuoyVideoSync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,12 +24,12 @@ class Channels_Page {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'admin_post_yousync_save_channels', array( $this, 'save_channels' ) );
-		add_action( 'wp_ajax_yousync_add_rule', array( $this, 'ajax_add_rule' ) );
-		add_action( 'wp_ajax_yousync_sync_progress', array( $this, 'ajax_sync_progress' ) );
-		add_action( 'wp_ajax_yousync_mark_history_read', array( $this, 'ajax_mark_history_read' ) );
-		add_action( 'load-toplevel_page_yousync',        array( $this, 'add_help_tabs' ) );
-		add_action( 'load-yousync_page_yousync_settings', array( $this, 'add_help_tabs' ) );
+		add_action( 'admin_post_wpbuoy_video_sync_save_channels', array( $this, 'save_channels' ) );
+		add_action( 'wp_ajax_wpbuoy_video_sync_add_rule', array( $this, 'ajax_add_rule' ) );
+		add_action( 'wp_ajax_wpbuoy_video_sync_sync_progress', array( $this, 'ajax_sync_progress' ) );
+		add_action( 'wp_ajax_wpbuoy_video_sync_mark_history_read', array( $this, 'ajax_mark_history_read' ) );
+		add_action( 'load-toplevel_page_wpbuoy-video-sync',        array( $this, 'add_help_tabs' ) );
+		add_action( 'load-wpbuoy_video_sync_page_wpbuoy_video_sync_settings', array( $this, 'add_help_tabs' ) );
 	}
 
 	/**
@@ -51,89 +51,89 @@ class Channels_Page {
 
 		$screen->add_help_tab( array(
 			'id'      => 'yousync-help-getting-started',
-			'title'   => __( 'Getting Started', 'yousync' ),
+			'title'   => __( 'Getting Started', 'wpbuoy-video-sync' ),
 			'content' =>
-				'<h2>' . esc_html__( 'Getting Started', 'yousync' ) . '</h2>' .
+				'<h2>' . esc_html__( 'Getting Started', 'wpbuoy-video-sync' ) . '</h2>' .
 				'<ul>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#how-yousync-works' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How YouSync works', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#whats-the-difference-between-free-and-pro' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "What's the difference between Free and Pro?", 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#sync-actions-explained' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync actions explained', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#minimum-requirements' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Minimum requirements', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#getting-your-google-api-key' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Getting your Google API key', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#how-to-install' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to install', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#initial-configuration' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Initial configuration', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#will-syncing-affect-my-site' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Will syncing affect my site?', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'getting-started/#privacy-and-data-collection' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Privacy and data collection', 'yousync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#how-yousync-works' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How WPBuoy Video Sync works', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#whats-the-difference-between-free-and-pro' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "What's the difference between Free and Pro?", 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#sync-actions-explained' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync actions explained', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#minimum-requirements' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Minimum requirements', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#getting-your-google-api-key' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Getting your Google API key', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#how-to-install' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to install', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#initial-configuration' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Initial configuration', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#will-syncing-affect-my-site' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Will syncing affect my site?', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#privacy-and-data-collection' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Privacy and data collection', 'wpbuoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );
 
 		$screen->add_help_tab( array(
 			'id'      => 'yousync-help-connecting-to-youtube',
-			'title'   => __( 'Connecting to YouTube', 'yousync' ),
+			'title'   => __( 'Connecting to YouTube', 'wpbuoy-video-sync' ),
 			'content' =>
-				'<h2>' . esc_html__( 'Connecting to YouTube', 'yousync' ) . '</h2>' .
+				'<h2>' . esc_html__( 'Connecting to YouTube', 'wpbuoy-video-sync' ) . '</h2>' .
 				'<ul>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#how-to-get-a-google-api-key' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get a Google API key', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#api-key-vs-oauth-which-does-yousync-use' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key vs OAuth — which does YouSync use?', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#keeping-your-api-key-secure' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Keeping your API key secure', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#understanding-your-youtube-api-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Understanding your YouTube API quota', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#the-pre-sync-quota-estimate' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'The pre-sync quota estimate', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#conserving-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Conserving quota', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#requesting-a-higher-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Requesting a higher quota', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#fixing-api-key-and-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Fixing API key and quota errors', 'yousync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#how-to-get-a-google-api-key' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get a Google API key', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#api-key-vs-oauth-which-does-yousync-use' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key vs OAuth — which does WPBuoy Video Sync use?', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#keeping-your-api-key-secure' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Keeping your API key secure', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#understanding-your-youtube-api-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Understanding your YouTube API quota', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#the-pre-sync-quota-estimate' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'The pre-sync quota estimate', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#conserving-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Conserving quota', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#requesting-a-higher-quota' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Requesting a higher quota', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'connecting-to-youtube/#fixing-api-key-and-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Fixing API key and quota errors', 'wpbuoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );
 
 		$screen->add_help_tab( array(
 			'id'      => 'yousync-help-features-usage',
-			'title'   => __( 'Features & Usage', 'yousync' ),
+			'title'   => __( 'Features & Usage', 'wpbuoy-video-sync' ),
 			'content' =>
-				'<h2>' . esc_html__( 'Features & Usage', 'yousync' ) . '</h2>' .
+				'<h2>' . esc_html__( 'Features & Usage', 'wpbuoy-video-sync' ) . '</h2>' .
 				'<ul>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#choosing-what-to-import' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Choosing what to import', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#destination-post-type' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Destination post type', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#run-once-vs-recurring-schedules' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Run-once vs recurring schedules', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#thumbnails-and-featured-images' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Thumbnails and featured images', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#sync-history-and-error-logs' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync history and error logs', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#the-post-metabox-and-copy-buttons' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'The post metabox and copy buttons', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#post-meta-reference' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Post meta reference', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'features-usage/#compatibility' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Compatibility', 'yousync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#choosing-what-to-import' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Choosing what to import', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#destination-post-type' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Destination post type', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#run-once-vs-recurring-schedules' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Run-once vs recurring schedules', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#thumbnails-and-featured-images' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Thumbnails and featured images', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#sync-history-and-error-logs' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync history and error logs', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#the-post-metabox-and-copy-buttons' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'The post metabox and copy buttons', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#post-meta-reference' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Post meta reference', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#compatibility' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Compatibility', 'wpbuoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );
 
 		$screen->add_help_tab( array(
 			'id'      => 'yousync-help-troubleshooting',
-			'title'   => __( 'Troubleshooting', 'yousync' ),
+			'title'   => __( 'Troubleshooting', 'wpbuoy-video-sync' ),
 			'content' =>
-				'<h2>' . esc_html__( 'Troubleshooting', 'yousync' ) . '</h2>' .
+				'<h2>' . esc_html__( 'Troubleshooting', 'wpbuoy-video-sync' ) . '</h2>' .
 				'<ul>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#api-key-or-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key or quota errors', 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#the-channel-cant-be-found' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "The channel can't be found", 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#im-seeing-duplicate-posts' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I'm seeing duplicate posts", 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#i-cant-activate-my-license' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I can't activate my license", 'yousync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#how-to-get-support' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get support', 'yousync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#api-key-or-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key or quota errors', 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#the-channel-cant-be-found' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "The channel can't be found", 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#im-seeing-duplicate-posts' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I'm seeing duplicate posts", 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#i-cant-activate-my-license' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I can't activate my license", 'wpbuoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#how-to-get-support' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get support', 'wpbuoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );
 
 		$screen->set_help_sidebar(
-			'<p><strong>' . esc_html__( 'For more information:', 'yousync' ) . '</strong></p>' .
-			'<p><a href="' . esc_url( $kb ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Knowledge Base', 'yousync' ) . '</a></p>' .
-			'<p><a href="https://wpbuoy.com/my-account/support/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'yousync' ) . '</a></p>'
+			'<p><strong>' . esc_html__( 'For more information:', 'wpbuoy-video-sync' ) . '</strong></p>' .
+			'<p><a href="' . esc_url( $kb ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Knowledge Base', 'wpbuoy-video-sync' ) . '</a></p>' .
+			'<p><a href="https://wpbuoy.com/my-account/support/" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'wpbuoy-video-sync' ) . '</a></p>'
 		);
 	}
 
 
 	/**
-	 * Register the top-level YouSync menu and submenus.
+	 * Register the top-level WPBuoy Video Sync menu and submenus.
 	 *
 	 * @return void
 	 */
 	public function register_menu() {
 		add_menu_page(
-			__( 'YouSync', 'yousync' ),
-			__( 'YouSync', 'yousync' ),
+			__( 'WPBuoy Video Sync', 'wpbuoy-video-sync' ),
+			__( 'WPBuoy Video Sync', 'wpbuoy-video-sync' ),
 			'manage_options',
-			'yousync',
+			'wpbuoy-video-sync',
 			array( $this, 'render_page' ),
 			'dashicons-video-alt3',
 			26
@@ -141,11 +141,11 @@ class Channels_Page {
 
 		// Replace auto-generated first submenu item.
 		add_submenu_page(
-			'yousync',
-			__( 'Channels', 'yousync' ),
-			__( 'Channels', 'yousync' ),
+			'wpbuoy-video-sync',
+			__( 'Channels', 'wpbuoy-video-sync' ),
+			__( 'Channels', 'wpbuoy-video-sync' ),
 			'manage_options',
-			'yousync',
+			'wpbuoy-video-sync',
 			array( $this, 'render_page' )
 		);
 	}
@@ -156,7 +156,7 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function render_page() {
-		$channel = get_option( 'yousync_channel_config', array() );
+		$channel = get_option( 'wpbuoy_video_sync_channel_config', array() );
 		if ( ! is_array( $channel ) ) {
 			$channel = array();
 		}
@@ -167,15 +167,15 @@ class Channels_Page {
 			$channel = is_array( $channel[0] ) ? $channel[0] : array();
 		}
 
-		$ch_errors = get_transient( 'yousync_ch_errors_' . get_current_user_id() );
+		$ch_errors = get_transient( 'wpbuoy_video_sync_ch_errors_' . get_current_user_id() );
 		if ( $ch_errors ) {
-			delete_transient( 'yousync_ch_errors_' . get_current_user_id() );
+			delete_transient( 'wpbuoy_video_sync_ch_errors_' . get_current_user_id() );
 		}
 		$ch_errors = is_array( $ch_errors ) ? $ch_errors : array();
 
-		$has_api_key = ! empty( get_option( 'yousync_api_key', '' ) );
+		$has_api_key = ! empty( get_option( 'wpbuoy_video_sync_api_key', '' ) );
 
-		yousync_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'has_api_key' ) );
+		wpbuoy_video_sync_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'has_api_key' ) );
 	}
 
 	/**
@@ -185,14 +185,14 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function enqueue_assets( $hook ) {
-		if ( 'toplevel_page_yousync' !== $hook ) {
+		if ( 'toplevel_page_wpbuoy-video-sync' !== $hook ) {
 			return;
 		}
 
-		wp_enqueue_style( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
-		wp_enqueue_style( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), YOUSYNC_VERSION );
-		wp_enqueue_script( 'tom-select', YOUSYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
-		wp_enqueue_script( 'yousync-admin', YOUSYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), YOUSYNC_VERSION, true );
+		wp_enqueue_style( 'tom-select', WPBUOY_VIDEO_SYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.min.css', array(), '2.4.3' );
+		wp_enqueue_style( 'yousync-admin', WPBUOY_VIDEO_SYNC_PLUGIN_URL . 'assets/css/admin.css', array( 'tom-select' ), WPBUOY_VIDEO_SYNC_VERSION );
+		wp_enqueue_script( 'tom-select', WPBUOY_VIDEO_SYNC_PLUGIN_URL . 'assets/vendor/tom-select/tom-select.complete.min.js', array(), '2.4.3', true );
+		wp_enqueue_script( 'yousync-admin', WPBUOY_VIDEO_SYNC_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery', 'tom-select' ), WPBUOY_VIDEO_SYNC_VERSION, true );
 
 		// Render the sync-rule template with a channel-specific name_prefix placeholder
 		// for the JS-inserted rule card.
@@ -200,13 +200,13 @@ class Channels_Page {
 
 		wp_localize_script( 'yousync-admin', 'youSync', array(
 			'syncRule' => array(
-				'rule' => yousync_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
+				'rule' => wpbuoy_video_sync_return_template_part( 'sync-rule', null, array( 'name_prefix' => $name_prefix ) ),
 			),
 			'isChannelsPage'       => true,
 			'ajaxUrl'              => admin_url( 'admin-ajax.php' ),
-			'addRuleNonce'         => wp_create_nonce( 'yousync_add_rule' ),
-			'syncProgressNonce'    => wp_create_nonce( 'yousync_sync_progress' ),
-			'markHistoryReadNonce' => wp_create_nonce( 'yousync_mark_history_read' ),
+			'addRuleNonce'         => wp_create_nonce( 'wpbuoy_video_sync_add_rule' ),
+			'syncProgressNonce'    => wp_create_nonce( 'wpbuoy_video_sync_sync_progress' ),
+			'markHistoryReadNonce' => wp_create_nonce( 'wpbuoy_video_sync_mark_history_read' ),
 		) );
 	}
 
@@ -216,16 +216,16 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function save_channels() {
-		if ( ! isset( $_POST['yousync_channels_nonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['yousync_channels_nonce'] ) ), 'yousync_save_channels' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'yousync' ) );
+		if ( ! isset( $_POST['wpbuoy_video_sync_channels_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wpbuoy_video_sync_channels_nonce'] ) ), 'wpbuoy_video_sync_save_channels' ) ) {
+			wp_die( esc_html__( 'Security check failed.', 'wpbuoy-video-sync' ) );
 		}
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have permission to do this.', 'yousync' ) );
+			wp_die( esc_html__( 'You do not have permission to do this.', 'wpbuoy-video-sync' ) );
 		}
 
-		$existing = get_option( 'yousync_channel_config', array() );
+		$existing = get_option( 'wpbuoy_video_sync_channel_config', array() );
 		if ( ! is_array( $existing ) ) {
 			$existing = array();
 		}
@@ -241,7 +241,7 @@ class Channels_Page {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$first_channel   = ( isset( $_POST['channels'][0] ) && is_array( $_POST['channels'][0] ) ) ? $_POST['channels'][0] : array();
 		$posted_channels = $first_channel ? array( $first_channel ) : array();
-		$api_key         = get_option( 'yousync_api_key', '' );
+		$api_key         = get_option( 'wpbuoy_video_sync_api_key', '' );
 		$new_channels    = array();
 		$save_errors     = array();
 
@@ -282,7 +282,7 @@ class Channels_Page {
 			$old_free_rules      = array();
 			$preserved_pro_rules = array();
 			foreach ( $old_rules as $old_rule ) {
-				if ( yousync_rule_is_unsupported( $old_rule ) ) {
+				if ( wpbuoy_video_sync_rule_is_unsupported( $old_rule ) ) {
 					$preserved_pro_rules[] = $old_rule;
 				} else {
 					$old_free_rules[] = $old_rule;
@@ -291,7 +291,7 @@ class Channels_Page {
 			$old_free_rules = array_values( $old_free_rules );
 
 			if ( isset( $ch_data['sync_rules'] ) && is_array( $ch_data['sync_rules'] ) ) {
-				$new_rules = array_values( array_map( 'yousync_sanitize_sync_rule', $ch_data['sync_rules'] ) );
+				$new_rules = array_values( array_map( 'wpbuoy_video_sync_sanitize_sync_rule', $ch_data['sync_rules'] ) );
 
 				foreach ( $new_rules as $i => &$new_rule ) {
 					if ( isset( $old_free_rules[ $i ] ) ) {
@@ -358,17 +358,17 @@ class Channels_Page {
 		) );
 
 		// Persist the single flat channel (Pro rules within it are preserved above).
-		update_option( 'yousync_channel_config', $new_channels[0] ?? array() );
+		update_option( 'wpbuoy_video_sync_channel_config', $new_channels[0] ?? array() );
 
 		// Schedule cron events for the channel's free rules (the scheduler skips
 		// preserved Pro rules).
-		do_action( 'yousync_reschedule_option_channels', $new_channels );
+		do_action( 'wpbuoy_video_sync_reschedule_option_channels', $new_channels );
 
 		if ( ! empty( $save_errors ) ) {
-			set_transient( 'yousync_ch_errors_' . get_current_user_id(), $save_errors, 60 );
+			set_transient( 'wpbuoy_video_sync_ch_errors_' . get_current_user_id(), $save_errors, 60 );
 		}
 
-		wp_safe_redirect( add_query_arg( 'yousync-channels-updated', '1', admin_url( 'admin.php?page=yousync' ) ) );
+		wp_safe_redirect( add_query_arg( 'yousync-channels-updated', '1', admin_url( 'admin.php?page=wpbuoy-video-sync' ) ) );
 		exit;
 	}
 
@@ -378,7 +378,7 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function ajax_add_rule(): void {
-		check_ajax_referer( 'yousync_add_rule', 'nonce' );
+		check_ajax_referer( 'wpbuoy_video_sync_add_rule', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'forbidden', 403 );
@@ -390,7 +390,7 @@ class Channels_Page {
 			? wp_unslash( $_POST['rule'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing
 			: array();
 
-		$rule                  = yousync_sanitize_sync_rule( $raw_rule );
+		$rule                  = wpbuoy_video_sync_sanitize_sync_rule( $raw_rule );
 		$rule['enabled']       = true; // A rule created via the wizard is active and runs on save.
 		$rule['scheduled_at']  = time();
 		$rule['sync_status']   = '';
@@ -399,7 +399,7 @@ class Channels_Page {
 		$rule['sync_errors']   = array();
 
 		// Load, normalize, append, save.
-		$config   = get_option( 'yousync_channel_config', array() );
+		$config   = get_option( 'wpbuoy_video_sync_channel_config', array() );
 		$is_single = isset( $config['youtube_id'] );
 		$channels = $is_single ? array( $config ) : array_values( (array) $config );
 
@@ -413,19 +413,19 @@ class Channels_Page {
 		$channels[ $ch_index ]['sync_rules'][] = $rule;
 		$rule_index = array_key_last( $channels[ $ch_index ]['sync_rules'] );
 
-		update_option( 'yousync_channel_config', $is_single ? $channels[0] : $channels );
-		do_action( 'yousync_reschedule_option_channels', $channels );
+		update_option( 'wpbuoy_video_sync_channel_config', $is_single ? $channels[0] : $channels );
+		do_action( 'wpbuoy_video_sync_reschedule_option_channels', $channels );
 
 		// Re-read so the rendered card reflects the scheduler's state — an enabled
 		// once rule is marked 'syncing' and runs immediately after this save.
-		$fresh          = get_option( 'yousync_channel_config', array() );
+		$fresh          = get_option( 'wpbuoy_video_sync_channel_config', array() );
 		$fresh_channels = isset( $fresh['youtube_id'] ) ? array( $fresh ) : array_values( (array) $fresh );
 		$render_rule    = $fresh_channels[ $ch_index ]['sync_rules'][ $rule_index ] ?? $rule;
 
 		// Render the accordion card for the new rule.
 		$name_prefix = 'channels[' . $ch_index . '][sync_rules]';
 		ob_start();
-		yousync_get_template_part( 'sync-rule', null, array(
+		wpbuoy_video_sync_get_template_part( 'sync-rule', null, array(
 			'index'              => $rule_index,
 			'rule'               => $render_rule,
 			'term_id'            => 0,
@@ -448,7 +448,7 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function ajax_sync_progress(): void {
-		check_ajax_referer( 'yousync_sync_progress', 'nonce' );
+		check_ajax_referer( 'wpbuoy_video_sync_sync_progress', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'forbidden', 403 );
@@ -457,7 +457,7 @@ class Channels_Page {
 		$ch_index   = absint( $_POST['ch_index'] ?? 0 );
 		$rule_index = absint( $_POST['rule_index'] ?? 0 );
 
-		$config   = get_option( 'yousync_channel_config', array() );
+		$config   = get_option( 'wpbuoy_video_sync_channel_config', array() );
 		$channels = isset( $config['youtube_id'] ) ? array( $config ) : array_values( (array) $config );
 		$rule     = $channels[ $ch_index ]['sync_rules'][ $rule_index ] ?? null;
 
@@ -468,7 +468,7 @@ class Channels_Page {
 		$sync_status = $rule['sync_status'] ?? '';
 
 		if ( 'syncing' === $sync_status ) {
-			$progress = get_transient( 'yousync_prog_' . $ch_index . '_' . $rule_index );
+			$progress = get_transient( 'wpbuoy_video_sync_prog_' . $ch_index . '_' . $rule_index );
 			wp_send_json_success( array(
 				'status'  => 'syncing',
 				'current' => $progress ? (int) $progress['current'] : 0,
@@ -476,7 +476,7 @@ class Channels_Page {
 			) );
 		} else {
 			$last_synced  = (int) ( $rule['last_synced'] ?? 0 );
-			$progress     = get_transient( 'yousync_prog_' . $ch_index . '_' . $rule_index );
+			$progress     = get_transient( 'wpbuoy_video_sync_prog_' . $ch_index . '_' . $rule_index );
 			wp_send_json_success( array(
 				'status'            => $sync_status ?: 'idle',
 				'last_synced'       => $last_synced,
@@ -489,7 +489,7 @@ class Channels_Page {
 	}
 
 	public function ajax_mark_history_read(): void {
-		check_ajax_referer( 'yousync_mark_history_read', 'nonce' );
+		check_ajax_referer( 'wpbuoy_video_sync_mark_history_read', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'forbidden', 403 );
