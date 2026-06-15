@@ -131,7 +131,7 @@ class Channels_Page {
 	public function register_menu() {
 		add_menu_page(
 			__( 'WPBuoy Video Sync', 'wpbuoy-video-sync' ),
-			__( 'WPBuoy Video Sync', 'wpbuoy-video-sync' ),
+			__( 'Video Sync', 'wpbuoy-video-sync' ),
 			'manage_options',
 			'wpbuoy-video-sync',
 			array( $this, 'render_page' ),

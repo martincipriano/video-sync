@@ -275,9 +275,9 @@ class Video_Importer {
 	/**
 	 * Import a YouTube channel as a new WordPress post.
 	 *
-	 * Deduplication key: _wpbuoy_video_sync_channel_post. The channel profile picture is
-	 * sideloaded as the post's featured image (fallback: user-set image takes
-	 * precedence on the frontend via the post_thumbnail_html filter).
+	 * Deduplication key: _wpbuoy_video_sync_channel_post. The channel profile picture
+	 * URL is stored in meta and served as the featured image on the frontend via the
+	 * post_thumbnail_html filter (a user-set featured image takes precedence).
 	 *
 	 * @param array  $channel_data              Channel data from YouTube_API::get_channel_data().
 	 * @param string $channel_id                YouTube channel ID.
@@ -299,12 +299,6 @@ class Video_Importer {
 		}
 
 		$this->save_channel_meta( $post_id, $channel_data, $channel_id );
-
-		// Sideload profile picture as the featured image.
-		$pic_url = $channel_data['profile_picture']['url'] ?? '';
-		if ( $pic_url ) {
-			$this->sideload_as_featured_image( $post_id, $pic_url );
-		}
 
 		return $post_id;
 	}
@@ -329,46 +323,6 @@ class Video_Importer {
 		update_post_meta( $post_id, '_wpbuoy_video_sync_banner_image',       $channel_data['banner_image']['url'] ?? '' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_source_type',         'channel' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',         time() );
-	}
-
-	/**
-	 * Sideload an image URL as the post's featured image.
-	 *
-	 * A no-op if the attachment sideload fails.
-	 *
-	 * @param int    $post_id Post ID.
-	 * @param string $url     Image URL to sideload.
-	 * @return void
-	 */
-	private function sideload_as_featured_image( int $post_id, string $url ): void {
-		// Always include admin dependencies — they may not be loaded in cron context
-		// even if media_sideload_image itself has been defined elsewhere.
-		require_once ABSPATH . 'wp-admin/includes/media.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$attachment_id = media_sideload_image( $url, $post_id, '', 'id' );
-		if ( ! is_wp_error( $attachment_id ) && $attachment_id ) {
-			set_post_thumbnail( $post_id, (int) $attachment_id );
-		}
-	}
-
-	/**
-	 * Sideload the stored profile picture as the post's featured image if none is set.
-	 *
-	 * Used to backfill the featured image on channel posts that were imported before
-	 * the profile picture URL was correctly populated.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return void
-	 */
-	public function ensure_channel_featured_image( int $post_id ): void {
-		if ( get_post_thumbnail_id( $post_id ) ) {
-			return;
-		}
-		$url = (string) get_post_meta( $post_id, '_wpbuoy_video_sync_profile_picture', true );
-		if ( $url ) {
-			$this->sideload_as_featured_image( $post_id, $url );
-		}
 	}
 
 	/**

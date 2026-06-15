@@ -224,10 +224,37 @@ function wpbuoy_video_sync_render_video_metabox( $post ) {
 }
 
 /**
- * Fall back to the YouTube thumbnail URL when no featured image is set.
+ * Resolve the YouTube image to use as the featured-image fallback for a post.
  *
- * Only applies to posts that have WPBuoy Video Sync thumbnail meta. If the user has
- * explicitly set a featured image, that takes precedence and this filter is a no-op.
+ * Video and playlist posts store a sized thumbnails array; channel posts store a
+ * single profile-picture URL. Returns a normalised array with at least a 'url'
+ * key (and optional 'width'/'height'), or null when the post has no YouTube image.
+ *
+ * @param int $post_id Post ID.
+ * @return array|null { url, width?, height? } or null.
+ */
+function wpbuoy_video_sync_get_fallback_thumbnail( int $post_id ): ?array {
+	$thumbnails = get_post_meta( $post_id, '_wpbuoy_video_sync_thumbnails', true );
+
+	if ( is_array( $thumbnails ) && ! empty( $thumbnails ) ) {
+		return \WPBuoyVideoSync\Video_Importer::get_best_thumbnail( $thumbnails );
+	}
+
+	$profile_picture = (string) get_post_meta( $post_id, '_wpbuoy_video_sync_profile_picture', true );
+
+	if ( $profile_picture ) {
+		return array( 'url' => $profile_picture );
+	}
+
+	return null;
+}
+
+/**
+ * Fall back to the YouTube image when no featured image is set.
+ *
+ * Applies to synced video, playlist, and channel posts, and only when the
+ * "Use the YouTube image as the featured image" setting is enabled. If the user
+ * has explicitly set a featured image, that takes precedence and this is a no-op.
  *
  * @param string     $html             Current featured image HTML.
  * @param int        $post_id          Post ID.
@@ -241,13 +268,11 @@ function wpbuoy_video_sync_post_thumbnail_html( string $html, int $post_id, int 
 		return $html;
 	}
 
-	$thumbnails = get_post_meta( $post_id, '_wpbuoy_video_sync_thumbnails', true );
-
-	if ( ! is_array( $thumbnails ) || empty( $thumbnails ) ) {
+	if ( ! get_option( 'wpbuoy_video_sync_youtube_image_as_featured', 1 ) ) {
 		return $html;
 	}
 
-	$thumb = \WPBuoyVideoSync\Video_Importer::get_best_thumbnail( $thumbnails );
+	$thumb = wpbuoy_video_sync_get_fallback_thumbnail( $post_id );
 
 	if ( ! $thumb ) {
 		return $html;
@@ -278,13 +303,11 @@ function wpbuoy_video_sync_admin_post_thumbnail_html( string $content, int $post
 		return $content;
 	}
 
-	$thumbnails = get_post_meta( $post_id, '_wpbuoy_video_sync_thumbnails', true );
-
-	if ( ! is_array( $thumbnails ) || empty( $thumbnails ) ) {
+	if ( ! get_option( 'wpbuoy_video_sync_youtube_image_as_featured', 1 ) ) {
 		return $content;
 	}
 
-	$thumb = \WPBuoyVideoSync\Video_Importer::get_best_thumbnail( $thumbnails );
+	$thumb = wpbuoy_video_sync_get_fallback_thumbnail( $post_id );
 
 	if ( ! $thumb ) {
 		return $content;

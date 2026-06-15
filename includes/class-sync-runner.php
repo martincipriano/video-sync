@@ -400,11 +400,9 @@ class Sync_Runner {
 			return;
 		}
 
-		// Skip if this channel is already imported into this post type, but
-		// backfill the featured image if missing.
+		// Skip if this channel is already imported into this post type.
 		$existing_post_id = $this->importer->find_post_by_channel_id( $channel_id, $destination_post_type );
 		if ( $existing_post_id ) {
-			$this->importer->ensure_channel_featured_image( $existing_post_id );
 			return;
 		}
 

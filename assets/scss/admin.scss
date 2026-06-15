@@ -1045,11 +1045,11 @@
   flex-direction: column;
   gap: 16px;
 }
-#yousync_video_details .inside,
-#yousync_playlist_details .inside,
-#yousync_channel_details .inside {
-  margin: 0;
-  padding: 0;
+#wpbuoy_video_sync_video_details .inside,
+#wpbuoy_video_sync_playlist_details .inside,
+#wpbuoy_video_sync_channel_details .inside {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .yousync-metabox {
   display: flex;

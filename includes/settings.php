@@ -65,6 +65,15 @@ class WPBuoyVideoSyncSettings {
 			)
 		);
 
+		register_setting(
+			'wpbuoy_video_sync_settings_group',
+			'wpbuoy_video_sync_youtube_image_as_featured',
+			array(
+				'sanitize_callback' => 'absint',
+				'default'           => 1,
+			)
+		);
+
 		add_settings_section(
 			'wpbuoy_video_sync_api_settings',
 			__( 'API Settings', 'wpbuoy-video-sync'),
@@ -78,6 +87,21 @@ class WPBuoyVideoSyncSettings {
 			array( $this, 'api_key_html' ),
 			'wpbuoy_video_sync_settings',
 			'wpbuoy_video_sync_api_settings'
+		);
+
+		add_settings_section(
+			'wpbuoy_video_sync_content_settings',
+			__( 'Content', 'wpbuoy-video-sync'),
+			null,
+			'wpbuoy_video_sync_settings'
+		);
+
+		add_settings_field(
+			'wpbuoy_video_sync_youtube_image_as_featured',
+			__( 'Featured Images', 'wpbuoy-video-sync'),
+			array( $this, 'youtube_image_as_featured_html' ),
+			'wpbuoy_video_sync_settings',
+			'wpbuoy_video_sync_content_settings'
 		);
 
 		add_settings_section(
@@ -173,6 +197,24 @@ class WPBuoyVideoSyncSettings {
 		if ( ! in_array( 'wpbuoy_video_sync_settings_saved', $existing, true ) ) {
 			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_settings_saved', __( 'Settings saved.', 'wpbuoy-video-sync' ), 'updated' );
 		}
+	}
+
+	/**
+	 * Render the "use YouTube image as featured image" field HTML.
+	 *
+	 * @return void
+	 */
+	public function youtube_image_as_featured_html() {
+		$checked = (bool) get_option( 'wpbuoy_video_sync_youtube_image_as_featured', 1 );
+		?>
+		<label>
+			<input type="checkbox" name="wpbuoy_video_sync_youtube_image_as_featured" value="1" <?php checked( $checked, true ); ?>>
+			<?php esc_html_e( 'Use the YouTube image as the featured image when none is set', 'wpbuoy-video-sync'); ?>
+		</label>
+		<p class="description">
+			<?php esc_html_e( 'When enabled, synced videos, playlists, and channels show their YouTube thumbnail (or channel picture) as the featured image unless you set your own. Disable to leave synced posts without a featured image.', 'wpbuoy-video-sync'); ?>
+		</p>
+		<?php
 	}
 
 	/**
