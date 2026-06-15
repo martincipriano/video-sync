@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.2.2\n"
+"Project-Id-Version: WPBuoy Video Sync 2.2.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpbuoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-14T17:28:54+00:00\n"
+"POT-Creation-Date: 2026-06-15T16:01:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wpbuoy-video-sync\n"
@@ -17,7 +17,6 @@ msgstr ""
 #. Plugin Name of the plugin
 #: wpbuoy-video-sync.php
 #: includes/class-channels-page.php:133
-#: includes/class-channels-page.php:134
 msgid "WPBuoy Video Sync"
 msgstr ""
 
@@ -188,6 +187,10 @@ msgstr ""
 msgid "Support"
 msgstr ""
 
+#: includes/class-channels-page.php:134
+msgid "Video Sync"
+msgstr ""
+
 #: includes/class-channels-page.php:145
 #: includes/class-channels-page.php:146
 msgid "Channels"
@@ -209,12 +212,12 @@ msgid_plural "No videos were imported. %d candidates were fetched from the API b
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sync-runner.php:574
+#: includes/class-sync-runner.php:572
 msgid "No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/class-sync-runner.php:578
+#: includes/class-sync-runner.php:576
 #, php-format
 msgid "The destination post type \"%s\" is no longer registered. Choose a valid post type for this rule."
 msgstr ""
@@ -251,45 +254,61 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: includes/settings.php:70
+#: includes/settings.php:79
 msgid "API Settings"
 msgstr ""
 
-#: includes/settings.php:77
+#: includes/settings.php:86
 msgid "Google API Key"
 msgstr ""
 
-#: includes/settings.php:85
+#: includes/settings.php:94
+msgid "Content"
+msgstr ""
+
+#: includes/settings.php:101
+msgid "Featured Images"
+msgstr ""
+
+#: includes/settings.php:109
 msgid "Advanced"
 msgstr ""
 
-#: includes/settings.php:92
+#: includes/settings.php:116
 msgid "Uninstall Data"
 msgstr ""
 
-#: includes/settings.php:127
+#: includes/settings.php:151
 msgid "API key cannot be empty."
 msgstr ""
 
-#: includes/settings.php:143
+#: includes/settings.php:167
 msgid "Could not connect to YouTube API."
 msgstr ""
 
 #. translators: %s: Error message from YouTube API
-#: includes/settings.php:156
+#: includes/settings.php:180
 #, php-format
 msgid "YouTube API error: %s"
 msgstr ""
 
-#: includes/settings.php:174
+#: includes/settings.php:198
 msgid "Settings saved."
 msgstr ""
 
-#: includes/settings.php:188
+#: includes/settings.php:212
+msgid "Use the YouTube image as the featured image when none is set"
+msgstr ""
+
+#: includes/settings.php:215
+msgid "When enabled, synced videos, playlists, and channels show their YouTube thumbnail (or channel picture) as the featured image unless you set your own. Disable to leave synced posts without a featured image."
+msgstr ""
+
+#: includes/settings.php:230
 msgid "Remove all WPBuoy Video Sync data when the plugin is deleted"
 msgstr ""
 
-#: includes/settings.php:191
+#: includes/settings.php:233
 msgid "When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later."
 msgstr ""
 
@@ -778,18 +797,18 @@ msgstr ""
 msgid "WPBuoy Video Sync Video Details"
 msgstr ""
 
-#: wpbuoy-video-sync.php:296
+#: wpbuoy-video-sync.php:319
 msgid "Click to set a custom featured image"
 msgstr ""
 
-#: wpbuoy-video-sync.php:300
+#: wpbuoy-video-sync.php:323
 msgid "Click the YouTube thumbnail to edit or update"
 msgstr ""
 
-#: wpbuoy-video-sync.php:318
+#: wpbuoy-video-sync.php:341
 msgid "WPBuoy Video Sync Playlist Details"
 msgstr ""
 
-#: wpbuoy-video-sync.php:359
+#: wpbuoy-video-sync.php:382
 msgid "WPBuoy Video Sync Channel Details"
 msgstr ""

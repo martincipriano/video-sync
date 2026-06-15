@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -92,6 +92,8 @@ WPBuoy Video Sync connects to the **YouTube Data API v3**, a service provided by
 
 **What data is sent and when:** requests are made only when you save a channel, run a sync (manually or on a schedule you configure), or use the pre-sync quota estimate. Each request is sent directly from your own server to Google's API endpoint (`https://www.googleapis.com/youtube/v3/`) and includes the Google API key you provide and the channel, playlist, or video identifier being synced. No personal data about your site's visitors or users is sent, and no data passes through any service operated by the plugin author or a third party.
 
+**Images:** the thumbnail and channel banner image URLs returned by the YouTube Data API point to Google's own content delivery network (`i.ytimg.com` and `*.googleusercontent.com`). These provider-hosted image URLs are stored and referenced as-is, in the same way YouTube serves them — the plugin does not host, offload, or proxy any of these images from its author's servers.
+
 This service is provided by Google. By using it you agree to Google's terms and privacy policy:
 
 * YouTube API Services Terms of Service: https://developers.google.com/youtube/terms/api-services-terms-of-service
@@ -105,6 +107,11 @@ This service is provided by Google. By using it you agree to Google's terms and 
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.2.3 =
+* New: Option to use the YouTube thumbnail as the post featured image (enabled by default) — disable it to keep your own featured images.
+* Fixed: Channel posts now reliably display their profile image (removed image sideloading that failed on extension-less YouTube CDN URLs).
+* Improved: Documented the YouTube / Google image CDN (i.ytimg.com, googleusercontent.com) in the readme's External services section, per WordPress.org review feedback.
 
 = 2.2.2 =
 * Improved: Added an "External services" section to the readme documenting the YouTube Data API v3 usage, in line with WordPress.org plugin guidelines.
