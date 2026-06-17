@@ -22,8 +22,8 @@ $ch_errors           = isset( $ch_errors ) && is_array( $ch_errors ) ? $ch_error
 $channel_error       = $channel['_api_error'] ?? $ch_errors[ $youtube_id ] ?? '';
 $is_new_channel      = ! $youtube_id || ! empty( $channel_error );
 $history             = \WPBuoyVideoSync\Sync_History::get( $youtube_id );
-$error_count         = count( array_filter( $history, fn( $e ) => $e['has_error'] ?? false ) );
-$has_errors          = \WPBuoyVideoSync\Sync_History::has_unread_errors( $youtube_id );
+$error_count         = \WPBuoyVideoSync\Sync_History::unread_error_count( $youtube_id );
+$has_errors          = $error_count > 0;
 $channel_title       = $channel['channel_title'] ?? '';
 $channel_description = $channel['channel_description'] ?? '';
 $subscriber_count    = isset( $channel['subscriber_count'] ) ? $channel['subscriber_count'] : '';

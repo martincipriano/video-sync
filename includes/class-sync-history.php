@@ -88,6 +88,30 @@ class Sync_History {
 	}
 
 	/**
+	 * Count error runs that have not yet been read by the user.
+	 *
+	 * An error entry is unread when its timestamp is newer than the channel's
+	 * read-at marker. Because that marker only moves forward, this equals the
+	 * number of error runs logged since the user last opened the History tab.
+	 *
+	 * @param string $youtube_id YouTube channel ID.
+	 * @return int
+	 */
+	public static function unread_error_count( string $youtube_id ): int {
+		if ( ! $youtube_id ) {
+			return 0;
+		}
+		$read_at = (int) get_option( self::read_option_key( $youtube_id ), 0 );
+		$count   = 0;
+		foreach ( self::get( $youtube_id ) as $entry ) {
+			if ( ! empty( $entry['has_error'] ) && ( $entry['timestamp'] ?? 0 ) > $read_at ) {
+				++$count;
+			}
+		}
+		return $count;
+	}
+
+	/**
 	 * Mark all current errors as read for a channel.
 	 *
 	 * Stores the current timestamp so any error entry older than it is considered read.
