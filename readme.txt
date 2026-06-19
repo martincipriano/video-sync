@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.2.5
+Stable tag: 2.3.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,6 +149,9 @@ Fires after a channel's metadata is saved.
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.3.0 =
+* New: Action hooks fire after each video, playlist, and channel is synced — `wpbuoy_video_sync_video_synced`, `wpbuoy_video_sync_playlist_synced`, `wpbuoy_video_sync_channel_synced`.
 
 = 2.2.5 =
 * Maintenance release.

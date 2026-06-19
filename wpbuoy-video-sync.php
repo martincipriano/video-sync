@@ -4,7 +4,7 @@ declare(strict_types=1);
  * Plugin Name: WPBuoy Video Sync
  * Plugin URI: https://wpbuoy.com/product/video-sync
  * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
- * Version: 2.2.5
+ * Version: 2.3.0
  * Author: Martin Cipriano
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'WPBUOY_VIDEO_SYNC_VERSION', '2.2.5' );
+define( 'WPBUOY_VIDEO_SYNC_VERSION', '2.3.0' );
 define( 'WPBUOY_VIDEO_SYNC_PLUGIN_FILE', __FILE__ );
 define( 'WPBUOY_VIDEO_SYNC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPBUOY_VIDEO_SYNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
