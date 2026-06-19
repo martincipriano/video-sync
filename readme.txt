@@ -99,6 +99,48 @@ This service is provided by Google. By using it you agree to Google's terms and 
 * YouTube API Services Terms of Service: https://developers.google.com/youtube/terms/api-services-terms-of-service
 * Google Privacy Policy: https://policies.google.com/privacy
 
+== For Developers ==
+
+WPBuoy Video Sync fires action hooks after each item's metadata is saved, so you can run your own code whenever a video, playlist, or channel is synced. Each hook fires on both the initial import and every re-sync, after all metadata has been written. The synced data is passed to the hook, so you can identify or filter items without making another API call.
+
+= wpbuoy_video_sync_video_synced =
+
+Fires after a video's metadata is saved.
+
+`do_action( 'wpbuoy_video_sync_video_synced', int $post_id, array $video_data, string $source_type, int $source_id );`
+
+* `$post_id` — the video post ID.
+* `$video_data` — video data from the YouTube Data API (title, description, view_count, like_count, comment_count, video_id, and more).
+* `$source_type` — how it was synced: `channel`, `playlist`, or `video`.
+* `$source_id` — the source term ID the video was synced from.
+
+= wpbuoy_video_sync_playlist_synced =
+
+Fires after a playlist's metadata is saved.
+
+`do_action( 'wpbuoy_video_sync_playlist_synced', int $post_id, array $playlist_data, string $channel_id );`
+
+* `$post_id` — the playlist post ID.
+* `$playlist_data` — playlist data from the YouTube Data API.
+* `$channel_id` — the source channel ID the playlist belongs to.
+
+= wpbuoy_video_sync_channel_synced =
+
+Fires after a channel's metadata is saved.
+
+`do_action( 'wpbuoy_video_sync_channel_synced', int $post_id, array $channel_data, string $channel_id );`
+
+* `$post_id` — the channel post ID.
+* `$channel_data` — channel data from the YouTube Data API.
+* `$channel_id` — the YouTube channel ID.
+
+= Example =
+
+`add_action( 'wpbuoy_video_sync_video_synced', function ( $post_id, $video_data ) {
+    // Runs each time a video is synced.
+    error_log( sprintf( 'Synced video %d (%s)', $post_id, $video_data['video_id'] ?? '' ) );
+}, 10, 2 );`
+
 == Screenshots ==
 
 1. Channels page — add a YouTube channel and configure its sync rules.

@@ -159,6 +159,19 @@ class Video_Importer {
 		update_post_meta( $post_id, '_wpbuoy_video_sync_thumbnails',           $thumbnails );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_thumbnail_url',        $best_thumb['url'] ?? '' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',          time() );
+
+		/**
+		 * Fires after a video's metadata has been written during sync.
+		 *
+		 * Fires on both initial import and every re-sync, after all meta is set,
+		 * so consumers have full context to identify or filter the synced video.
+		 *
+		 * @param int    $post_id     Video post ID.
+		 * @param array  $video_data  Video data from the YouTube API.
+		 * @param string $source_type Sync source type: 'channel', 'playlist', or 'video'.
+		 * @param int    $source_id   Source term ID the video was synced from.
+		 */
+		do_action( 'wpbuoy_video_sync_video_synced', $post_id, $video_data, $source_type, $source_id );
 	}
 
 	// -------------------------------------------------------------------------
@@ -236,6 +249,17 @@ class Video_Importer {
 		update_post_meta( $post_id, '_wpbuoy_video_sync_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_etag',                 $playlist_data['etag'] ?? '' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',          time() );
+
+		/**
+		 * Fires after a playlist's metadata has been written during sync.
+		 *
+		 * Fires on both initial import and every re-sync, after all meta is set.
+		 *
+		 * @param int    $post_id       Playlist post ID.
+		 * @param array  $playlist_data Playlist data from the YouTube API.
+		 * @param string $channel_id    Source channel ID the playlist belongs to.
+		 */
+		do_action( 'wpbuoy_video_sync_playlist_synced', $post_id, $playlist_data, $channel_id );
 	}
 
 	// -------------------------------------------------------------------------
@@ -323,6 +347,17 @@ class Video_Importer {
 		update_post_meta( $post_id, '_wpbuoy_video_sync_banner_image',       $channel_data['banner_image']['url'] ?? '' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_source_type',         'channel' );
 		update_post_meta( $post_id, '_wpbuoy_video_sync_last_synced',         time() );
+
+		/**
+		 * Fires after a channel's metadata has been written during sync.
+		 *
+		 * Fires on both initial import and every re-sync, after all meta is set.
+		 *
+		 * @param int    $post_id      Channel post ID.
+		 * @param array  $channel_data Channel data from the YouTube API.
+		 * @param string $channel_id   YouTube channel ID.
+		 */
+		do_action( 'wpbuoy_video_sync_channel_synced', $post_id, $channel_data, $channel_id );
 	}
 
 	/**
