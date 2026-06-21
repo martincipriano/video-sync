@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -175,6 +175,9 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.4.0 =
+* New: `wpbuoy_video_sync_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.
 
 = 2.3.0 =
 * New: Action hooks fire after each video, playlist, and channel is synced — `wpbuoy_video_sync_video_synced`, `wpbuoy_video_sync_playlist_synced`, `wpbuoy_video_sync_channel_synced`.

@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.3.0\n"
+"Project-Id-Version: WPBuoy Video Sync 2.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpbuoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-19T13:26:02+00:00\n"
+"POT-Creation-Date: 2026-06-21T02:24:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wpbuoy-video-sync\n"
@@ -354,19 +354,19 @@ msgid "Title"
 msgstr ""
 
 #: template-parts/channel-group.php:125
-#: template-parts/metabox-channel.php:65
+#: template-parts/metabox-channel.php:67
 msgid "Subscribers"
 msgstr ""
 
 #: template-parts/channel-group.php:132
-#: template-parts/metabox-channel.php:75
+#: template-parts/metabox-channel.php:77
 msgid "Videos"
 msgstr ""
 
 #: template-parts/channel-group.php:139
-#: template-parts/metabox-channel.php:55
-#: template-parts/metabox-playlist.php:57
-#: template-parts/metabox-video.php:67
+#: template-parts/metabox-channel.php:57
+#: template-parts/metabox-playlist.php:59
+#: template-parts/metabox-video.php:69
 msgid "Description"
 msgstr ""
 
@@ -456,7 +456,7 @@ msgid "%ds"
 msgstr ""
 
 #: template-parts/channels-page.php:21
-#: template-parts/metabox-video.php:77
+#: template-parts/metabox-video.php:79
 msgid "Channel"
 msgstr ""
 
@@ -502,146 +502,146 @@ msgstr ""
 msgid "Images"
 msgstr ""
 
-#: template-parts/metabox-channel.php:45
+#: template-parts/metabox-channel.php:47
 msgid "Channel Title"
 msgstr ""
 
-#: template-parts/metabox-channel.php:46
-#: template-parts/metabox-channel.php:56
-#: template-parts/metabox-channel.php:66
-#: template-parts/metabox-channel.php:76
-#: template-parts/metabox-channel.php:86
-#: template-parts/metabox-channel.php:97
-#: template-parts/metabox-channel.php:135
-#: template-parts/metabox-channel.php:144
-#: template-parts/metabox-playlist.php:48
-#: template-parts/metabox-playlist.php:58
-#: template-parts/metabox-playlist.php:68
-#: template-parts/metabox-playlist.php:78
-#: template-parts/metabox-playlist.php:90
-#: template-parts/metabox-playlist.php:100
-#: template-parts/metabox-playlist.php:126
-#: template-parts/metabox-video.php:58
-#: template-parts/metabox-video.php:68
-#: template-parts/metabox-video.php:78
-#: template-parts/metabox-video.php:88
-#: template-parts/metabox-video.php:106
-#: template-parts/metabox-video.php:116
-#: template-parts/metabox-video.php:126
-#: template-parts/metabox-video.php:136
-#: template-parts/metabox-video.php:146
-#: template-parts/metabox-video.php:158
-#: template-parts/metabox-video.php:168
-#: template-parts/metabox-video.php:178
-#: template-parts/metabox-video.php:210
+#: template-parts/metabox-channel.php:48
+#: template-parts/metabox-channel.php:58
+#: template-parts/metabox-channel.php:68
+#: template-parts/metabox-channel.php:78
+#: template-parts/metabox-channel.php:88
+#: template-parts/metabox-channel.php:99
+#: template-parts/metabox-channel.php:137
+#: template-parts/metabox-channel.php:146
+#: template-parts/metabox-playlist.php:50
+#: template-parts/metabox-playlist.php:60
+#: template-parts/metabox-playlist.php:70
+#: template-parts/metabox-playlist.php:80
+#: template-parts/metabox-playlist.php:92
+#: template-parts/metabox-playlist.php:102
+#: template-parts/metabox-playlist.php:128
+#: template-parts/metabox-video.php:60
+#: template-parts/metabox-video.php:70
+#: template-parts/metabox-video.php:80
+#: template-parts/metabox-video.php:90
+#: template-parts/metabox-video.php:108
+#: template-parts/metabox-video.php:118
+#: template-parts/metabox-video.php:128
+#: template-parts/metabox-video.php:138
+#: template-parts/metabox-video.php:148
+#: template-parts/metabox-video.php:160
+#: template-parts/metabox-video.php:170
+#: template-parts/metabox-video.php:180
+#: template-parts/metabox-video.php:212
 msgid "Copy value"
 msgstr ""
 
-#: template-parts/metabox-channel.php:85
+#: template-parts/metabox-channel.php:87
 msgid "Channel Link"
 msgstr ""
 
-#: template-parts/metabox-channel.php:96
-#: template-parts/metabox-playlist.php:99
-#: template-parts/metabox-video.php:177
+#: template-parts/metabox-channel.php:98
+#: template-parts/metabox-playlist.php:101
+#: template-parts/metabox-video.php:179
 msgid "Channel ID"
 msgstr ""
 
-#: template-parts/metabox-channel.php:103
-#: template-parts/metabox-playlist.php:108
-#: template-parts/metabox-video.php:186
+#: template-parts/metabox-channel.php:105
+#: template-parts/metabox-playlist.php:110
+#: template-parts/metabox-video.php:188
 msgid "Hide Developer Fields"
 msgstr ""
 
-#: template-parts/metabox-channel.php:104
-#: template-parts/metabox-playlist.php:109
-#: template-parts/metabox-video.php:187
+#: template-parts/metabox-channel.php:106
+#: template-parts/metabox-playlist.php:111
+#: template-parts/metabox-video.php:189
 msgid "Show Developer Fields"
 msgstr ""
 
-#: template-parts/metabox-channel.php:134
+#: template-parts/metabox-channel.php:136
 msgid "Banner Image"
 msgstr ""
 
-#: template-parts/metabox-channel.php:143
+#: template-parts/metabox-channel.php:145
 msgid "Profile Photo"
 msgstr ""
 
-#: template-parts/metabox-channel.php:152
+#: template-parts/metabox-channel.php:154
 msgid "No images synced yet."
 msgstr ""
 
-#: template-parts/metabox-channel.php:162
-#: template-parts/metabox-playlist.php:140
-#: template-parts/metabox-video.php:225
+#: template-parts/metabox-channel.php:164
+#: template-parts/metabox-playlist.php:142
+#: template-parts/metabox-video.php:227
 msgid "Last Synced"
 msgstr ""
 
-#: template-parts/metabox-channel.php:166
+#: template-parts/metabox-channel.php:168
 msgid "This channel has not been synced yet."
 msgstr ""
 
-#: template-parts/metabox-playlist.php:47
+#: template-parts/metabox-playlist.php:49
 msgid "Playlist Title"
 msgstr ""
 
-#: template-parts/metabox-playlist.php:67
+#: template-parts/metabox-playlist.php:69
 msgid "Video Count"
 msgstr ""
 
-#: template-parts/metabox-playlist.php:77
+#: template-parts/metabox-playlist.php:79
 msgid "Playlist Link"
 msgstr ""
 
-#: template-parts/metabox-playlist.php:89
+#: template-parts/metabox-playlist.php:91
 msgid "Playlist ID"
 msgstr ""
 
-#: template-parts/metabox-playlist.php:125
+#: template-parts/metabox-playlist.php:127
 msgid "Thumbnail URL"
 msgstr ""
 
-#: template-parts/metabox-playlist.php:144
+#: template-parts/metabox-playlist.php:146
 msgid "This playlist has not been synced yet."
 msgstr ""
 
-#: template-parts/metabox-video.php:57
+#: template-parts/metabox-video.php:59
 msgid "Original Title"
 msgstr ""
 
-#: template-parts/metabox-video.php:87
+#: template-parts/metabox-video.php:89
 msgid "Published Date"
 msgstr ""
 
-#: template-parts/metabox-video.php:105
+#: template-parts/metabox-video.php:107
 msgid "Duration"
 msgstr ""
 
-#: template-parts/metabox-video.php:115
+#: template-parts/metabox-video.php:117
 msgid "View Count"
 msgstr ""
 
-#: template-parts/metabox-video.php:125
+#: template-parts/metabox-video.php:127
 msgid "Like Count"
 msgstr ""
 
-#: template-parts/metabox-video.php:135
+#: template-parts/metabox-video.php:137
 msgid "Comment Count"
 msgstr ""
 
-#: template-parts/metabox-video.php:145
+#: template-parts/metabox-video.php:147
 msgid "Video Link"
 msgstr ""
 
-#: template-parts/metabox-video.php:157
+#: template-parts/metabox-video.php:159
 msgid "Video ID"
 msgstr ""
 
-#: template-parts/metabox-video.php:167
+#: template-parts/metabox-video.php:169
 msgid "Embed Code"
 msgstr ""
 
-#: template-parts/metabox-video.php:229
+#: template-parts/metabox-video.php:231
 msgid "This video has not been synced yet."
 msgstr ""
 
