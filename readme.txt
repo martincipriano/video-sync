@@ -141,6 +141,32 @@ Fires after a channel's metadata is saved.
     error_log( sprintf( 'Synced video %d (%s)', $post_id, $video_data['video_id'] ?? '' ) );
 }, 10, 2 );`
 
+= wpbuoy_video_sync_metabox_tabs =
+
+Add your own tab to the video, playlist, or channel metabox on the post edit screen. Return an array of tabs, each with a `slug`, a `label`, and a `render` callback that echoes the panel's content.
+
+`apply_filters( 'wpbuoy_video_sync_metabox_tabs', array $tabs, string $type, int $post_id );`
+
+* `$tabs` — list of tabs to add. Each: `[ 'slug' => string, 'label' => string, 'render' => callable( int $post_id ) ]`.
+* `$type` — which metabox is rendering: `video`, `playlist`, or `channel`.
+* `$post_id` — the current post ID.
+
+Example — add a tab only to the video metabox:
+
+`add_filter( 'wpbuoy_video_sync_metabox_tabs', function ( $tabs, $type, $post_id ) {
+    if ( 'video' !== $type ) {
+        return $tabs;
+    }
+    $tabs[] = array(
+        'slug'   => 'my_tab',
+        'label'  => 'My Tab',
+        'render' => function ( $post_id ) {
+            echo '<p>Custom content for post ' . (int) $post_id . '</p>';
+        },
+    );
+    return $tabs;
+}, 10, 3 );`
+
 == Screenshots ==
 
 1. Channels page — add a YouTube channel and configure its sync rules.

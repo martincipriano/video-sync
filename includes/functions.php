@@ -116,3 +116,70 @@ function wpbuoy_video_sync_maybe_migrate(): void {
 	update_option( 'wpbuoy_video_sync_migrated', 1 );
 }
 add_action( 'plugins_loaded', 'wpbuoy_video_sync_maybe_migrate', 1 );
+
+/**
+ * Collect and validate extra metabox tabs registered by other plugins.
+ *
+ * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
+ * @param int    $post_id Current post ID.
+ * @return array<int,array> Validated tabs, each [ 'slug', 'label', 'render' ].
+ */
+function wpbuoy_video_sync_get_metabox_tabs( string $type, int $post_id ): array {
+	/**
+	 * Filter the extra tabs shown in the video/playlist/channel metabox.
+	 *
+	 * Each tab is an array:
+	 *   [ 'slug' => string, 'label' => string, 'render' => callable( int $post_id ) ]
+	 * The render callback echoes the tab panel's inner content.
+	 *
+	 * @param array  $tabs    List of tab definitions. Default empty.
+	 * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
+	 * @param int    $post_id Current post ID.
+	 */
+	$tabs = apply_filters( 'wpbuoy_video_sync_metabox_tabs', array(), $type, $post_id );
+
+	$valid = array();
+	if ( is_array( $tabs ) ) {
+		foreach ( $tabs as $tab ) {
+			if ( ! empty( $tab['slug'] ) && ! empty( $tab['label'] ) && isset( $tab['render'] ) && is_callable( $tab['render'] ) ) {
+				$valid[] = $tab;
+			}
+		}
+	}
+	return $valid;
+}
+
+/**
+ * Render extra metabox tab buttons (call inside .ys-channel-tabs-nav).
+ *
+ * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
+ * @param int    $post_id Current post ID.
+ * @return void
+ */
+function wpbuoy_video_sync_render_extra_tab_nav( string $type, int $post_id ): void {
+	foreach ( wpbuoy_video_sync_get_metabox_tabs( $type, $post_id ) as $tab ) {
+		printf(
+			'<button type="button" class="ys-channel-tab-btn" data-tab="%1$s" role="tab" aria-selected="false">%2$s</button>',
+			esc_attr( $tab['slug'] ),
+			esc_html( $tab['label'] )
+		);
+	}
+}
+
+/**
+ * Render extra metabox tab panels (call inside .ys-channel-tabs-content).
+ *
+ * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
+ * @param int    $post_id Current post ID.
+ * @return void
+ */
+function wpbuoy_video_sync_render_extra_tab_panels( string $type, int $post_id ): void {
+	foreach ( wpbuoy_video_sync_get_metabox_tabs( $type, $post_id ) as $tab ) {
+		printf(
+			'<div class="ys-channel-tab-panel ys-hidden" data-panel="%s" role="tabpanel">',
+			esc_attr( $tab['slug'] )
+		);
+		call_user_func( $tab['render'], $post_id );
+		echo '</div>';
+	}
+}

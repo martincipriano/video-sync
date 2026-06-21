@@ -33,9 +33,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<button type="button" class="ys-channel-tab-btn" data-tab="sync" role="tab" aria-selected="false">
 			<?php esc_html_e( 'Sync', 'wpbuoy-video-sync' ); ?>
 		</button>
+		<?php wpbuoy_video_sync_render_extra_tab_nav( 'playlist', $post_id ); ?>
 	</div>
 
 	<div class="ys-channel-tabs-content">
+		<?php wpbuoy_video_sync_render_extra_tab_panels( 'playlist', $post_id ); ?>
 
 		<!-- Details -->
 		<div class="ys-channel-tab-panel ys-hidden" data-panel="details" role="tabpanel">
