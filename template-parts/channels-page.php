@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template part for the Channels admin page.
  *
- * @package WPBuoyVideoSync
+ * @package WPBuoy_Video_Sync
  *
  * Variables available in this template:
  * @var array $channel    The single channel configuration.
@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h1><?php esc_html_e( 'Channel', 'wpbuoy-video-sync' ); ?></h1>
 
 	<?php if ( ! $has_api_key ) : ?>
-	<div class="ys-empty-state">
-		<span class="ys-empty-state-icon ys-icon-api-key"></span>
+	<div class="wpbyvs-empty-state">
+		<span class="wpbyvs-empty-state-icon wpbyvs-icon-api-key"></span>
 		<h2><?php esc_html_e( 'API key required', 'wpbuoy-video-sync' ); ?></h2>
 		<p>
 			<?php
@@ -34,28 +34,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 			);
 			?>
 		</p>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wpbuoy_video_sync_settings' ) ); ?>" class="button button-primary">
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wpbyvs_settings' ) ); ?>" class="button button-primary">
 			<?php esc_html_e( 'Go to Settings', 'wpbuoy-video-sync' ); ?>
 		</a>
 	</div>
 	<?php else : ?>
 
 	<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-	<?php if ( isset( $_GET['yousync-channels-updated'] ) && '1' === $_GET['yousync-channels-updated'] && empty( $ch_errors ) ) : ?>
+	<?php if ( isset( $_GET['wpbyvs-channels-updated'] ) && '1' === $_GET['wpbyvs-channels-updated'] && empty( $ch_errors ) ) : ?>
 	<div class="notice notice-success is-dismissible">
 		<p><?php esc_html_e( 'Channel configuration saved.', 'wpbuoy-video-sync' ); ?></p>
 	</div>
 	<?php endif; ?>
 
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-		<?php wp_nonce_field( 'wpbuoy_video_sync_save_channels', 'wpbuoy_video_sync_channels_nonce' ); ?>
-		<input type="hidden" name="action" value="wpbuoy_video_sync_save_channels">
+		<?php wp_nonce_field( 'wpbyvs_save_channels', 'wpbyvs_channels_nonce' ); ?>
+		<input type="hidden" name="action" value="wpbyvs_save_channels">
 
-		<div id="ys-channels">
+		<div id="wpbyvs-channels">
 			<?php
-			wpbuoy_video_sync_get_template_part( 'channel', 'group', array(
+			wpbyvs_get_template_part( 'channel', 'group', array(
 				'channel'   => $channel,
-				'ch_index'  => 0,
 				'ch_errors' => $ch_errors,
 			) );
 			?>

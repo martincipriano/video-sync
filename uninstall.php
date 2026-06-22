@@ -8,7 +8,7 @@ declare(strict_types=1);
  * Only removes content (videos, channels, playlists) when the
  * "Remove all WPBuoy Video Sync data on uninstall" setting is enabled.
  *
- * @package WPBuoyVideoSync
+ * @package WPBuoy_Video_Sync
  */
 
 // Security check — WordPress sets this constant before calling uninstall.php.
@@ -24,7 +24,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  *
  * @return void
  */
-function wpbuoy_video_sync_run_uninstall(): void {
+function wpbyvs_run_uninstall(): void {
 	global $wpdb;
 
 	// Uninstall is a one-time teardown: direct, uncached deletes are required to
@@ -35,110 +35,35 @@ function wpbuoy_video_sync_run_uninstall(): void {
 	// ---------------------------------------------------------------------
 	// Always: unschedule all sync cron events.
 	// ---------------------------------------------------------------------
-	wp_unschedule_hook( 'wpbuoy_video_sync_sync_rule' );
+	wp_unschedule_hook( 'wpbyvs_sync_rule' );
 
 	// ---------------------------------------------------------------------
 	// Always: remove dismissed-notice user meta.
 	// ---------------------------------------------------------------------
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'wpbuoy_video_sync_cron_notice_dismissed' ) );
+	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'wpbyvs_cron_notice_dismissed' ) );
 
-	// ---------------------------------------------------------------------
-	// Conditionally: remove all plugin content if the user opted in.
-	// ---------------------------------------------------------------------
-	if ( get_option( 'wpbuoy_video_sync_delete_on_uninstall' ) ) {
-
-		// --- Delete all yousync_videos posts and their meta ---
-		$post_ids = $wpdb->get_col(
-			"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'yousync_videos'"
-		);
-
-		if ( ! empty( $post_ids ) ) {
-			foreach ( $post_ids as $post_id ) {
-				$post_id = (int) $post_id;
-				$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $post_id ) );
-				$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
-			}
-		}
-
-		// --- Delete all terms for WPBuoy Video Sync taxonomies ---
-		$taxonomies = array( 'yousync_channel', 'yousync_playlist', 'yousync_tag', 'yousync_category' );
-
-		// Collect term IDs and term_taxonomy IDs for bulk deletion.
-		$placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
-
-		$term_taxonomy_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-				$taxonomies
-			)
-		);
-
-		$term_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT term_id FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-				$taxonomies
-			)
-		);
-
-		if ( ! empty( $term_taxonomy_ids ) ) {
-			$tt_placeholders = implode( ', ', array_fill( 0, count( $term_taxonomy_ids ), '%d' ) );
-
-			// Delete object relationships (post ↔ term).
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ($tt_placeholders)",
-					$term_taxonomy_ids
-				)
-			);
-		}
-
-		if ( ! empty( $term_ids ) ) {
-			$term_placeholders = implode( ', ', array_fill( 0, count( $term_ids ), '%d' ) );
-
-			// Delete term meta.
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->termmeta} WHERE term_id IN ($term_placeholders)",
-					$term_ids
-				)
-			);
-
-			// Delete terms.
-			$wpdb->query(
-				$wpdb->prepare(
-					"DELETE FROM {$wpdb->terms} WHERE term_id IN ($term_placeholders)",
-					$term_ids
-				)
-			);
-		}
-
-		// Delete term_taxonomy entries.
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($placeholders)",
-				$taxonomies
-			)
-		);
-	}
+	// Note: WPBuoy Video Sync 2.x registers no custom post type or taxonomy —
+	// synced items live in user-selected post types as `_wpbyvs_*` post meta,
+	// so there is no plugin-owned CPT/taxonomy content to remove on uninstall.
 
 	// ---------------------------------------------------------------------
 	// Always: delete plugin options.
 	// ---------------------------------------------------------------------
 	$options = array(
-		'wpbuoy_video_sync_api_key',
-		'wpbuoy_video_sync_active_archives',
-		'wpbuoy_video_sync_delete_on_uninstall',
-		'wpbuoy_video_sync_reschedule_on_activation',
-		'wpbuoy_video_sync_sync_log',
+		'wpbyvs_api_key',
+		'wpbyvs_active_archives',
+		'wpbyvs_delete_on_uninstall',
+		'wpbyvs_reschedule_on_activation',
+		'wpbyvs_sync_log',
 	);
 
 	foreach ( $options as $option ) {
 		delete_option( $option );
 	}
 
-	delete_transient( 'wpbuoy_video_sync_flush_rewrite_rules' );
+	delete_transient( 'wpbyvs_flush_rewrite_rules' );
 
 	// phpcs:enable WordPress.DB
 }
 
-wpbuoy_video_sync_run_uninstall();
+wpbyvs_run_uninstall();

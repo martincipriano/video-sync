@@ -3,25 +3,25 @@
  */
 ;(function () {
 	function activateTab(box, tab) {
-		box.querySelectorAll('.ys-channel-tab-btn').forEach(function (b) {
+		box.querySelectorAll('.wpbyvs-channel-tab-btn').forEach(function (b) {
 			var on = b.dataset.tab === tab
-			b.classList.toggle('ys-channel-tab-btn--active', on)
+			b.classList.toggle('wpbyvs-channel-tab-btn--active', on)
 			b.setAttribute('aria-selected', String(on))
 		})
-		box.querySelectorAll('.ys-channel-tab-panel').forEach(function (p) {
-			p.classList.toggle('ys-hidden', p.dataset.panel !== tab)
+		box.querySelectorAll('.wpbyvs-channel-tab-panel').forEach(function (p) {
+			p.classList.toggle('wpbyvs-hidden', p.dataset.panel !== tab)
 		})
 	}
 
-	document.querySelectorAll('.yousync-metabox').forEach(function (box) {
-		var first = box.querySelector('.ys-channel-tab-btn')
+	document.querySelectorAll('.wpbyvs-metabox').forEach(function (box) {
+		var first = box.querySelector('.wpbyvs-channel-tab-btn')
 		if (first) activateTab(box, first.dataset.tab)
 	})
 
 	document.addEventListener('click', function (e) {
-		var btn = e.target.closest('.ys-channel-tab-btn')
+		var btn = e.target.closest('.wpbyvs-channel-tab-btn')
 		if (!btn) return
-		var box = btn.closest('.yousync-metabox')
+		var box = btn.closest('.wpbyvs-metabox')
 		if (!box) return
 		activateTab(box, btn.dataset.tab)
 	})
@@ -47,23 +47,23 @@
 	}
 
 	function flashCopied(btn) {
-		btn.classList.add('ys-copied')
+		btn.classList.add('wpbyvs-copied')
 		setTimeout(function () {
-			btn.classList.remove('ys-copied')
+			btn.classList.remove('wpbyvs-copied')
 		}, 1000)
 	}
 
 	document.addEventListener('click', function (e) {
-		var valBtn = e.target.closest('.ys-copy-val-btn')
+		var valBtn = e.target.closest('.wpbyvs-copy-val-btn')
 		if (valBtn) {
-			var wrap  = valBtn.closest('.ys-mb-field')
-			var input = wrap ? wrap.querySelector('.ys-mb-input, .ys-mb-textarea') : null
+			var wrap  = valBtn.closest('.wpbyvs-mb-field')
+			var input = wrap ? wrap.querySelector('.wpbyvs-mb-input, .wpbyvs-mb-textarea') : null
 			copyToClipboard(input ? input.value : '')
 			flashCopied(valBtn)
 			return
 		}
 
-		var scBtn = e.target.closest('.ys-copy-sc-btn')
+		var scBtn = e.target.closest('.wpbyvs-copy-sc-btn')
 		if (scBtn) {
 			copyToClipboard(scBtn.dataset.shortcode || '')
 			flashCopied(scBtn)
@@ -72,7 +72,7 @@
 })()
 
 ;(function () {
-	document.querySelector('.ys-developer-fields-toggle').addEventListener('click', function (e) {
-		document.querySelector('.ys-developer-fields').classList.toggle('ys-hidden')
+	document.querySelector('.wpbyvs-developer-fields-toggle').addEventListener('click', function (e) {
+		document.querySelector('.wpbyvs-developer-fields').classList.toggle('wpbyvs-hidden')
 	})
 })()

@@ -3,10 +3,10 @@ declare(strict_types=1);
 /**
  * WPBuoy Video Sync Settings Class
  *
- * @package WPBuoyVideoSync
+ * @package WPBuoy_Video_Sync
  */
 
-namespace WPBuoyVideoSync;
+namespace WPBuoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WPBuoy Video Sync Settings Class
  */
-class WPBuoyVideoSyncSettings {
+class WPBuoy_Video_Sync_Settings {
 
 	/**
 	 * Constructor.
@@ -37,7 +37,7 @@ class WPBuoyVideoSyncSettings {
 			__( 'WPBuoy Video Sync Settings', 'wpbuoy-video-sync'),
 			__( 'Settings', 'wpbuoy-video-sync'),
 			'manage_options',
-			'wpbuoy_video_sync_settings',
+			'wpbyvs_settings',
 			array( $this, 'settings_html' )
 		);
 	}
@@ -49,16 +49,16 @@ class WPBuoyVideoSyncSettings {
 	 */
 	public function register_settings() {
 		register_setting(
-			'wpbuoy_video_sync_settings_group',
-			'wpbuoy_video_sync_api_key',
+			'wpbyvs_settings_group',
+			'wpbyvs_api_key',
 			array(
 				'sanitize_callback' => array( $this, 'validate_api_key' ),
 			)
 		);
 
 		register_setting(
-			'wpbuoy_video_sync_settings_group',
-			'wpbuoy_video_sync_delete_on_uninstall',
+			'wpbyvs_settings_group',
+			'wpbyvs_delete_on_uninstall',
 			array(
 				'sanitize_callback' => 'absint',
 				'default'           => 0,
@@ -66,8 +66,8 @@ class WPBuoyVideoSyncSettings {
 		);
 
 		register_setting(
-			'wpbuoy_video_sync_settings_group',
-			'wpbuoy_video_sync_youtube_image_as_featured',
+			'wpbyvs_settings_group',
+			'wpbyvs_youtube_image_as_featured',
 			array(
 				'sanitize_callback' => 'absint',
 				'default'           => 1,
@@ -75,48 +75,48 @@ class WPBuoyVideoSyncSettings {
 		);
 
 		add_settings_section(
-			'wpbuoy_video_sync_api_settings',
+			'wpbyvs_api_settings',
 			__( 'API Settings', 'wpbuoy-video-sync'),
 			null,
-			'wpbuoy_video_sync_settings'
+			'wpbyvs_settings'
 		);
 
 		add_settings_field(
-			'wpbuoy_video_sync_api_key',
+			'wpbyvs_api_key',
 			__( 'Google API Key', 'wpbuoy-video-sync'),
 			array( $this, 'api_key_html' ),
-			'wpbuoy_video_sync_settings',
-			'wpbuoy_video_sync_api_settings'
+			'wpbyvs_settings',
+			'wpbyvs_api_settings'
 		);
 
 		add_settings_section(
-			'wpbuoy_video_sync_content_settings',
+			'wpbyvs_content_settings',
 			__( 'Content', 'wpbuoy-video-sync'),
 			null,
-			'wpbuoy_video_sync_settings'
+			'wpbyvs_settings'
 		);
 
 		add_settings_field(
-			'wpbuoy_video_sync_youtube_image_as_featured',
+			'wpbyvs_youtube_image_as_featured',
 			__( 'Featured Images', 'wpbuoy-video-sync'),
 			array( $this, 'youtube_image_as_featured_html' ),
-			'wpbuoy_video_sync_settings',
-			'wpbuoy_video_sync_content_settings'
+			'wpbyvs_settings',
+			'wpbyvs_content_settings'
 		);
 
 		add_settings_section(
-			'wpbuoy_video_sync_advanced_settings',
+			'wpbyvs_advanced_settings',
 			__( 'Advanced', 'wpbuoy-video-sync'),
 			null,
-			'wpbuoy_video_sync_settings'
+			'wpbyvs_settings'
 		);
 
 		add_settings_field(
-			'wpbuoy_video_sync_delete_on_uninstall',
+			'wpbyvs_delete_on_uninstall',
 			__( 'Uninstall Data', 'wpbuoy-video-sync'),
 			array( $this, 'delete_on_uninstall_html' ),
-			'wpbuoy_video_sync_settings',
-			'wpbuoy_video_sync_advanced_settings'
+			'wpbyvs_settings',
+			'wpbyvs_advanced_settings'
 		);
 	}
 
@@ -126,8 +126,8 @@ class WPBuoyVideoSyncSettings {
 	 * @return void
 	 */
 	public function api_key_html() {
-		$value = get_option( 'wpbuoy_video_sync_api_key', '' );
-		wpbuoy_video_sync_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
+		$value = get_option( 'wpbyvs_api_key', '' );
+		wpbyvs_get_template_part( 'settings-field', 'api-key', compact( 'value' ) );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WPBuoyVideoSyncSettings {
 	 */
 	public function validate_api_key( $input ) {
 		$input  = sanitize_text_field( $input );
-		$stored = get_option( 'wpbuoy_video_sync_api_key', '' );
+		$stored = get_option( 'wpbyvs_api_key', '' );
 
 		// Unchanged key — this save likely only touches other settings (e.g. the
 		// uninstall toggle). Skip the YouTube API round-trip and confirm generically.
@@ -148,8 +148,8 @@ class WPBuoyVideoSyncSettings {
 		}
 
 		if ( empty( $input ) ) {
-			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_api_key_empty', __( 'API key cannot be empty.', 'wpbuoy-video-sync' ) );
-			return get_option( 'wpbuoy_video_sync_api_key', '' );
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_empty', __( 'API key cannot be empty.', 'wpbuoy-video-sync' ) );
+			return get_option( 'wpbyvs_api_key', '' );
 		}
 
 		$response = wp_remote_get(
@@ -164,8 +164,8 @@ class WPBuoyVideoSyncSettings {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_api_key_request_error', __( 'Could not connect to YouTube API.', 'wpbuoy-video-sync') );
-			return get_option( 'wpbuoy_video_sync_api_key', '' );
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_request_error', __( 'Could not connect to YouTube API.', 'wpbuoy-video-sync') );
+			return get_option( 'wpbyvs_api_key', '' );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
@@ -174,12 +174,12 @@ class WPBuoyVideoSyncSettings {
 		if ( 200 !== $code ) {
 			$error_msg = isset( $data['error']['message'] ) ? $data['error']['message'] : 'Unknown error';
 			add_settings_error(
-				'wpbuoy_video_sync_api_key',
-				'wpbuoy_video_sync_api_key_invalid',
+				'wpbyvs_api_key',
+				'wpbyvs_api_key_invalid',
 				/* translators: %s: Error message from YouTube API */
 				sprintf( __( 'YouTube API error: %s', 'wpbuoy-video-sync'), esc_html( $error_msg ) )
 			);
-			return get_option( 'wpbuoy_video_sync_api_key', '' );
+			return get_option( 'wpbyvs_api_key', '' );
 		}
 
 		$this->add_settings_saved_notice();
@@ -193,9 +193,9 @@ class WPBuoyVideoSyncSettings {
 	 * @return void
 	 */
 	private function add_settings_saved_notice() {
-		$existing = wp_list_pluck( get_settings_errors( 'wpbuoy_video_sync_api_key' ), 'code' );
-		if ( ! in_array( 'wpbuoy_video_sync_settings_saved', $existing, true ) ) {
-			add_settings_error( 'wpbuoy_video_sync_api_key', 'wpbuoy_video_sync_settings_saved', __( 'Settings saved.', 'wpbuoy-video-sync' ), 'updated' );
+		$existing = wp_list_pluck( get_settings_errors( 'wpbyvs_api_key' ), 'code' );
+		if ( ! in_array( 'wpbyvs_settings_saved', $existing, true ) ) {
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_settings_saved', __( 'Settings saved.', 'wpbuoy-video-sync' ), 'updated' );
 		}
 	}
 
@@ -205,10 +205,10 @@ class WPBuoyVideoSyncSettings {
 	 * @return void
 	 */
 	public function youtube_image_as_featured_html() {
-		$checked = (bool) get_option( 'wpbuoy_video_sync_youtube_image_as_featured', 1 );
+		$checked = (bool) get_option( 'wpbyvs_youtube_image_as_featured', 1 );
 		?>
 		<label>
-			<input type="checkbox" name="wpbuoy_video_sync_youtube_image_as_featured" value="1" <?php checked( $checked, true ); ?>>
+			<input type="checkbox" name="wpbyvs_youtube_image_as_featured" value="1" <?php checked( $checked, true ); ?>>
 			<?php esc_html_e( 'Use the YouTube image as the featured image when none is set', 'wpbuoy-video-sync'); ?>
 		</label>
 		<p class="description">
@@ -223,10 +223,10 @@ class WPBuoyVideoSyncSettings {
 	 * @return void
 	 */
 	public function delete_on_uninstall_html() {
-		$checked = (bool) get_option( 'wpbuoy_video_sync_delete_on_uninstall', 0 );
+		$checked = (bool) get_option( 'wpbyvs_delete_on_uninstall', 0 );
 		?>
 		<label>
-			<input type="checkbox" name="wpbuoy_video_sync_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
+			<input type="checkbox" name="wpbyvs_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
 			<?php esc_html_e( 'Remove all WPBuoy Video Sync data when the plugin is deleted', 'wpbuoy-video-sync'); ?>
 		</label>
 		<p class="description">
@@ -241,9 +241,9 @@ class WPBuoyVideoSyncSettings {
 	 * @return void
 	 */
 	public function settings_html() {
-		wpbuoy_video_sync_get_template_part( 'settings', 'page' );
+		wpbyvs_get_template_part( 'settings', 'page' );
 	}
 
 }
 
-new WPBuoyVideoSyncSettings();
+new WPBuoy_Video_Sync_Settings();

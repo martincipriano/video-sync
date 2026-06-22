@@ -3,9 +3,9 @@
  *
  * Verifies that channel, playlist, and video metadata is correctly saved into
  * and reloaded from the single JSON meta keys:
- *   - Channel  → yousync_channel  (term meta)
- *   - Playlist → yousync_playlist (term meta)
- *   - Video    → _yousync_video   (post meta)
+ *   - Channel  → wpbyvs_channel  (term meta)
+ *   - Playlist → wpbyvs_playlist (term meta)
+ *   - Video    → _wpbyvs_video   (post meta)
  *
  * Each test creates its own uniquely named entry so tests can run in any order
  * without colliding with each other or with existing data.
@@ -64,7 +64,7 @@ test.describe('Channel – field persistence', () => {
     await expect(page.locator('input[name="channel_id"]')).toHaveValue(`UC${id}`);
   });
 
-  test('channel ID appears in the list column (read from yousync_channel JSON)', async ({ page }) => {
+  test('channel ID appears in the list column (read from wpbyvs_channel JSON)', async ({ page }) => {
     await goToChannels(page);
     const id = uniqueId();
 
@@ -100,11 +100,11 @@ test.describe('Channel – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Rule Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-sync-schedule').selectOption('weekly');
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-sync-schedule').selectOption('weekly');
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -112,9 +112,9 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Rule Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first();
-    await expect(saved.locator('.ys-sync-schedule')).toHaveValue('weekly');
-    await expect(saved.locator('.ys-action')).toHaveValue('videos_sync_new');
+    const saved = page.locator('.wpbyvs-sync-rule').first();
+    await expect(saved.locator('.wpbyvs-sync-schedule')).toHaveValue('weekly');
+    await expect(saved.locator('.wpbyvs-action')).toHaveValue('videos_sync_new');
   });
 
   test('disabled toggle state persists on the edit page', async ({ page }) => {
@@ -123,11 +123,11 @@ test.describe('Channel – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Toggle Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-rule-toggle').uncheck({ force: true });
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-rule-toggle').uncheck({ force: true });
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -135,7 +135,7 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Toggle Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.ys-sync-rule').first().locator('.ys-rule-toggle')).not.toBeChecked();
+    await expect(page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-rule-toggle')).not.toBeChecked();
   });
 
   test('custom schedule value persists on the edit page', async ({ page }) => {
@@ -144,12 +144,12 @@ test.describe('Channel – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Custom Sched Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-sync-schedule').selectOption('custom');
-    await rule.locator('.ys-custom-sync-schedule').fill('72');
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-sync-schedule').selectOption('custom');
+    await rule.locator('.wpbyvs-custom-sync-schedule').fill('72');
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -157,10 +157,10 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Custom Sched Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first();
-    await expect(saved.locator('.ys-sync-schedule')).toHaveValue('custom');
-    await expect(saved.locator('.ys-custom-sync-schedule')).toHaveValue('72');
-    await expect(saved.locator('.ys-custom-sync-schedule')).toBeEnabled();
+    const saved = page.locator('.wpbyvs-sync-rule').first();
+    await expect(saved.locator('.wpbyvs-sync-schedule')).toHaveValue('custom');
+    await expect(saved.locator('.wpbyvs-custom-sync-schedule')).toHaveValue('72');
+    await expect(saved.locator('.wpbyvs-custom-sync-schedule')).toBeEnabled();
   });
 
   test('"once" schedule value persists on the edit page and keeps custom hours input disabled', async ({ page }) => {
@@ -169,11 +169,11 @@ test.describe('Channel – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Once Sched Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-sync-schedule').selectOption('once');
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-sync-schedule').selectOption('once');
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -181,9 +181,9 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Once Sched Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first();
-    await expect(saved.locator('.ys-sync-schedule')).toHaveValue('once');
-    await expect(saved.locator('.ys-custom-sync-schedule')).toBeDisabled();
+    const saved = page.locator('.wpbyvs-sync-rule').first();
+    await expect(saved.locator('.wpbyvs-sync-schedule')).toHaveValue('once');
+    await expect(saved.locator('.wpbyvs-custom-sync-schedule')).toBeDisabled();
   });
 
   test('multiple sync rules persist with correct count in list column', async ({ page }) => {
@@ -194,15 +194,15 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
 
     // Rule 1 — enabled
-    await page.locator('#ys-add-rule').click();
-    const rule1 = page.locator('.ys-sync-rule').nth(0);
-    await rule1.locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    const rule1 = page.locator('.wpbyvs-sync-rule').nth(0);
+    await rule1.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     // Rule 2 — disabled
-    await page.locator('#ys-add-rule').click();
-    const rule2 = page.locator('.ys-sync-rule').nth(1);
-    await rule2.locator('.ys-action').selectOption('videos_update_all');
-    await rule2.locator('.ys-rule-toggle').uncheck({ force: true });
+    await page.locator('#wpbyvs-add-rule').click();
+    const rule2 = page.locator('.wpbyvs-sync-rule').nth(1);
+    await rule2.locator('.wpbyvs-action').selectOption('videos_update_all');
+    await rule2.locator('.wpbyvs-rule-toggle').uncheck({ force: true });
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -218,11 +218,11 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('input[name="tag-name"]').fill(`Multi Rule Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
 
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').nth(0).locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').nth(0).locator('.wpbyvs-action').selectOption('videos_sync_new');
 
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').nth(1).locator('.ys-action').selectOption('channel_update_all');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').nth(1).locator('.wpbyvs-action').selectOption('channel_update_all');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -230,7 +230,7 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Multi Rule Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.ys-sync-rule')).toHaveCount(2);
+    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(2);
   });
 
   test('removing the only sync rule clears it from metadata after save', async ({ page }) => {
@@ -239,8 +239,8 @@ test.describe('Channel – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Remove Last Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').last().locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').last().locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -249,7 +249,7 @@ test.describe('Channel – sync rule persistence', () => {
     await page.waitForLoadState('networkidle');
 
     // Remove the only rule and wait for the 300 ms removal animation
-    await page.locator('.ys-sync-rule').first().locator('.ys-remove-rule').click();
+    await page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-remove-rule').click();
     await page.waitForTimeout(400);
 
     await page.locator('#submit').click();
@@ -258,7 +258,7 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Remove Last Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.ys-sync-rule')).toHaveCount(0);
+    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(0);
   });
 
   test('removing one of multiple sync rules removes only that rule after save', async ({ page }) => {
@@ -268,11 +268,11 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('input[name="tag-name"]').fill(`Remove One Rule Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
 
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').nth(0).locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').nth(0).locator('.wpbyvs-action').selectOption('videos_sync_new');
 
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').nth(1).locator('.ys-action').selectOption('channel_update_all');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').nth(1).locator('.wpbyvs-action').selectOption('channel_update_all');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -281,7 +281,7 @@ test.describe('Channel – sync rule persistence', () => {
     await page.waitForLoadState('networkidle');
 
     // Remove the first rule
-    await page.locator('.ys-sync-rule').first().locator('.ys-remove-rule').click();
+    await page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-remove-rule').click();
     await page.waitForTimeout(400);
 
     await page.locator('#submit').click();
@@ -290,8 +290,8 @@ test.describe('Channel – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Remove One Rule Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.ys-sync-rule')).toHaveCount(1);
-    await expect(page.locator('.ys-sync-rule').first().locator('.ys-action')).toHaveValue('channel_update_all');
+    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(1);
+    await expect(page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-action')).toHaveValue('channel_update_all');
   });
 });
 
@@ -306,16 +306,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Cond Field Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('title');
-    await cond.locator('.ys-condition-operator').selectOption('contains');
-    await cond.locator('.ys-condition-value').fill('Tutorial');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('title');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('contains');
+    await cond.locator('.wpbyvs-condition-value').fill('Tutorial');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -323,8 +323,8 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Cond Field Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('title');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('title');
   });
 
   test('condition operator is pre-selected and enabled on the edit page', async ({ page }) => {
@@ -333,16 +333,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Cond Op Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('view_count');
-    await cond.locator('.ys-condition-operator').selectOption('greater_than');
-    await cond.locator('.ys-condition-value').fill('1000');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('view_count');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('greater_than');
+    await cond.locator('.wpbyvs-condition-value').fill('1000');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -350,9 +350,9 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Cond Op Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-operator')).toBeEnabled();
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('greater_than');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-operator')).toBeEnabled();
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('greater_than');
   });
 
   test('condition value is pre-filled and enabled on the edit page', async ({ page }) => {
@@ -361,16 +361,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Cond Val Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('title');
-    await cond.locator('.ys-condition-operator').selectOption('contains');
-    await cond.locator('.ys-condition-value').fill('My Saved Value');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('title');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('contains');
+    await cond.locator('.wpbyvs-condition-value').fill('My Saved Value');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -378,9 +378,9 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Cond Val Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('My Saved Value');
-    await expect(saved.locator('.ys-condition-value')).toBeEnabled();
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('My Saved Value');
+    await expect(saved.locator('.wpbyvs-condition-value')).toBeEnabled();
   });
 
   test('date condition field, operator, and value all persist on the edit page', async ({ page }) => {
@@ -389,16 +389,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Date Cond Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('published_date');
-    await cond.locator('.ys-condition-operator').selectOption('after');
-    await cond.locator('.ys-condition-value').fill('2024-01-01');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('published_date');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('after');
+    await cond.locator('.wpbyvs-condition-value').fill('2024-01-01');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -406,10 +406,10 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Date Cond Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('published_date');
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('after');
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('2024-01-01');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('published_date');
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('after');
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('2024-01-01');
   });
 
   test('number condition with numeric field type persists correctly', async ({ page }) => {
@@ -418,16 +418,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Num Cond Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('duration');
-    await cond.locator('.ys-condition-operator').selectOption('less_than');
-    await cond.locator('.ys-condition-value').fill('600');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('duration');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('less_than');
+    await cond.locator('.wpbyvs-condition-value').fill('600');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -435,10 +435,10 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Num Cond Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('duration');
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('less_than');
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('600');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('duration');
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('less_than');
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('600');
   });
 
   test('video_id condition field, operator, and value persist on the edit page', async ({ page }) => {
@@ -447,16 +447,16 @@ test.describe('Channel – condition persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`VideoID Cond Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('video_id');
-    await cond.locator('.ys-condition-operator').selectOption('contains');
-    await cond.locator('.ys-condition-value').fill('dQw4w9WgXcQ');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('video_id');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('contains');
+    await cond.locator('.wpbyvs-condition-value').fill('dQw4w9WgXcQ');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -464,10 +464,10 @@ test.describe('Channel – condition persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `VideoID Cond Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('video_id');
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('contains');
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('dQw4w9WgXcQ');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('video_id');
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('contains');
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('dQw4w9WgXcQ');
   });
 });
 
@@ -482,12 +482,12 @@ test.describe('Channel – specific metadata persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Meta Wrapper Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('channel_update_specific');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('channel_update_specific');
 
-    const wrapper = rule.locator('.ys-specific-metadata-wrapper');
+    const wrapper = rule.locator('.wpbyvs-specific-metadata-wrapper');
     await waitForTomSelect(wrapper);
     await chooseTomSelectOption(page, wrapper, 'Channel Title');
 
@@ -497,8 +497,8 @@ test.describe('Channel – specific metadata persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Meta Wrapper Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const savedWrapper = page.locator('.ys-sync-rule').first().locator('.ys-specific-metadata-wrapper');
-    await expect(savedWrapper).not.toHaveClass(/ys-hidden/);
+    const savedWrapper = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-specific-metadata-wrapper');
+    await expect(savedWrapper).not.toHaveClass(/wpbyvs-hidden/);
   });
 
   test('saved video metadata selection appears as a TomSelect item on the edit page', async ({ page }) => {
@@ -507,12 +507,12 @@ test.describe('Channel – specific metadata persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Video Meta Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_update_specific_all');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_update_specific_all');
 
-    const wrapper = rule.locator('.ys-specific-metadata-wrapper');
+    const wrapper = rule.locator('.wpbyvs-specific-metadata-wrapper');
     await waitForTomSelect(wrapper);
     await chooseTomSelectOption(page, wrapper, 'Title');
 
@@ -522,8 +522,8 @@ test.describe('Channel – specific metadata persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Video Meta Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const savedWrapper = page.locator('.ys-sync-rule').first().locator('.ys-specific-metadata-wrapper');
-    await expect(savedWrapper).not.toHaveClass(/ys-hidden/);
+    const savedWrapper = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-specific-metadata-wrapper');
+    await expect(savedWrapper).not.toHaveClass(/wpbyvs-hidden/);
     await waitForTomSelect(savedWrapper);
     await expect(savedWrapper.locator('.ts-wrapper .item[data-value="title"]')).toBeVisible();
   });
@@ -534,12 +534,12 @@ test.describe('Channel – specific metadata persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Chan Meta Channel ${id}`);
     await page.locator('input[name="channel_id"]').fill(`UC${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('channel_update_specific');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('channel_update_specific');
 
-    const wrapper = rule.locator('.ys-specific-metadata-wrapper');
+    const wrapper = rule.locator('.wpbyvs-specific-metadata-wrapper');
     await waitForTomSelect(wrapper);
     await chooseTomSelectOption(page, wrapper, 'Subscriber Count');
 
@@ -549,7 +549,7 @@ test.describe('Channel – specific metadata persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Chan Meta Channel ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const savedWrapper = page.locator('.ys-sync-rule').first().locator('.ys-specific-metadata-wrapper');
+    const savedWrapper = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-specific-metadata-wrapper');
     await waitForTomSelect(savedWrapper);
     await expect(savedWrapper.locator('.ts-wrapper .item[data-value="subscriber_count"]')).toBeVisible();
   });
@@ -567,7 +567,7 @@ test.describe('Playlist – field persistence', () => {
     await expect(page.locator('input[name="playlist_id"]')).toHaveValue(`PL${id}`);
   });
 
-  test('playlist ID appears in the list column (read from yousync_playlist JSON)', async ({ page }) => {
+  test('playlist ID appears in the list column (read from wpbyvs_playlist JSON)', async ({ page }) => {
     await goToPlaylists(page);
     const id = uniqueId();
 
@@ -591,11 +591,11 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Rule Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-sync-schedule').selectOption('monthly');
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-sync-schedule').selectOption('monthly');
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -603,9 +603,9 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Rule Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first();
-    await expect(saved.locator('.ys-sync-schedule')).toHaveValue('monthly');
-    await expect(saved.locator('.ys-action')).toHaveValue('videos_sync_new');
+    const saved = page.locator('.wpbyvs-sync-rule').first();
+    await expect(saved.locator('.wpbyvs-sync-schedule')).toHaveValue('monthly');
+    await expect(saved.locator('.wpbyvs-action')).toHaveValue('videos_sync_new');
   });
 
   test('"once" schedule value persists on the edit page and keeps custom hours input disabled', async ({ page }) => {
@@ -614,11 +614,11 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Once Sched Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-sync-schedule').selectOption('once');
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-sync-schedule').selectOption('once');
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -626,9 +626,9 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Once Sched Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first();
-    await expect(saved.locator('.ys-sync-schedule')).toHaveValue('once');
-    await expect(saved.locator('.ys-custom-sync-schedule')).toBeDisabled();
+    const saved = page.locator('.wpbyvs-sync-rule').first();
+    await expect(saved.locator('.wpbyvs-sync-schedule')).toHaveValue('once');
+    await expect(saved.locator('.wpbyvs-custom-sync-schedule')).toBeDisabled();
   });
 
   test('playlist sync rule count shows correctly in list column', async ({ page }) => {
@@ -639,13 +639,13 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
 
     // Two rules, one disabled
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').nth(0).locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').nth(0).locator('.wpbyvs-action').selectOption('videos_sync_new');
 
-    await page.locator('#ys-add-rule').click();
-    const rule2 = page.locator('.ys-sync-rule').nth(1);
-    await rule2.locator('.ys-action').selectOption('videos_update_all');
-    await rule2.locator('.ys-rule-toggle').uncheck({ force: true });
+    await page.locator('#wpbyvs-add-rule').click();
+    const rule2 = page.locator('.wpbyvs-sync-rule').nth(1);
+    await rule2.locator('.wpbyvs-action').selectOption('videos_update_all');
+    await rule2.locator('.wpbyvs-rule-toggle').uncheck({ force: true });
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -660,16 +660,16 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Cond Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('view_count');
-    await cond.locator('.ys-condition-operator').selectOption('greater_than');
-    await cond.locator('.ys-condition-value').fill('500');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('view_count');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('greater_than');
+    await cond.locator('.wpbyvs-condition-value').fill('500');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -677,10 +677,10 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Cond Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('view_count');
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('greater_than');
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('500');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('view_count');
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('greater_than');
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('500');
   });
 
   test('video_id condition field, operator, and value persist on the edit page', async ({ page }) => {
@@ -689,16 +689,16 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`VideoID Cond Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('videos_sync_new');
-    await rule.locator('.ys-add-condition').click();
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.wpbyvs-add-condition').click();
 
-    const cond = rule.locator('.ys-condition').last();
-    await cond.locator('.ys-condition-field').selectOption('video_id');
-    await cond.locator('.ys-condition-operator').selectOption('contains');
-    await cond.locator('.ys-condition-value').fill('dQw4w9WgXcQ');
+    const cond = rule.locator('.wpbyvs-condition').last();
+    await cond.locator('.wpbyvs-condition-field').selectOption('video_id');
+    await cond.locator('.wpbyvs-condition-operator').selectOption('contains');
+    await cond.locator('.wpbyvs-condition-value').fill('dQw4w9WgXcQ');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -706,10 +706,10 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `VideoID Cond Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const saved = page.locator('.ys-sync-rule').first().locator('.ys-condition').first();
-    await expect(saved.locator('.ys-condition-field')).toHaveValue('video_id');
-    await expect(saved.locator('.ys-condition-operator')).toHaveValue('contains');
-    await expect(saved.locator('.ys-condition-value')).toHaveValue('dQw4w9WgXcQ');
+    const saved = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-condition').first();
+    await expect(saved.locator('.wpbyvs-condition-field')).toHaveValue('video_id');
+    await expect(saved.locator('.wpbyvs-condition-operator')).toHaveValue('contains');
+    await expect(saved.locator('.wpbyvs-condition-value')).toHaveValue('dQw4w9WgXcQ');
   });
 
   test('removing the only sync rule clears it from playlist metadata after save', async ({ page }) => {
@@ -718,8 +718,8 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Remove Last Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
-    await page.locator('.ys-sync-rule').last().locator('.ys-action').selectOption('videos_sync_new');
+    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('.wpbyvs-sync-rule').last().locator('.wpbyvs-action').selectOption('videos_sync_new');
 
     await page.locator('#submit').click();
     await page.waitForLoadState('networkidle');
@@ -727,7 +727,7 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Remove Last Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.ys-sync-rule').first().locator('.ys-remove-rule').click();
+    await page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-remove-rule').click();
     await page.waitForTimeout(400);
 
     await page.locator('#submit').click();
@@ -736,7 +736,7 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Remove Last Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('.ys-sync-rule')).toHaveCount(0);
+    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(0);
   });
 
   test('playlist specific metadata persists as a TomSelect item on the edit page', async ({ page }) => {
@@ -745,12 +745,12 @@ test.describe('Playlist – sync rule persistence', () => {
 
     await page.locator('input[name="tag-name"]').fill(`Meta Playlist ${id}`);
     await page.locator('input[name="playlist_id"]').fill(`PL${id}`);
-    await page.locator('#ys-add-rule').click();
+    await page.locator('#wpbyvs-add-rule').click();
 
-    const rule = page.locator('.ys-sync-rule').last();
-    await rule.locator('.ys-action').selectOption('playlist_update_specific');
+    const rule = page.locator('.wpbyvs-sync-rule').last();
+    await rule.locator('.wpbyvs-action').selectOption('playlist_update_specific');
 
-    const wrapper = rule.locator('.ys-specific-metadata-wrapper');
+    const wrapper = rule.locator('.wpbyvs-specific-metadata-wrapper');
     await waitForTomSelect(wrapper);
     await chooseTomSelectOption(page, wrapper, 'Title');
 
@@ -760,8 +760,8 @@ test.describe('Playlist – sync rule persistence', () => {
     await page.locator('#the-list tr').filter({ hasText: `Meta Playlist ${id}` }).locator('a.row-title').click();
     await page.waitForLoadState('networkidle');
 
-    const savedWrapper = page.locator('.ys-sync-rule').first().locator('.ys-specific-metadata-wrapper');
-    await expect(savedWrapper).not.toHaveClass(/ys-hidden/);
+    const savedWrapper = page.locator('.wpbyvs-sync-rule').first().locator('.wpbyvs-specific-metadata-wrapper');
+    await expect(savedWrapper).not.toHaveClass(/wpbyvs-hidden/);
     await waitForTomSelect(savedWrapper);
     await expect(savedWrapper.locator('.ts-wrapper .item[data-value="playlist_title"]')).toBeVisible();
   });
@@ -772,13 +772,13 @@ test.describe('Playlist – sync rule persistence', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('Video – metabox field persistence', () => {
-  test('YouSync Video Details metabox is visible on the video edit page', async ({ page }) => {
-    await page.goto('/wp-admin/post-new.php?post_type=yousync_videos');
+  test('WPBuoy Video Sync Video Details metabox is visible on the video edit page', async ({ page }) => {
+    await page.goto('/wp-admin/post-new.php?post_type=wpbyvs_videos');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('#yousync_video_details')).toBeVisible();
-    await expect(page.locator('#yousync_video_id')).toBeVisible();
-    await expect(page.locator('#yousync_video_url')).toBeVisible();
+    await expect(page.locator('#wpbyvs_video_details')).toBeVisible();
+    await expect(page.locator('#wpbyvs_video_id')).toBeVisible();
+    await expect(page.locator('#wpbyvs_video_url')).toBeVisible();
   });
 
   test('video ID and video URL persist after saving the post', async ({ page }) => {
@@ -786,43 +786,43 @@ test.describe('Video – metabox field persistence', () => {
     const videoYtId = `dQw${id}`;
     const videoUrl = `https://www.youtube.com/watch?v=${videoYtId}`;
 
-    await page.goto('/wp-admin/post-new.php?post_type=yousync_videos');
+    await page.goto('/wp-admin/post-new.php?post_type=wpbyvs_videos');
     await page.waitForLoadState('networkidle');
 
     // Fill in the post title (required to save)
     await page.locator('#title').fill(`Test Video ${id}`);
 
-    // Fill in the YouSync metabox fields
-    await page.locator('#yousync_video_id').fill(videoYtId);
-    await page.locator('#yousync_video_url').fill(videoUrl);
+    // Fill in the WPBuoy Video Sync metabox fields
+    await page.locator('#wpbyvs_video_id').fill(videoYtId);
+    await page.locator('#wpbyvs_video_url').fill(videoUrl);
 
     // Save the post
     await page.locator('#publish').click();
     await page.waitForLoadState('networkidle');
 
     // WordPress reloads the edit page after publishing
-    await expect(page.locator('#yousync_video_id')).toHaveValue(videoYtId);
-    await expect(page.locator('#yousync_video_url')).toHaveValue(videoUrl);
+    await expect(page.locator('#wpbyvs_video_id')).toHaveValue(videoYtId);
+    await expect(page.locator('#wpbyvs_video_url')).toHaveValue(videoUrl);
   });
 
   test('video ID persists when updated on an existing post', async ({ page }) => {
     const id = uniqueId();
 
     // Create the post first
-    await page.goto('/wp-admin/post-new.php?post_type=yousync_videos');
+    await page.goto('/wp-admin/post-new.php?post_type=wpbyvs_videos');
     await page.waitForLoadState('networkidle');
 
     await page.locator('#title').fill(`Update Video ${id}`);
-    await page.locator('#yousync_video_id').fill(`original${id}`);
+    await page.locator('#wpbyvs_video_id').fill(`original${id}`);
     await page.locator('#publish').click();
     await page.waitForLoadState('networkidle');
 
     // Update the video ID
     const updatedId = `updated${id}`;
-    await page.locator('#yousync_video_id').fill(updatedId);
+    await page.locator('#wpbyvs_video_id').fill(updatedId);
     await page.locator('#publish').click();
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('#yousync_video_id')).toHaveValue(updatedId);
+    await expect(page.locator('#wpbyvs_video_id')).toHaveValue(updatedId);
   });
 });

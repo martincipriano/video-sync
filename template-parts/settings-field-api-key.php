@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Template part for displaying API key settings field
  *
- * @package WPBuoyVideoSync
+ * @package WPBuoy_Video_Sync
  * @var string $value The current API key value
  */
 
@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <input
-	aria-describedby="wpbuoy_video_sync_api_key_description"
+	aria-describedby="wpbyvs_api_key_description"
 	class="regular-text"
-	name="wpbuoy_video_sync_api_key"
+	name="wpbyvs_api_key"
 	type="text"
 	value="<?php echo esc_attr( $value ); ?>"
 >
-<p class="description" id="wpbuoy_video_sync_api_key_description">
+<p class="description" id="wpbyvs_api_key_description">
 	<?php
 	printf(
 		/* translators: %s: Link to YouTube Data API documentation */

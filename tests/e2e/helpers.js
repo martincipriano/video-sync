@@ -2,21 +2,21 @@
  * Navigate to the Channels taxonomy admin page.
  */
 export async function goToChannels(page) {
-  await page.goto('/wp-admin/edit-tags.php?taxonomy=yousync_channel&post_type=yousync_videos');
+  await page.goto('/wp-admin/edit-tags.php?taxonomy=wpbyvs_channel&post_type=wpbyvs_videos');
 }
 
 /**
  * Navigate to the Playlists taxonomy admin page.
  */
 export async function goToPlaylists(page) {
-  await page.goto('/wp-admin/edit-tags.php?taxonomy=yousync_playlist&post_type=yousync_videos');
+  await page.goto('/wp-admin/edit-tags.php?taxonomy=wpbyvs_playlist&post_type=wpbyvs_videos');
 }
 
 /**
- * Navigate to the YouSync Settings page.
+ * Navigate to the WPBuoy Video Sync Settings page.
  */
 export async function goToSettings(page) {
-  await page.goto('/wp-admin/edit.php?post_type=yousync_videos&page=yousync_settings');
+  await page.goto('/wp-admin/edit.php?post_type=wpbyvs_videos&page=wpbyvs_settings');
 }
 
 /**
@@ -34,7 +34,7 @@ export async function waitForTomSelect(wrapper) {
  * Open a Tom Select dropdown and choose an option by its visible label.
  *
  * @param {import('@playwright/test').Page} page
- * @param {import('@playwright/test').Locator} selectWrapper - The .ys-form-group or parent
+ * @param {import('@playwright/test').Locator} selectWrapper - The .wpbyvs-form-group or parent
  * @param {string} optionLabel - Visible text of the option to choose
  */
 export async function chooseTomSelectOption(page, selectWrapper, optionLabel) {

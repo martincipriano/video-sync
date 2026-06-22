@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.4.0
+Stable tag: 2.5.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -25,7 +25,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
 * **Thumbnails** imported and used as the featured image when no image is set
 * **Sync history** with the last-synced time and a per-rule error log
-* Stores all YouTube data in standard post meta (`_wpbuoy_video_sync_*`) for easy use in your theme or queries
+* Stores all YouTube data in standard post meta (`_wpbyvs_*`) for easy use in your theme or queries
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
@@ -103,32 +103,32 @@ This service is provided by Google. By using it you agree to Google's terms and 
 
 WPBuoy Video Sync fires action hooks after each item's metadata is saved, so you can run your own code whenever a video, playlist, or channel is synced. Each hook fires on both the initial import and every re-sync, after all metadata has been written. The synced data is passed to the hook, so you can identify or filter items without making another API call.
 
-= wpbuoy_video_sync_video_synced =
+= wpbyvs_video_synced =
 
 Fires after a video's metadata is saved.
 
-`do_action( 'wpbuoy_video_sync_video_synced', int $post_id, array $video_data, string $source_type, int $source_id );`
+`do_action( 'wpbyvs_video_synced', int $post_id, array $video_data, string $source_type, int $source_id );`
 
 * `$post_id` — the video post ID.
 * `$video_data` — video data from the YouTube Data API (title, description, view_count, like_count, comment_count, video_id, and more).
 * `$source_type` — how it was synced: `channel`, `playlist`, or `video`.
 * `$source_id` — the source term ID the video was synced from.
 
-= wpbuoy_video_sync_playlist_synced =
+= wpbyvs_playlist_synced =
 
 Fires after a playlist's metadata is saved.
 
-`do_action( 'wpbuoy_video_sync_playlist_synced', int $post_id, array $playlist_data, string $channel_id );`
+`do_action( 'wpbyvs_playlist_synced', int $post_id, array $playlist_data, string $channel_id );`
 
 * `$post_id` — the playlist post ID.
 * `$playlist_data` — playlist data from the YouTube Data API.
 * `$channel_id` — the source channel ID the playlist belongs to.
 
-= wpbuoy_video_sync_channel_synced =
+= wpbyvs_channel_synced =
 
 Fires after a channel's metadata is saved.
 
-`do_action( 'wpbuoy_video_sync_channel_synced', int $post_id, array $channel_data, string $channel_id );`
+`do_action( 'wpbyvs_channel_synced', int $post_id, array $channel_data, string $channel_id );`
 
 * `$post_id` — the channel post ID.
 * `$channel_data` — channel data from the YouTube Data API.
@@ -136,16 +136,16 @@ Fires after a channel's metadata is saved.
 
 = Example =
 
-`add_action( 'wpbuoy_video_sync_video_synced', function ( $post_id, $video_data ) {
+`add_action( 'wpbyvs_video_synced', function ( $post_id, $video_data ) {
     // Runs each time a video is synced.
     error_log( sprintf( 'Synced video %d (%s)', $post_id, $video_data['video_id'] ?? '' ) );
 }, 10, 2 );`
 
-= wpbuoy_video_sync_metabox_tabs =
+= wpbyvs_metabox_tabs =
 
 Add your own tab to the video, playlist, or channel metabox on the post edit screen. Return an array of tabs, each with a `slug`, a `label`, and a `render` callback that echoes the panel's content.
 
-`apply_filters( 'wpbuoy_video_sync_metabox_tabs', array $tabs, string $type, int $post_id );`
+`apply_filters( 'wpbyvs_metabox_tabs', array $tabs, string $type, int $post_id );`
 
 * `$tabs` — list of tabs to add. Each: `[ 'slug' => string, 'label' => string, 'render' => callable( int $post_id ) ]`.
 * `$type` — which metabox is rendering: `video`, `playlist`, or `channel`.
@@ -153,7 +153,7 @@ Add your own tab to the video, playlist, or channel metabox on the post edit scr
 
 Example — add a tab only to the video metabox:
 
-`add_filter( 'wpbuoy_video_sync_metabox_tabs', function ( $tabs, $type, $post_id ) {
+`add_filter( 'wpbyvs_metabox_tabs', function ( $tabs, $type, $post_id ) {
     if ( 'video' !== $type ) {
         return $tabs;
     }
@@ -176,11 +176,14 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
+= 2.5.0 =
+* Change: Standardized internal namespace and code prefix (functions, classes, constants, hooks) for consistency across WPBuoy plugins. No changes to features or settings.
+
 = 2.4.0 =
-* New: `wpbuoy_video_sync_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.
+* New: `wpbyvs_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.
 
 = 2.3.0 =
-* New: Action hooks fire after each video, playlist, and channel is synced — `wpbuoy_video_sync_video_synced`, `wpbuoy_video_sync_playlist_synced`, `wpbuoy_video_sync_channel_synced`.
+* New: Action hooks fire after each video, playlist, and channel is synced — `wpbyvs_video_synced`, `wpbyvs_playlist_synced`, `wpbyvs_channel_synced`.
 
 = 2.2.5 =
 * Maintenance release.

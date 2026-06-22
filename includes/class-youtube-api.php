@@ -7,10 +7,10 @@ declare(strict_types=1);
  * (which costs 100 quota units per call). Every method here costs 1 unit
  * per page of up to 50 items.
  *
- * @package WPBuoyVideoSync
+ * @package WPBuoy_Video_Sync
  */
 
-namespace WPBuoyVideoSync;
+namespace WPBuoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -122,7 +122,7 @@ class YouTube_API {
 	public function resolve_channel_id( string $input ): string|\WP_Error {
 		$input = trim( $input );
 		if ( '' === $input ) {
-			return new \WP_Error( 'wpbuoy_video_sync_channel_empty', __( 'Enter a channel URL or ID.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_empty', __( 'Enter a channel URL or ID.', 'wpbuoy-video-sync' ) );
 		}
 
 		// Already a channel ID.
@@ -165,7 +165,7 @@ class YouTube_API {
 		}
 
 		return new \WP_Error(
-			'wpbuoy_video_sync_channel_unresolved',
+			'wpbyvs_channel_unresolved',
 			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'wpbuoy-video-sync' )
 		);
 	}
@@ -182,7 +182,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['id'] ?? '';
-		return $id ?: new \WP_Error( 'wpbuoy_video_sync_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['snippet']['channelId'] ?? '';
-		return $id ?: new \WP_Error( 'wpbuoy_video_sync_channel_not_found', __( 'No channel matched that video.', 'wpbuoy-video-sync' ) );
+		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that video.', 'wpbuoy-video-sync' ) );
 	}
 
 	/**
@@ -222,10 +222,10 @@ class YouTube_API {
 
 		$response = wp_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error( 'wpbuoy_video_sync_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'wpbuoy-video-sync' ) );
 		}
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new \WP_Error( 'wpbuoy_video_sync_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -242,7 +242,7 @@ class YouTube_API {
 			}
 		}
 
-		return new \WP_Error( 'wpbuoy_video_sync_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+		return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
 	}
 
 	/**
