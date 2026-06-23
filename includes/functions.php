@@ -24,21 +24,13 @@ function wpbyvs_free_actions(): array {
  * Get the configured channel as a single flat object.
  *
  * The free plugin manages exactly one channel, stored as a flat object in the
- * wpbyvs_channel_config option. As downgrade safety, if a legacy indexed array is
- * found (e.g. left by a prior multi-channel install) the first element is used.
+ * wpbyvs_channel_config option.
  *
  * @return array The single channel config, or an empty array if none.
  */
 function wpbyvs_get_channel_config(): array {
 	$config = get_option( 'wpbyvs_channel_config', array() );
-	if ( ! is_array( $config ) ) {
-		return array();
-	}
-	// Downgrade safety: a legacy indexed array → use the first channel.
-	if ( isset( $config[0] ) && is_array( $config[0] ) ) {
-		return $config[0];
-	}
-	return $config;
+	return is_array( $config ) ? $config : array();
 }
 
 /**

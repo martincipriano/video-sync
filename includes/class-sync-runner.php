@@ -3,9 +3,9 @@ declare(strict_types=1);
 /**
  * Sync runner.
  *
- * Executes one sync rule end-to-end: reads the rule from term meta,
- * calls the YouTube API, evaluates conditions, imports videos, and
- * writes results back to term meta.
+ * Executes one sync rule end-to-end: reads the channel config, calls the
+ * YouTube API, imports videos/playlists/channel data, and writes results
+ * back to wpbyvs_channel_config.
  *
  * @package WPBuoy_Video_Sync
  */
@@ -72,9 +72,7 @@ class Sync_Runner {
 	private int $current_run_count = 0;
 
 	/**
-	 * When running an option-based channel (Channels Page), holds the channel
 	 * Whether the current run is the single option-based channel (Channels page).
-	 * False for term-based (legacy) runs.
 	 *
 	 * @var bool
 	 */
@@ -82,7 +80,7 @@ class Sync_Runner {
 
 	/**
 	 * In-memory copy of the source data when running an option-based channel.
-	 * Returned by get_term_meta_data() instead of term meta. Kept in sync after
+	 * Returned by get_channel_data(). Kept in sync after
 	 * every save_source_data() call so subsequent reads within the same run see
 	 * the latest state.
 	 *
@@ -227,7 +225,7 @@ class Sync_Runner {
 	/**
 	 * Execute a sync rule for an option-based channel (Channels Page / wpbyvs_channel_config).
 	 *
-	 * Sets up the source data override so that get_term_meta_data() and
+	 * Sets up the source data override so that get_channel_data() and
 	 * save_source_data() transparently read/write wp_options instead of
 	 * term meta, then delegates to the standard run() method with term_id = 0.
 	 *
@@ -283,7 +281,7 @@ class Sync_Runner {
 
 		if ( 'channel' === $source_type ) {
 			// Channels: need to get the uploads playlist ID first.
-			$meta = $this->get_term_meta_data( $source_type, $term_id );
+			$meta = $this->get_channel_data();
 			if ( ! $meta || empty( $meta['channel_id'] ) ) {
 				throw new \RuntimeException( 'Channel ID not found in term meta.' );
 			}
@@ -304,7 +302,7 @@ class Sync_Runner {
 			}
 		} else {
 			// Playlists: playlist ID is stored directly in term meta.
-			$meta = $this->get_term_meta_data( $source_type, $term_id );
+			$meta = $this->get_channel_data();
 			if ( ! $meta || empty( $meta['playlist_id'] ) ) {
 				throw new \RuntimeException( 'Playlist ID not found in term meta.' );
 			}
@@ -375,7 +373,7 @@ class Sync_Runner {
 	 * @throws \RuntimeException On missing channel ID.
 	 */
 	private function handle_channel_sync_new( int $term_id, array $rule ): void {
-		$data = $this->get_term_meta_data( 'channel', $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || empty( $data['channel_id'] ) ) {
 			throw new \RuntimeException( 'Channel ID not found in term meta.' );
 		}
@@ -427,7 +425,7 @@ class Sync_Runner {
 	private function handle_playlists_sync( int $term_id, array $rule, string $action ): void {
 		$destination_post_type = $rule['destination_post_type'] ?? '';
 
-		$data = $this->get_term_meta_data( 'channel', $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || empty( $data['channel_id'] ) ) {
 			throw new \RuntimeException( 'Channel ID not found.' );
 		}
@@ -580,7 +578,7 @@ class Sync_Runner {
 	 * @return array|null Rule array, or null if not found.
 	 */
 	private function load_rule( string $source_type, int $term_id, int $rule_index ): ?array {
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 
 		if ( ! $data ) {
 			return null;
@@ -601,7 +599,7 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function refresh_channel_meta( int $term_id, array $channel_data ): void {
-		$data = $this->get_term_meta_data( 'channel', $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data ) {
 			return;
 		}
@@ -618,51 +616,30 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Read and decode the source term's JSON meta.
+	 * Return the current channel's source data.
 	 *
-	 * When running the option-based channel (is_option_channel is true),
-	 * returns the in-memory source_data_override instead of reading term meta.
+	 * The free runner only ever syncs the single option-based channel, so this
+	 * returns the in-memory source_data_override that run_config_channel() loaded
+	 * from wpbyvs_channel_config. (Params retained for the call signature.)
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @return array|null Decoded data array, or null on failure.
+	 * @return array|null Channel data array, or null if not set.
 	 */
-	private function get_term_meta_data( string $source_type, int $term_id ): ?array {
-		if ( null !== $this->source_data_override && 'channel' === $source_type ) {
-			return $this->source_data_override;
-		}
-
-		$meta_key = $this->meta_key( $source_type );
-		$raw      = get_term_meta( $term_id, $meta_key, true );
-
-		if ( ! $raw ) {
-			return null;
-		}
-
-		$data = json_decode( $raw, true );
-		return is_array( $data ) ? $data : null;
+	private function get_channel_data(): ?array {
+		return $this->source_data_override;
 	}
 
 	/**
-	 * Persist source data to term meta or, for option-based channels, to
-	 * wpbyvs_channel_config and the in-memory override.
-	 *
-	 * Replaces direct update_term_meta() calls for the channel JSON blob so
-	 * that all write paths work for both term-based and option-based channels.
+	 * Persist the channel's source data to wpbyvs_channel_config and refresh the
+	 * in-memory override so later reads in the same run see the update.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID (ignored for option channels).
+	 * @param int    $term_id     Term ID (unused; retained for the call signature).
 	 * @param array  $data        Decoded data to persist.
 	 * @return void
 	 */
 	private function save_source_data( string $source_type, int $term_id, array $data ): void {
-		if ( $this->is_option_channel && 'channel' === $source_type ) {
-			$this->update_option_channel( $data );
-			$this->source_data_override = $data;
-			return;
-		}
-
-		update_term_meta( $term_id, $this->meta_key( $source_type ), wp_slash( wp_json_encode( $data ) ) );
+		$this->update_option_channel( $data );
+		$this->source_data_override = $data;
 	}
 
 	/**
@@ -680,16 +657,6 @@ class Sync_Runner {
 		}
 
 		update_option( 'wpbyvs_channel_config', $data );
-	}
-
-	/**
-	 * Return the term meta key for a source type.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @return string Meta key.
-	 */
-	private function meta_key( string $source_type ): string {
-		return 'playlist' === $source_type ? 'wpbyvs_playlist' : 'wpbyvs_channel';
 	}
 
 	// -------------------------------------------------------------------------
@@ -717,7 +684,7 @@ class Sync_Runner {
 			return;
 		}
 
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		$rule = $data['sync_rules'][ $this->current_rule_index ] ?? array();
 
 		Sync_History::append( $youtube_id, array(
@@ -753,7 +720,7 @@ class Sync_Runner {
 			'code'      => $code,
 		);
 
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
 			return;
 		}
@@ -779,7 +746,7 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function record_success( string $source_type, int $term_id ): void {
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
 			return;
 		}
@@ -793,27 +760,6 @@ class Sync_Runner {
 
 		$this->save_source_data( $source_type, $term_id, $data );
 		$this->append_history( $source_type, $term_id, ! empty( $this->run_errors ) );
-	}
-
-	/**
-	 * Resolve a human-readable name for the sync source.
-	 *
-	 * For option-based channels the title is taken from source_data_override.
-	 * For legacy term-based channels it is read from term meta.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID (0 for option-based channels).
-	 * @return string
-	 */
-	private function get_source_name( string $source_type, int $term_id ): string {
-		if ( null !== $this->source_data_override && 'channel' === $source_type ) {
-			return $this->source_data_override['channel_title'] ?? '';
-		}
-		if ( $term_id > 0 ) {
-			$term = get_term( $term_id );
-			return ( $term && ! is_wp_error( $term ) ) ? $term->name : '';
-		}
-		return '';
 	}
 
 	/**
@@ -847,7 +793,7 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function mark_syncing( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
 			return;
 		}
@@ -878,7 +824,7 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function clear_syncing( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
 			return;
 		}
@@ -905,7 +851,7 @@ class Sync_Runner {
 	 * @return void
 	 */
 	private function disable_once_rule( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_term_meta_data( $source_type, $term_id );
+		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
 			return;
 		}

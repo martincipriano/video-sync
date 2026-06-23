@@ -28,8 +28,6 @@ $default_post_type = $default_post_type ?? '';
 		<span class="wpbyvs-wizard-step-indicator wpbyvs-wizard-step-indicator--active" data-step="1">1</span>
 		<span class="wpbyvs-wizard-progress-line"></span>
 		<span class="wpbyvs-wizard-step-indicator" data-step="2">2</span>
-		<span class="wpbyvs-wizard-progress-line"></span>
-		<span class="wpbyvs-wizard-step-indicator" data-step="3">3</span>
 	</div>
 
 	<div class="wpbyvs-wizard-panels">
@@ -63,25 +61,8 @@ $default_post_type = $default_post_type ?? '';
 		</div>
 	</div>
 
-	<?php /* Step 2 — Schedule */ ?>
+	<?php /* Step 2 — Destination */ ?>
 	<div class="wpbyvs-wizard-panel wpbyvs-hidden" data-step="2">
-		<div class="wpbyvs-wizard-step-header">
-			<h3><?php esc_html_e( 'When should this rule run?', 'wpbuoy-video-sync' ); ?></h3>
-		</div>
-		<div class="wpbyvs-2-columns wpbyvs-cols-3-1">
-			<div class="wpbyvs-form-group">
-				<label for="wpbyvs-wizard-schedule"><?php esc_html_e( 'Sync schedule', 'wpbuoy-video-sync' ); ?></label>
-				<input type="text" class="wpbyvs-text" id="wpbyvs-wizard-schedule" value="<?php esc_attr_e( 'Once (run immediately after enabling and saving)', 'wpbuoy-video-sync' ); ?>" readonly disabled>
-			</div>
-		</div>
-		<div class="wpbyvs-wizard-nav">
-			<button type="button" class="button wpbyvs-wizard-back" data-step="2"><?php esc_html_e( '← Back', 'wpbuoy-video-sync' ); ?></button>
-			<button type="button" class="button button-primary wpbyvs-wizard-next" data-step="2"><?php esc_html_e( 'Next →', 'wpbuoy-video-sync' ); ?></button>
-		</div>
-	</div>
-
-	<?php /* Step 3 — Destination */ ?>
-	<div class="wpbyvs-wizard-panel wpbyvs-hidden" data-step="3">
 		<div class="wpbyvs-wizard-step-header">
 			<h3><?php esc_html_e( 'Where should synced items be saved?', 'wpbuoy-video-sync' ); ?></h3>
 		</div>
@@ -100,7 +81,7 @@ $default_post_type = $default_post_type ?? '';
 		</div>
 		<div class="wpbyvs-wizard-error wpbyvs-hidden"></div>
 		<div class="wpbyvs-wizard-nav">
-			<button type="button" class="button wpbyvs-wizard-back" data-step="3"><?php esc_html_e( '← Back', 'wpbuoy-video-sync' ); ?></button>
+			<button type="button" class="button wpbyvs-wizard-back" data-step="2"><?php esc_html_e( '← Back', 'wpbuoy-video-sync' ); ?></button>
 			<button type="button" class="button button-primary wpbyvs-wizard-finish"><?php esc_html_e( 'Add Rule', 'wpbuoy-video-sync' ); ?></button>
 		</div>
 	</div>

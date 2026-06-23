@@ -151,12 +151,6 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</div>
 		</div>
 
-		<div class="wpbyvs-2-columns wpbyvs-cols-3-1">
-			<div class="wpbyvs-form-group">
-				<label for="wpbyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync schedule', 'wpbuoy-video-sync' ); ?></label>
-				<input type="text" class="wpbyvs-text" id="wpbyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" value="<?php esc_attr_e( 'Once (run immediately after enabling and saving)', 'wpbuoy-video-sync' ); ?>" readonly disabled>
-			</div>
-		</div>
 
 		<?php $_show_post_type = in_array( $action, array( 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' ), true ); ?>
 		<div class="wpbyvs-2-columns wpbyvs-post-type-wrapper<?php echo $_show_post_type ? '' : ' wpbyvs-hidden'; ?>">

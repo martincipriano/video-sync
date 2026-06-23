@@ -333,7 +333,7 @@ delegationRoot.addEventListener('change', function(e) {
 // ============================================================
 // Sync Rule Wizard (flat scope inside delegationRoot for function access)
 // ============================================================
-const TOTAL_STEPS    = 3
+const TOTAL_STEPS    = 2
 const SLIDE_DURATION = 220 // ms
 
 /**
@@ -494,13 +494,12 @@ function wizardBack(wizard, fromStep) {
  */
 function collectWizardRule(wizard) {
 	const action    = wizard.querySelector('.wpbyvs-wizard-action-select')?.value ?? ''
-	const schedule  = wizard.querySelector('.wpbyvs-wizard-schedule-select')?.value ?? 'once'
 	const maxVideos = parseInt(wizard.querySelector('.wpbyvs-wizard-max-videos')?.value) || 0
 	const postType  = wizard.querySelector('.wpbyvs-wizard-post-type')?.value ?? ''
 
 	return {
 		action,
-		schedule,
+		schedule:              'once', // Free always runs once; coerced server-side too.
 		max_videos:            maxVideos,
 		destination_post_type: postType,
 	}
