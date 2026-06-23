@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -176,8 +176,9 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
-= 2.5.0 =
-* Change: Standardized internal namespace and code prefix (functions, classes, constants, hooks) for consistency across WPBuoy plugins. No changes to features or settings.
+= 2.5.1 =
+* Standardized internal code naming for consistency across WPBuoy plugins.
+* Simplified the single-channel architecture and removed unused legacy code. No changes to features or settings.
 
 = 2.4.0 =
 * New: `wpbyvs_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.

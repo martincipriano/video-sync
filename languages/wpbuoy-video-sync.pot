@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.4.0\n"
+"Project-Id-Version: WPBuoy Video Sync 2.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpbuoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-21T02:24:14+00:00\n"
+"POT-Creation-Date: 2026-06-23T12:29:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wpbuoy-video-sync\n"
@@ -196,28 +196,28 @@ msgstr ""
 msgid "Channels"
 msgstr ""
 
-#: includes/class-channels-page.php:221
+#: includes/class-channels-page.php:211
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-channels-page.php:225
+#: includes/class-channels-page.php:215
 msgid "You do not have permission to do this."
 msgstr ""
 
 #. translators: %d: number of candidate videos
-#: includes/class-sync-runner.php:360
+#: includes/class-sync-runner.php:347
 #, php-format
 msgid "No videos were imported. %d candidate was fetched from the API but could not be saved."
 msgid_plural "No videos were imported. %d candidates were fetched from the API but none could be saved."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sync-runner.php:572
+#: includes/class-sync-runner.php:559
 msgid "No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/class-sync-runner.php:576
+#: includes/class-sync-runner.php:563
 #, php-format
 msgid "The destination post type \"%s\" is no longer registered. Choose a valid post type for this rule."
 msgstr ""
@@ -250,7 +250,7 @@ msgid "WPBuoy Video Sync Settings"
 msgstr ""
 
 #: includes/settings.php:38
-#: template-parts/channel-group.php:81
+#: template-parts/channel-group.php:79
 msgid "Settings"
 msgstr ""
 
@@ -312,152 +312,147 @@ msgstr ""
 msgid "When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later."
 msgstr ""
 
-#. translators: %d: channel number
-#: template-parts/channel-group.php:65
-#, php-format
-msgid "Channel %d"
+#: template-parts/channel-group.php:63
+#: template-parts/channels-page.php:21
+#: template-parts/metabox-video.php:79
+msgid "Channel"
 msgstr ""
 
-#: template-parts/channel-group.php:75
+#: template-parts/channel-group.php:73
 msgid "Info"
 msgstr ""
 
-#: template-parts/channel-group.php:78
+#: template-parts/channel-group.php:76
 #: template-parts/metabox-channel.php:32
 #: template-parts/metabox-playlist.php:34
 #: template-parts/metabox-video.php:44
 msgid "Sync"
 msgstr ""
 
-#: template-parts/channel-group.php:84
+#: template-parts/channel-group.php:82
 msgid "History"
 msgstr ""
 
 #. translators: %d: number of sync errors
-#: template-parts/channel-group.php:88
+#: template-parts/channel-group.php:86
 #, php-format
 msgid "%d sync error"
 msgid_plural "%d sync errors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: template-parts/channel-group.php:101
+#: template-parts/channel-group.php:99
 msgid "Channel (channel URL or ID)"
 msgstr ""
 
-#: template-parts/channel-group.php:108
+#: template-parts/channel-group.php:106
 msgid "e.g. youtube.com/@channel or UCuAXFkgsw1L7xaCfnd5JJOw"
 msgstr ""
 
-#: template-parts/channel-group.php:118
+#: template-parts/channel-group.php:116
 msgid "Title"
 msgstr ""
 
-#: template-parts/channel-group.php:125
+#: template-parts/channel-group.php:123
 #: template-parts/metabox-channel.php:67
 msgid "Subscribers"
 msgstr ""
 
-#: template-parts/channel-group.php:132
+#: template-parts/channel-group.php:130
 #: template-parts/metabox-channel.php:77
 msgid "Videos"
 msgstr ""
 
-#: template-parts/channel-group.php:139
+#: template-parts/channel-group.php:137
 #: template-parts/metabox-channel.php:57
 #: template-parts/metabox-playlist.php:59
 #: template-parts/metabox-video.php:69
 msgid "Description"
 msgstr ""
 
-#: template-parts/channel-group.php:151
+#: template-parts/channel-group.php:149
 msgid "Add sync rule"
 msgstr ""
 
-#: template-parts/channel-group.php:188
+#: template-parts/channel-group.php:179
 msgid "Default Post Type"
 msgstr ""
 
-#: template-parts/channel-group.php:190
-#: template-parts/sync-rule.php:126
-#: template-parts/sync-rule.php:142
-#: template-parts/sync-rule.php:168
+#: template-parts/channel-group.php:181
+#: template-parts/sync-rule.php:125
+#: template-parts/sync-rule.php:141
+#: template-parts/sync-rule.php:161
 msgid "More info"
 msgstr ""
 
-#: template-parts/channel-group.php:191
+#: template-parts/channel-group.php:182
 msgid "Assign synced videos and playlists from this channel to this post type by default."
 msgstr ""
 
-#: template-parts/channel-group.php:199
-#: template-parts/sync-rule-wizard.php:92
-#: template-parts/sync-rule.php:173
+#: template-parts/channel-group.php:190
+#: template-parts/sync-rule-wizard.php:73
+#: template-parts/sync-rule.php:166
 msgid "— Select post type —"
 msgstr ""
 
-#: template-parts/channel-group.php:212
+#: template-parts/channel-group.php:203
 msgid "No sync history yet."
 msgstr ""
 
-#: template-parts/channel-group.php:217
-#: template-parts/sync-rule-wizard.php:47
+#: template-parts/channel-group.php:208
+#: template-parts/sync-rule-wizard.php:45
 #: template-parts/sync-rule.php:38
-#: template-parts/sync-rule.php:132
+#: template-parts/sync-rule.php:131
 msgid "Sync new videos"
 msgstr ""
 
-#: template-parts/channel-group.php:218
-#: template-parts/sync-rule-wizard.php:48
+#: template-parts/channel-group.php:209
+#: template-parts/sync-rule-wizard.php:46
 #: template-parts/sync-rule.php:37
-#: template-parts/sync-rule.php:133
+#: template-parts/sync-rule.php:132
 msgid "Sync new playlists"
 msgstr ""
 
-#: template-parts/channel-group.php:219
+#: template-parts/channel-group.php:210
 msgid "Sync channel"
 msgstr ""
 
-#: template-parts/channel-group.php:237
+#: template-parts/channel-group.php:228
 msgid "synced"
 msgstr ""
 
-#: template-parts/channel-group.php:237
+#: template-parts/channel-group.php:228
 msgid "updated"
 msgstr ""
 
-#: template-parts/channel-group.php:239
+#: template-parts/channel-group.php:230
 msgid "playlist"
 msgid_plural "playlists"
 msgstr[0] ""
 msgstr[1] ""
 
-#: template-parts/channel-group.php:241
+#: template-parts/channel-group.php:232
 msgid "channel"
 msgid_plural "channels"
 msgstr[0] ""
 msgstr[1] ""
 
-#: template-parts/channel-group.php:243
+#: template-parts/channel-group.php:234
 msgid "video"
 msgid_plural "videos"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: post type label, e.g. "Posts"
-#: template-parts/channel-group.php:253
+#: template-parts/channel-group.php:244
 #, php-format
 msgid "to %s"
 msgstr ""
 
 #. translators: %d: sync run duration in seconds
-#: template-parts/channel-group.php:281
+#: template-parts/channel-group.php:272
 #, php-format
 msgid "%ds"
-msgstr ""
-
-#: template-parts/channels-page.php:21
-#: template-parts/metabox-video.php:79
-msgid "Channel"
 msgstr ""
 
 #: template-parts/channels-page.php:26
@@ -486,7 +481,7 @@ msgstr ""
 msgid "Channel configuration saved."
 msgstr ""
 
-#: template-parts/channels-page.php:64
+#: template-parts/channels-page.php:63
 msgid "Save Changes"
 msgstr ""
 
@@ -659,73 +654,57 @@ msgstr ""
 msgid "Wizard progress"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:40
+#: template-parts/sync-rule-wizard.php:38
 msgid "What should this rule do?"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:44
-#: template-parts/sync-rule.php:124
+#: template-parts/sync-rule-wizard.php:42
+#: template-parts/sync-rule.php:123
 msgid "Action"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:46
-#: template-parts/sync-rule.php:131
+#: template-parts/sync-rule-wizard.php:44
+#: template-parts/sync-rule.php:130
 msgid "— Select action —"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:49
+#: template-parts/sync-rule-wizard.php:47
 #: template-parts/sync-rule.php:36
-#: template-parts/sync-rule.php:134
+#: template-parts/sync-rule.php:133
 msgid "Sync this channel"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:53
-#: template-parts/sync-rule.php:76
+#: template-parts/sync-rule-wizard.php:51
+#: template-parts/sync-rule.php:75
 msgid "Items per run"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:56
-#: template-parts/sync-rule.php:148
+#: template-parts/sync-rule-wizard.php:54
+#: template-parts/sync-rule.php:147
 msgid "Unlimited — click to set a limit"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:61
+#: template-parts/sync-rule-wizard.php:59
 msgid "Cancel"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:62
-#: template-parts/sync-rule-wizard.php:79
+#: template-parts/sync-rule-wizard.php:60
 msgid "Next →"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:69
-msgid "When should this rule run?"
-msgstr ""
-
-#: template-parts/sync-rule-wizard.php:73
-#: template-parts/sync-rule.php:157
-msgid "Sync schedule"
-msgstr ""
-
-#: template-parts/sync-rule-wizard.php:74
-#: template-parts/sync-rule.php:158
-msgid "Once (run immediately after enabling and saving)"
-msgstr ""
-
-#: template-parts/sync-rule-wizard.php:78
-#: template-parts/sync-rule-wizard.php:103
-msgid "← Back"
-msgstr ""
-
-#: template-parts/sync-rule-wizard.php:86
+#: template-parts/sync-rule-wizard.php:67
 msgid "Where should synced items be saved?"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:90
+#: template-parts/sync-rule-wizard.php:71
 msgid "Post Type"
 msgstr ""
 
-#: template-parts/sync-rule-wizard.php:104
+#: template-parts/sync-rule-wizard.php:84
+msgid "← Back"
+msgstr ""
+
+#: template-parts/sync-rule-wizard.php:85
 msgid "Add Rule"
 msgstr ""
 
@@ -737,59 +716,59 @@ msgstr ""
 msgid "immediately after enabling and saving"
 msgstr ""
 
-#: template-parts/sync-rule.php:73
+#: template-parts/sync-rule.php:72
 msgid "Videos per run"
 msgstr ""
 
-#: template-parts/sync-rule.php:75
+#: template-parts/sync-rule.php:74
 msgid "Playlists per run"
 msgstr ""
 
-#: template-parts/sync-rule.php:79
+#: template-parts/sync-rule.php:78
 msgid "Save synced playlists as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:81
+#: template-parts/sync-rule.php:80
 msgid "Save synced channel as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:82
+#: template-parts/sync-rule.php:81
 msgid "Save synced videos as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:90
+#: template-parts/sync-rule.php:89
 msgid "Syncing..."
 msgstr ""
 
-#: template-parts/sync-rule.php:98
+#: template-parts/sync-rule.php:97
 msgid "This rule is disabled and won't run until re-enabled."
 msgstr ""
 
-#: template-parts/sync-rule.php:108
+#: template-parts/sync-rule.php:107
 msgid "Sync schedule info"
 msgstr ""
 
-#: template-parts/sync-rule.php:110
+#: template-parts/sync-rule.php:109
 msgid "Created:"
 msgstr ""
 
-#: template-parts/sync-rule.php:111
+#: template-parts/sync-rule.php:110
 msgid "Last Sync:"
 msgstr ""
 
-#: template-parts/sync-rule.php:127
+#: template-parts/sync-rule.php:126
 msgid "Choose what to sync from your YouTube channel."
 msgstr ""
 
-#: template-parts/sync-rule.php:143
+#: template-parts/sync-rule.php:142
 msgid "Maximum number of items to process per run. Set to 0 for unlimited."
 msgstr ""
 
-#: template-parts/sync-rule.php:169
+#: template-parts/sync-rule.php:162
 msgid "The WordPress post type that synced items will be created as."
 msgstr ""
 
-#: template-parts/sync-rule.php:203
+#: template-parts/sync-rule.php:196
 msgid "Remove sync rule"
 msgstr ""
 
