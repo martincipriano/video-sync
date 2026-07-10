@@ -45,13 +45,16 @@ function wpbyvs_run_uninstall(): void {
 
 	// ---------------------------------------------------------------------
 	// Optional: remove synced content when the user opted in.
-	// Synced items live in user-selected post types, identified by the
-	// _wpbyvs_source_type meta key. Attachments sideloaded for a synced post
-	// (channel profile picture / banner) are removed with their parent.
+	// Synced items live in user-selected post types, identified by their
+	// dedup meta key (video/playlist/channel each set a different one —
+	// playlist posts never set _wpbyvs_source_type). Attachments sideloaded
+	// for a synced post (channel profile picture / banner) are removed with
+	// their parent.
 	// ---------------------------------------------------------------------
 	if ( get_option( 'wpbyvs_delete_on_uninstall' ) ) {
 		$post_ids = $wpdb->get_col(
-			"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wpbyvs_source_type'"
+			"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+			 WHERE meta_key IN ( '_wpbyvs_video_id', '_wpbyvs_playlist_id', '_wpbyvs_channel_post' )"
 		);
 
 		foreach ( array_map( 'intval', $post_ids ) as $post_id ) {

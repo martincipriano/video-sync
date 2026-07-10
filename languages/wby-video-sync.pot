@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.6.0\n"
+"Project-Id-Version: WPBuoy Video Sync 2.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wby-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-10T05:06:06+00:00\n"
+"POT-Creation-Date: 2026-07-10T14:36:46+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wby-video-sync\n"
@@ -33,6 +33,17 @@ msgstr ""
 #. Author of the plugin
 #: wby-video-sync.php
 msgid "Martin Cipriano"
+msgstr ""
+
+#: includes/class-blocks.php:42
+#: includes/class-channels-page.php:131
+msgid "Video Sync"
+msgstr ""
+
+#. translators: %d: post ID
+#: includes/class-blocks.php:218
+#, php-format
+msgid "Post #%d"
 msgstr ""
 
 #: includes/class-channels-page.php:54
@@ -173,10 +184,6 @@ msgstr ""
 
 #: includes/class-channels-page.php:118
 msgid "Support"
-msgstr ""
-
-#: includes/class-channels-page.php:131
-msgid "Video Sync"
 msgstr ""
 
 #: includes/class-channels-page.php:142
@@ -350,6 +357,7 @@ msgid "e.g. youtube.com/@channel or UCuAXFkgsw1L7xaCfnd5JJOw"
 msgstr ""
 
 #: template-parts/channel-group.php:116
+#: blocks/field/index.js:18
 msgid "Title"
 msgstr ""
 
@@ -367,6 +375,7 @@ msgstr ""
 #: template-parts/metabox-channel.php:57
 #: template-parts/metabox-playlist.php:59
 #: template-parts/metabox-video.php:69
+#: blocks/field/index.js:19
 msgid "Description"
 msgstr ""
 
@@ -555,10 +564,12 @@ msgid "Show Developer Fields"
 msgstr ""
 
 #: template-parts/metabox-channel.php:136
+#: blocks/image/index.js:22
 msgid "Banner Image"
 msgstr ""
 
 #: template-parts/metabox-channel.php:145
+#: blocks/image/index.js:21
 msgid "Profile Photo"
 msgstr ""
 
@@ -581,6 +592,8 @@ msgid "Playlist Title"
 msgstr ""
 
 #: template-parts/metabox-playlist.php:69
+#: blocks/field/index.js:32
+#: blocks/field/index.js:35
 msgid "Video Count"
 msgstr ""
 
@@ -589,6 +602,7 @@ msgid "Playlist Link"
 msgstr ""
 
 #: template-parts/metabox-playlist.php:91
+#: blocks/field/index.js:31
 msgid "Playlist ID"
 msgstr ""
 
@@ -605,22 +619,27 @@ msgid "Original Title"
 msgstr ""
 
 #: template-parts/metabox-video.php:89
+#: blocks/field/index.js:25
 msgid "Published Date"
 msgstr ""
 
 #: template-parts/metabox-video.php:107
+#: blocks/field/index.js:26
 msgid "Duration"
 msgstr ""
 
 #: template-parts/metabox-video.php:117
+#: blocks/field/index.js:27
 msgid "View Count"
 msgstr ""
 
 #: template-parts/metabox-video.php:127
+#: blocks/field/index.js:28
 msgid "Like Count"
 msgstr ""
 
 #: template-parts/metabox-video.php:137
+#: blocks/field/index.js:29
 msgid "Comment Count"
 msgstr ""
 
@@ -629,10 +648,12 @@ msgid "Video Link"
 msgstr ""
 
 #: template-parts/metabox-video.php:159
+#: blocks/field/index.js:21
 msgid "Video ID"
 msgstr ""
 
 #: template-parts/metabox-video.php:169
+#: blocks/field/index.js:23
 msgid "Embed Code"
 msgstr ""
 
@@ -772,22 +793,210 @@ msgstr ""
 msgid "Remove sync rule"
 msgstr ""
 
-#: wby-video-sync.php:159
+#: wby-video-sync.php:160
 msgid "WPBuoy Video Sync Video Details"
 msgstr ""
 
-#: wby-video-sync.php:299
+#: wby-video-sync.php:300
 msgid "Click to set a custom featured image"
 msgstr ""
 
-#: wby-video-sync.php:303
+#: wby-video-sync.php:304
 msgid "Click the YouTube thumbnail to edit or update"
 msgstr ""
 
-#: wby-video-sync.php:321
+#: wby-video-sync.php:322
 msgid "WPBuoy Video Sync Playlist Details"
 msgstr ""
 
-#: wby-video-sync.php:362
+#: wby-video-sync.php:363
 msgid "WPBuoy Video Sync Channel Details"
+msgstr ""
+
+#: blocks/embed/index.js:26
+msgid "Video Sync Embed"
+msgstr ""
+
+#: blocks/embed/index.js:27
+msgid "This block embeds the current post's YouTube video."
+msgstr ""
+
+#: blocks/field/index.js:16
+msgid "— Select a field —"
+msgstr ""
+
+#: blocks/field/index.js:17
+msgid "— Common —"
+msgstr ""
+
+#: blocks/field/index.js:20
+msgid "— Video fields —"
+msgstr ""
+
+#: blocks/field/index.js:22
+msgid "Video URL"
+msgstr ""
+
+#: blocks/field/index.js:24
+msgid "Channel Name"
+msgstr ""
+
+#: blocks/field/index.js:30
+msgid "— Playlist fields —"
+msgstr ""
+
+#: blocks/field/index.js:33
+msgid "— Channel fields —"
+msgstr ""
+
+#: blocks/field/index.js:34
+msgid "Subscriber Count"
+msgstr ""
+
+#: blocks/field/index.js:53
+msgid "Field Settings"
+msgstr ""
+
+#: blocks/field/index.js:55
+msgid "Field"
+msgstr ""
+
+#: blocks/field/index.js:67
+msgid "Video Sync Field"
+msgstr ""
+
+#: blocks/field/index.js:68
+msgid "Select a field in the block settings panel."
+msgstr ""
+
+#: blocks/image/index.js:16
+msgid "— Video —"
+msgstr ""
+
+#: blocks/image/index.js:17
+#: blocks/image/index.js:19
+msgid "Thumbnail"
+msgstr ""
+
+#: blocks/image/index.js:18
+msgid "— Playlist —"
+msgstr ""
+
+#: blocks/image/index.js:20
+msgid "— Channel —"
+msgstr ""
+
+#: blocks/image/index.js:26
+msgid "Max Res (1280×720)"
+msgstr ""
+
+#: blocks/image/index.js:27
+msgid "Standard (640×480)"
+msgstr ""
+
+#: blocks/image/index.js:28
+msgid "High (480×360)"
+msgstr ""
+
+#: blocks/image/index.js:29
+msgid "Medium (320×180)"
+msgstr ""
+
+#: blocks/image/index.js:30
+msgid "Default (120×90)"
+msgstr ""
+
+#: blocks/image/index.js:49
+msgid "Image Settings"
+msgstr ""
+
+#: blocks/image/index.js:51
+msgid "Image"
+msgstr ""
+
+#: blocks/image/index.js:57
+msgid "Size"
+msgstr ""
+
+#: blocks/image/index.js:69
+msgid "Video Sync Image"
+msgstr ""
+
+#: blocks/image/index.js:70
+msgid "Select an image type in the block settings panel."
+msgstr ""
+
+#: blocks/embed/block.json
+msgctxt "block title"
+msgid "Video Sync Embed"
+msgstr ""
+
+#: blocks/embed/block.json
+msgctxt "block description"
+msgid "Embed a synced video's YouTube player."
+msgstr ""
+
+#: blocks/embed/block.json
+#: blocks/field/block.json
+#: blocks/image/block.json
+msgctxt "block keyword"
+msgid "video sync"
+msgstr ""
+
+#: blocks/embed/block.json
+#: blocks/field/block.json
+#: blocks/image/block.json
+msgctxt "block keyword"
+msgid "youtube"
+msgstr ""
+
+#: blocks/embed/block.json
+msgctxt "block keyword"
+msgid "embed"
+msgstr ""
+
+#: blocks/embed/block.json
+#: blocks/field/block.json
+msgctxt "block keyword"
+msgid "video"
+msgstr ""
+
+#: blocks/embed/block.json
+msgctxt "block keyword"
+msgid "player"
+msgstr ""
+
+#: blocks/field/block.json
+msgctxt "block title"
+msgid "Video Sync Field"
+msgstr ""
+
+#: blocks/field/block.json
+msgctxt "block description"
+msgid "Display a single field from a synced video, playlist, or channel."
+msgstr ""
+
+#: blocks/field/block.json
+msgctxt "block keyword"
+msgid "field"
+msgstr ""
+
+#: blocks/image/block.json
+msgctxt "block title"
+msgid "Video Sync Image"
+msgstr ""
+
+#: blocks/image/block.json
+msgctxt "block description"
+msgid "Display a synced video thumbnail, playlist thumbnail, or channel image."
+msgstr ""
+
+#: blocks/image/block.json
+msgctxt "block keyword"
+msgid "thumbnail"
+msgstr ""
+
+#: blocks/image/block.json
+msgctxt "block keyword"
+msgid "image"
 msgstr ""

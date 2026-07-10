@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.6.0
+Stable tag: 2.7.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -26,6 +26,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Thumbnails** shown as the featured image when none is set; channel profile pictures and banners are downloaded into your media library
 * **Sync history** with the last-synced time and a per-rule error log
 * Stores all YouTube data in standard post meta (`_wpbyvs_*`) for easy use in your theme or queries
+* **`[video-sync]` shortcode** and **three Gutenberg blocks** (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site — no code required
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
@@ -81,10 +82,29 @@ WPBuoy Video Sync connects to the **YouTube Data API v3**, a service provided by
 
 **Images:** channel profile pictures and banners are downloaded from the URLs the YouTube Data API returns and stored locally in your media library. Video and playlist thumbnail URLs returned by the API point to YouTube's own image host (`i.ytimg.com`) and are stored and referenced as-is, in the same way YouTube serves them — the plugin does not host, offload, or proxy any images from its author's servers.
 
+**Video player:** the optional Embed block and the `[video-sync type="embed"]` shortcode display YouTube's own embedded player in an iframe pointed at `https://www.youtube.com/embed/`, the same way pasting a YouTube link into the block editor does via WordPress's built-in oEmbed support. No plugin code or data is involved in loading the player — the visitor's browser requests it directly from YouTube.
+
 This service is provided by Google. By using it you agree to Google's terms and privacy policy:
 
 * YouTube API Services Terms of Service: https://developers.google.com/youtube/terms/api-services-terms-of-service
 * Google Privacy Policy: https://policies.google.com/privacy
+
+== Using synced data on your site ==
+
+Every synced video, playlist, and channel is a regular WordPress post, so you can already query and template it however you like. For everyone else, the `[video-sync]` shortcode and three Gutenberg blocks put the same data on the page without writing any code.
+
+**Shortcode**
+
+`[video-sync id="123" field="title"]`
+`[video-sync id="123" field="view_count"]`
+`[video-sync id="123" field="thumbnail" size="maxres"]`
+`[video-sync id="123" type="embed"]`
+
+`id` is the post ID of the synced video, playlist, or channel post. Available `field` values depend on the post: `title`, `description`, and, for videos, `video_url`, `published_date`, `duration`, `view_count`, `like_count`, `comment_count`; for playlists, `playlist_video_count`; for channels, `subscriber_count`, `video_count`. Image fields are `thumbnail` (video), `playlist_thumbnail`, `profile_photo`, and `banner_image` (channel).
+
+**Gutenberg blocks**
+
+Add a **Video Sync Field**, **Video Sync Image**, or **Video Sync Embed** block from the block inserter (search "Video Sync"). Each block reads from the post it's placed on by default — drop an Embed block into a synced video post's content and it plays that video — or pick a different post from the block's settings panel.
 
 == For Developers ==
 
@@ -162,6 +182,10 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.7.0 =
+* New: `[video-sync]` shortcode and three Gutenberg blocks (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site.
+* Fixed: Uninstalling with "remove all data" enabled now also removes synced playlist posts (previously only videos and channels were detected).
 
 = 2.6.0 =
 * New: Channel profile pictures and banners are now downloaded into the media library and attached to the channel post, instead of being referenced from YouTube's CDN.

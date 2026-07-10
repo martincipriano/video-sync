@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "wby-video-sync/image",
+  "title": "Video Sync Image",
+  "category": "wby-video-sync",
+  "description": "Display a synced video thumbnail, playlist thumbnail, or channel image.",
+  "keywords": ["video sync", "youtube", "thumbnail", "image"],
+  "textdomain": "wby-video-sync",
+  "attributes": {
+    "postId": { "type": "number", "default": 0 },
+    "field":  { "type": "string", "default": "thumbnail" },
+    "size":   { "type": "string", "default": "maxres" }
+  },
+  "supports": { "html": false },
+  "editorScript": "file:./index.js"
+}
