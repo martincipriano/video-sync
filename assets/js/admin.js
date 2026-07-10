@@ -932,7 +932,7 @@ delegationRoot.addEventListener('click', function(e) {
 
 			setTimeout(function () { window._wpbyvsSyncUpdate = false }, 0)
 
-			// Update "Last Sync" in the schedule tooltip if present.
+			// Update "Last Sync" in the sync-info tooltip if present.
 			if (data.last_synced_label) {
 				const tooltip  = ruleEl.querySelector('.wpbyvs-sync-info-tooltip')
 				if (tooltip) {
@@ -949,9 +949,9 @@ delegationRoot.addEventListener('click', function(e) {
 						item.innerHTML = '<span>Last Sync:</span><span>' + data.last_synced_label + '</span>'
 						tooltip.insertBefore(item, tooltip.firstChild)
 					}
-					// Make sure the schedule button is visible.
-					const scheduleBtn = ruleEl.querySelector('.wpbyvs-sync-info')
-					if (scheduleBtn) scheduleBtn.hidden = false
+					// Make sure the sync-info button is visible.
+					const syncInfoBtn = ruleEl.querySelector('.wpbyvs-sync-info')
+					if (syncInfoBtn) syncInfoBtn.hidden = false
 				}
 			}
 		}

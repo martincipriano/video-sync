@@ -38,7 +38,7 @@ $_action_labels = array(
 	'videos_sync_new'    => __( 'Sync new videos', 'wby-video-sync' ),
 );
 $rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'wby-video-sync' );
-$rule_schedule_suffix = __( 'immediately after enabling and saving', 'wby-video-sync' );
+$rule_label_suffix = __( 'immediately after enabling and saving', 'wby-video-sync' );
 
 $sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
 $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
@@ -89,7 +89,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 
 	<div class="wpbyvs-rule-header" role="button" tabindex="0" aria-expanded="true">
 		<div class="wpbyvs-rule-heading-wrap">
-			<div class="wpbyvs-rule-heading"><?php echo esc_html( $rule_action_label . ' ' . $rule_schedule_suffix . '.' ); ?></div>
+			<div class="wpbyvs-rule-heading"><?php echo esc_html( $rule_action_label . ' ' . $rule_label_suffix . '.' ); ?></div>
 			<?php if ( ! $enabled ) : ?>
 			<p class="wpbyvs-rule-disabled-notice"><?php esc_html_e( 'This rule is disabled and won\'t run until re-enabled.', 'wby-video-sync' ); ?></p>
 			<?php endif; ?>
