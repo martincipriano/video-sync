@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <div class="wrap">
-	<h1><?php esc_html_e( 'WPBuoy Video Sync Settings', 'wpbuoy-video-sync' ); ?></h1>
+	<h1><?php esc_html_e( 'WPBuoy Video Sync Settings', 'wby-video-sync' ); ?></h1>
 
 	<?php settings_errors( 'wpbyvs_api_key' ); ?>
 

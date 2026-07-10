@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * WPBuoy Video Sync Pro — General helper functions.
+ * WPBuoy Video Sync — General helper functions.
  *
  * @package WPBuoy_Video_Sync
  */
@@ -12,21 +12,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The sync rule actions the free plugin supports.
+ * Valid sync rule action values ('' = a rule that has not been configured yet).
  *
  * @return string[]
  */
-function wpbyvs_free_actions(): array {
+function wpbyvs_valid_actions(): array {
 	return array( '', 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' );
 }
 
 /**
  * Get the configured channel as a single flat object.
  *
- * The free plugin manages exactly one channel, stored as a flat object in the
- * wpbyvs_channel_config option.
+ * The channel is stored as a flat object in the wpbyvs_channel_config option.
  *
- * @return array The single channel config, or an empty array if none.
+ * @return array The channel config, or an empty array if none.
  */
 function wpbyvs_get_channel_config(): array {
 	$config = get_option( 'wpbyvs_channel_config', array() );
@@ -43,22 +42,17 @@ function wpbyvs_get_channel_config(): array {
  */
 function wpbyvs_sanitize_sync_rule( $rule ) {
 	$action = isset( $rule['action'] ) ? sanitize_text_field( $rule['action'] ) : '';
-	// Free supports only the "sync new" actions; coerce anything else (Pro actions) to empty.
-	if ( ! in_array( $action, wpbyvs_free_actions(), true ) ) {
+	// Unknown values sanitize to '' so the rule renders as unconfigured.
+	if ( ! in_array( $action, wpbyvs_valid_actions(), true ) ) {
 		$action = '';
 	}
 
 	$sanitized = array(
-		'enabled'           => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
-		'title'             => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
-		'max_videos'        => isset( $rule['max_videos'] ) ? absint( $rule['max_videos'] ) : 50,
-		// Free runs every rule as a one-time sync; recurring schedules are Pro.
-		'schedule'          => 'once',
-		'action'            => $action,
-		'specific_metadata' => isset( $rule['specific_metadata'] ) && is_array( $rule['specific_metadata'] )
-			? array_values( array_filter( array_map( 'sanitize_text_field', $rule['specific_metadata'] ) ) )
-			: array(),
-		'destination_post_type'      => isset( $rule['destination_post_type'] ) ? sanitize_key( $rule['destination_post_type'] ) : '',
+		'enabled'    => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
+		'title'      => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
+		'max_videos' => isset( $rule['max_videos'] ) ? absint( $rule['max_videos'] ) : 50,
+		'action'     => $action,
+		'destination_post_type' => isset( $rule['destination_post_type'] ) ? sanitize_key( $rule['destination_post_type'] ) : '',
 	);
 
 	return $sanitized;

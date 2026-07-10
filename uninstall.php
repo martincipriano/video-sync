@@ -4,8 +4,8 @@ declare(strict_types=1);
  * WPBuoy Video Sync Uninstall
  *
  * Runs when the plugin is deleted from the WordPress admin.
- * Always removes plugin options and cron events.
- * Only removes content (videos, channels, playlists) when the
+ * Always removes plugin options, transients, and cron events.
+ * Only removes content (synced video, playlist, and channel posts) when the
  * "Remove all WPBuoy Video Sync data on uninstall" setting is enabled.
  *
  * @package WPBuoy_Video_Sync
@@ -36,21 +36,46 @@ function wpbyvs_run_uninstall(): void {
 	// Always: unschedule all sync cron events.
 	// ---------------------------------------------------------------------
 	wp_unschedule_hook( 'wpbyvs_sync_rule' );
+	wp_unschedule_hook( 'wpbyvs_channel_config_sync_rule' );
 
 	// ---------------------------------------------------------------------
 	// Always: remove dismissed-notice user meta.
 	// ---------------------------------------------------------------------
 	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'wpbyvs_cron_notice_dismissed' ) );
 
-	// Note: WPBuoy Video Sync 2.x registers no custom post type or taxonomy —
-	// synced items live in user-selected post types as `_wpbyvs_*` post meta,
-	// so there is no plugin-owned CPT/taxonomy content to remove on uninstall.
+	// ---------------------------------------------------------------------
+	// Optional: remove synced content when the user opted in.
+	// Synced items live in user-selected post types, identified by the
+	// _wpbyvs_source_type meta key. Attachments sideloaded for a synced post
+	// (channel profile picture / banner) are removed with their parent.
+	// ---------------------------------------------------------------------
+	if ( get_option( 'wpbyvs_delete_on_uninstall' ) ) {
+		$post_ids = $wpdb->get_col(
+			"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wpbyvs_source_type'"
+		);
+
+		foreach ( array_map( 'intval', $post_ids ) as $post_id ) {
+			$attachments = get_children(
+				array(
+					'post_parent' => $post_id,
+					'post_type'   => 'attachment',
+					'fields'      => 'ids',
+				)
+			);
+			foreach ( $attachments as $attachment_id ) {
+				wp_delete_attachment( (int) $attachment_id, true );
+			}
+			wp_delete_post( $post_id, true );
+		}
+	}
 
 	// ---------------------------------------------------------------------
-	// Always: delete plugin options.
+	// Always: delete plugin options (including per-channel sync history).
 	// ---------------------------------------------------------------------
 	$options = array(
 		'wpbyvs_api_key',
+		'wpbyvs_channel_config',
+		'wpbyvs_youtube_image_as_featured',
 		'wpbyvs_active_archives',
 		'wpbyvs_delete_on_uninstall',
 		'wpbyvs_reschedule_on_activation',
@@ -61,7 +86,23 @@ function wpbyvs_run_uninstall(): void {
 		delete_option( $option );
 	}
 
-	delete_transient( 'wpbyvs_flush_rewrite_rules' );
+	$history_keys = $wpdb->get_col(
+		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'wpbyvs\\_sync\\_history\\_%' OR option_name LIKE 'wpbyvs\\_history\\_read\\_%'"
+	);
+	foreach ( $history_keys as $history_key ) {
+		delete_option( $history_key );
+	}
+
+	// ---------------------------------------------------------------------
+	// Always: delete plugin transients (sync locks, progress, notices).
+	// ---------------------------------------------------------------------
+	$transient_keys = $wpdb->get_col(
+		"SELECT option_name FROM {$wpdb->options}
+		 WHERE option_name LIKE '\\_transient\\_wpbyvs\\_%' OR option_name LIKE '\\_transient\\_timeout\\_wpbyvs\\_%'"
+	);
+	foreach ( $transient_keys as $transient_key ) {
+		delete_option( $transient_key );
+	}
 
 	// phpcs:enable WordPress.DB
 }

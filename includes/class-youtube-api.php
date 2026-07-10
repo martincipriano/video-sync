@@ -103,7 +103,7 @@ class YouTube_API {
 			'subscriber_count'    => (int) ( $item['statistics']['subscriberCount'] ?? 0 ),
 			'video_count'         => (int) ( $item['statistics']['videoCount'] ?? 0 ),
 			'profile_picture'     => array( 'url' => $item['snippet']['thumbnails']['high']['url'] ?? $item['snippet']['thumbnails']['medium']['url'] ?? $item['snippet']['thumbnails']['default']['url'] ?? '' ),
-			'banner_image'        => array( 'url' => $this->banner_url( $item['brandingSettings']['image'] ?? array() ) ),
+			'banner_image'        => array( 'url' => $item['brandingSettings']['image']['bannerExternalUrl'] ?? $item['brandingSettings']['image']['bannerTabletImageUrl'] ?? '' ),
 			'etag'                => $item['etag'] ?? '',
 		);
 	}
@@ -122,7 +122,7 @@ class YouTube_API {
 	public function resolve_channel_id( string $input ): string|\WP_Error {
 		$input = trim( $input );
 		if ( '' === $input ) {
-			return new \WP_Error( 'wpbyvs_channel_empty', __( 'Enter a channel URL or ID.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_empty', __( 'Enter a channel URL or ID.', 'wby-video-sync' ) );
 		}
 
 		// Already a channel ID.
@@ -166,7 +166,7 @@ class YouTube_API {
 
 		return new \WP_Error(
 			'wpbyvs_channel_unresolved',
-			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'wpbuoy-video-sync' )
+			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'wby-video-sync' )
 		);
 	}
 
@@ -182,7 +182,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['id'] ?? '';
-		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['snippet']['channelId'] ?? '';
-		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that video.', 'wpbuoy-video-sync' ) );
+		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that video.', 'wby-video-sync' ) );
 	}
 
 	/**
@@ -222,10 +222,10 @@ class YouTube_API {
 
 		$response = wp_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error( 'wpbyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'wby-video-sync' ) );
 		}
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+			return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -242,7 +242,7 @@ class YouTube_API {
 			}
 		}
 
-		return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wpbuoy-video-sync' ) );
+		return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
 	}
 
 	/**
@@ -503,26 +503,6 @@ class YouTube_API {
 	// -------------------------------------------------------------------------
 	// Private helpers
 	// -------------------------------------------------------------------------
-
-	/**
-	 * Resolve the best-quality banner URL from the brandingSettings image object.
-	 *
-	 * Google CDN URLs (yt3.googleusercontent.com) accept a size parameter appended
-	 * after the path, e.g. =w2560. bannerExternalUrl is the raw original upload URL
-	 * without any size constraint — appending =w2560 requests the full-width version.
-	 *
-	 * @param array $image brandingSettings.image object from the API.
-	 * @return string Banner URL.
-	 */
-	private function banner_url( array $image ): string {
-		$url = $image['bannerExternalUrl'] ?? $image['bannerTabletImageUrl'] ?? '';
-
-		if ( $url && str_contains( $url, 'googleusercontent.com' ) && ! str_contains( $url, '=' ) ) {
-			$url .= '=w2560';
-		}
-
-		return $url;
-	}
 
 	/**
 	 * Execute a GET request and return the decoded JSON body.

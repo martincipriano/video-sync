@@ -6,7 +6,7 @@ declare(strict_types=1);
  * @package WPBuoy_Video_Sync
  *
  * Variables available in this template:
- * @var array $channel  Channel configuration data (the single free channel).
+ * @var array $channel  Channel configuration data.
  */
 
 // Exit if accessed directly.
@@ -60,7 +60,7 @@ $name_prefix = 'channel[sync_rules]';
 			if ( $channel_title ) {
 				echo esc_html( $channel_title );
 			} else {
-				esc_html_e( 'Channel', 'wpbuoy-video-sync' );
+				esc_html_e( 'Channel', 'wby-video-sync' );
 			}
 			?>
 		</h2>
@@ -70,20 +70,20 @@ $name_prefix = 'channel[sync_rules]';
 
 		<div class="wpbyvs-channel-tabs-nav" role="tablist">
 			<button type="button" class="wpbyvs-channel-tab-btn wpbyvs-channel-tab-btn--active" data-tab="info" role="tab" aria-selected="true">
-				<?php esc_html_e( 'Info', 'wpbuoy-video-sync' ); ?>
+				<?php esc_html_e( 'Info', 'wby-video-sync' ); ?>
 			</button>
 			<button type="button" class="wpbyvs-channel-tab-btn" data-tab="rules" role="tab" aria-selected="false">
-				<?php esc_html_e( 'Sync', 'wpbuoy-video-sync' ); ?>
+				<?php esc_html_e( 'Sync', 'wby-video-sync' ); ?>
 			</button>
 			<button type="button" class="wpbyvs-channel-tab-btn" data-tab="settings" role="tab" aria-selected="false">
-				<?php esc_html_e( 'Settings', 'wpbuoy-video-sync' ); ?>
+				<?php esc_html_e( 'Settings', 'wby-video-sync' ); ?>
 			</button>
 			<button type="button" class="wpbyvs-channel-tab-btn" data-tab="history" role="tab" aria-selected="false">
-				<?php esc_html_e( 'History', 'wpbuoy-video-sync' ); ?>
+				<?php esc_html_e( 'History', 'wby-video-sync' ); ?>
 				<?php if ( $has_errors ) : ?>
 				<span class="wpbyvs-history-badge" aria-label="<?php
 					/* translators: %d: number of sync errors */
-					echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'wpbuoy-video-sync' ), $error_count ) );
+					echo esc_attr( sprintf( _n( '%d sync error', '%d sync errors', $error_count, 'wby-video-sync' ), $error_count ) );
 				?>"><?php echo (int) $error_count; ?></span>
 				<?php endif; ?>
 			</button>
@@ -96,14 +96,14 @@ $name_prefix = 'channel[sync_rules]';
 
 				<div class="wpbyvs-mb-fields">
 					<div class="wpbyvs-mb-field<?php echo $channel_error ? ' wpbyvs-form-group--error' : ''; ?>">
-						<label class="wpbyvs-mb-label" for="wpbyvs-youtube-id"><?php esc_html_e( 'Channel (channel URL or ID)', 'wpbuoy-video-sync' ); ?> <span class="wpbyvs-required" aria-hidden="true">*</span></label>
+						<label class="wpbyvs-mb-label" for="wpbyvs-youtube-id"><?php esc_html_e( 'Channel (channel URL or ID)', 'wby-video-sync' ); ?> <span class="wpbyvs-required" aria-hidden="true">*</span></label>
 						<input
 							type="text"
 							id="wpbyvs-youtube-id"
 							name="channel[youtube_id]"
 							value="<?php echo esc_attr( $youtube_id ); ?>"
 							class="wpbyvs-text"
-							placeholder="<?php esc_attr_e( 'e.g. youtube.com/@channel or UCuAXFkgsw1L7xaCfnd5JJOw', 'wpbuoy-video-sync' ); ?>"
+							placeholder="<?php esc_attr_e( 'e.g. youtube.com/@channel or UCuAXFkgsw1L7xaCfnd5JJOw', 'wby-video-sync' ); ?>"
 							required
 						>
 						<?php if ( $channel_error ) : ?>
@@ -113,28 +113,28 @@ $name_prefix = 'channel[sync_rules]';
 
 					<?php if ( $channel_title ) : ?>
 					<div class="wpbyvs-mb-field">
-						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Title', 'wpbuoy-video-sync' ); ?></p>
+						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Title', 'wby-video-sync' ); ?></p>
 						<input type="text" class="wpbyvs-text" value="<?php echo esc_attr( $channel_title ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( '' !== $subscriber_count ) : ?>
 					<div class="wpbyvs-mb-field">
-						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Subscribers', 'wpbuoy-video-sync' ); ?></p>
+						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Subscribers', 'wby-video-sync' ); ?></p>
 						<input type="text" class="wpbyvs-text" value="<?php echo esc_attr( number_format_i18n( (int) $subscriber_count ) ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( $video_count ) : ?>
 					<div class="wpbyvs-mb-field">
-						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Videos', 'wpbuoy-video-sync' ); ?></p>
+						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Videos', 'wby-video-sync' ); ?></p>
 						<input type="text" class="wpbyvs-text" value="<?php echo esc_attr( number_format_i18n( (int) $video_count ) ); ?>" disabled readonly>
 					</div>
 					<?php endif; ?>
 
 					<?php if ( $channel_description ) : ?>
 					<div class="wpbyvs-mb-field">
-						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Description', 'wpbuoy-video-sync' ); ?></p>
+						<p class="wpbyvs-mb-label"><?php esc_html_e( 'Description', 'wby-video-sync' ); ?></p>
 						<textarea class="wpbyvs-text" rows="3" disabled readonly><?php echo esc_textarea( $channel_description ); ?></textarea>
 					</div>
 					<?php endif; ?>
@@ -146,7 +146,7 @@ $name_prefix = 'channel[sync_rules]';
 			<div class="wpbyvs-channel-tab-panel wpbyvs-hidden" data-panel="rules" role="tabpanel">
 
 				<button type="button" class="wpbyvs-add-rule">
-					<?php esc_html_e( 'Add sync rule', 'wpbuoy-video-sync' ); ?>
+					<?php esc_html_e( 'Add sync rule', 'wby-video-sync' ); ?>
 				</button>
 				<div class="wpbyvs-rules wpbyvs-rules--init" data-video-count="<?php echo (int) $video_count; ?>">
 					<?php
@@ -176,10 +176,10 @@ $name_prefix = 'channel[sync_rules]';
 				<div class="wpbyvs-2-columns wpbyvs-cols-3-1">
 					<div class="wpbyvs-form-group">
 						<label for="wpbyvs-default-post-type">
-							<?php esc_html_e( 'Default Post Type', 'wpbuoy-video-sync' ); ?>
+							<?php esc_html_e( 'Default Post Type', 'wby-video-sync' ); ?>
 							<span class="wpbyvs-help-wrap">
-								<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wpbuoy-video-sync' ); ?>">?</button>
-								<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'wpbuoy-video-sync' ); ?></span>
+								<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wby-video-sync' ); ?>">?</button>
+								<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced videos and playlists from this channel to this post type by default.', 'wby-video-sync' ); ?></span>
 							</span>
 						</label>
 						<select
@@ -187,7 +187,7 @@ $name_prefix = 'channel[sync_rules]';
 							name="channel[default_post_type]"
 							class="wpbyvs-select wpbyvs-channel-default-post-type"
 						>
-							<option value=""><?php esc_html_e( '— Select post type —', 'wpbuoy-video-sync' ); ?></option>
+							<option value=""><?php esc_html_e( '— Select post type —', 'wby-video-sync' ); ?></option>
 							<?php foreach ( $post_types as $pt ) : ?>
 							<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 							<?php endforeach; ?>
@@ -200,14 +200,14 @@ $name_prefix = 'channel[sync_rules]';
 		<?php /* History tab */ ?>
 		<div class="wpbyvs-channel-tab-panel wpbyvs-hidden" data-panel="history" role="tabpanel">
 			<?php if ( empty( $history ) ) : ?>
-			<p class="wpbyvs-history-empty"><?php esc_html_e( 'No sync history yet.', 'wpbuoy-video-sync' ); ?></p>
+			<p class="wpbyvs-history-empty"><?php esc_html_e( 'No sync history yet.', 'wby-video-sync' ); ?></p>
 			<?php else : ?>
 			<ul class="wpbyvs-history-list">
 				<?php
 				$action_labels = array(
-					'videos_sync_new'               => __( 'Sync new videos', 'wpbuoy-video-sync' ),
-					'playlists_sync_new'            => __( 'Sync new playlists', 'wpbuoy-video-sync' ),
-					'channel_sync_new'              => __( 'Sync channel', 'wpbuoy-video-sync' ),
+					'videos_sync_new'               => __( 'Sync new videos', 'wby-video-sync' ),
+					'playlists_sync_new'            => __( 'Sync new playlists', 'wby-video-sync' ),
+					'channel_sync_new'              => __( 'Sync channel', 'wby-video-sync' ),
 				);
 				?>
 			<?php foreach ( $history as $entry ) :
@@ -225,13 +225,13 @@ $name_prefix = 'channel[sync_rules]';
 					$count_part = '';
 					if ( null !== $entry_count ) {
 						$is_sync  = str_contains( $entry_action, 'sync' );
-						$verb     = $is_sync ? __( 'synced', 'wpbuoy-video-sync' ) : __( 'updated', 'wpbuoy-video-sync' );
+						$verb     = $is_sync ? __( 'synced', 'wby-video-sync' ) : __( 'updated', 'wby-video-sync' );
 						if ( str_contains( $entry_action, 'playlist' ) ) {
-							$resource = _n( 'playlist', 'playlists', $entry_count, 'wpbuoy-video-sync' );
+							$resource = _n( 'playlist', 'playlists', $entry_count, 'wby-video-sync' );
 						} elseif ( str_contains( $entry_action, 'channel' ) ) {
-							$resource = _n( 'channel', 'channels', $entry_count, 'wpbuoy-video-sync' );
+							$resource = _n( 'channel', 'channels', $entry_count, 'wby-video-sync' );
 						} else {
-							$resource = _n( 'video', 'videos', $entry_count, 'wpbuoy-video-sync' );
+							$resource = _n( 'video', 'videos', $entry_count, 'wby-video-sync' );
 						}
 						$count_part = $entry_count . ' ' . $resource . ' ' . $verb;
 					}
@@ -241,7 +241,7 @@ $name_prefix = 'channel[sync_rules]';
 						$pt_obj  = get_post_type_object( $entry_dest_pt );
 						$pt_name = $pt_obj ? $pt_obj->labels->name : $entry_dest_pt;
 						/* translators: %s: post type label, e.g. "Posts" */
-						$pt_part = ' ' . sprintf( __( 'to %s', 'wpbuoy-video-sync' ), $pt_name );
+						$pt_part = ' ' . sprintf( __( 'to %s', 'wby-video-sync' ), $pt_name );
 					}
 
 					$entry_summary = $count_part . $pt_part;
@@ -269,7 +269,7 @@ $name_prefix = 'channel[sync_rules]';
 						<span class="wpbyvs-history-entry-time"><?php echo esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $entry_time ) ); ?></span>
 						<span class="wpbyvs-history-entry-duration"><?php
 							/* translators: %d: sync run duration in seconds */
-							printf( esc_html__( '%ds', 'wpbuoy-video-sync' ), absint( $entry_duration ) );
+							printf( esc_html__( '%ds', 'wby-video-sync' ), absint( $entry_duration ) );
 						?></span>
 					</div>
 				</li>

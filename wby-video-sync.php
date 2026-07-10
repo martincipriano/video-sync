@@ -4,11 +4,11 @@ declare(strict_types=1);
  * Plugin Name: WPBuoy Video Sync
  * Plugin URI: https://wpbuoy.com/product/video-sync
  * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
- * Version: 2.5.1
+ * Version: 2.6.0
  * Author: Martin Cipriano
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wpbuoy-video-sync
+ * Text Domain: wby-video-sync
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'WPBYVS_VERSION', '2.5.1' );
+define( 'WPBYVS_VERSION', '2.6.0' );
 define( 'WPBYVS_PLUGIN_FILE', __FILE__ );
 define( 'WPBYVS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPBYVS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -116,26 +116,6 @@ register_deactivation_hook( WPBYVS_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'wpbyvs_channel_config_sync_rule' );
 } );
 
-/**
- * Stand down if WPBuoy Video Sync Pro is active.
- *
- * Pro is a superset of the free plugin and owns all of the shared runtime
- * surface: the wpbyvs_* options, post meta, cron hooks, AJAX actions, admin
- * menus, and the bundled license client. Bailing here — at plugin load, in every
- * request context (admin, front-end, and WP-Cron) — guarantees the two never
- * register the same hooks or run the same sync simultaneously. Activation and
- * deactivation hooks above stay registered so toggling either plugin stays clean.
- *
- * Shared option/meta keys are intentional: they give a seamless free -> pro
- * upgrade (channels, rules, API key, and synced posts carry over).
- */
-if (
-	in_array( 'wpbuoy-video-sync-pro/wpbuoy-video-sync-pro.php', (array) get_option( 'active_plugins', array() ), true )
-	|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['wpbuoy-video-sync-pro/wpbuoy-video-sync-pro.php'] ) )
-) {
-	return;
-}
-
 // Load plugin files.
 require_once WPBYVS_PLUGIN_DIR . 'includes/functions.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/settings.php';
@@ -176,7 +156,7 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'wpbyvs_video_details',
-		__( 'WPBuoy Video Sync Video Details', 'wpbuoy-video-sync' ),
+		__( 'WPBuoy Video Sync Video Details', 'wby-video-sync' ),
 		'wpbyvs_render_video_metabox',
 		$post_type,
 		'normal',
@@ -316,11 +296,11 @@ function wpbyvs_admin_post_thumbnail_html( string $content, int $post_id, $thumb
 	$preview = '<img'
 		. ' src="' . esc_url( $thumb['url'] ) . '"'
 		. ' onclick="document.getElementById(\'set-post-thumbnail\').click()"'
-		. ' title="' . esc_attr__( 'Click to set a custom featured image', 'wpbuoy-video-sync') . '"'
+		. ' title="' . esc_attr__( 'Click to set a custom featured image', 'wby-video-sync') . '"'
 		. ' alt=""'
 		. '>';
 	$label   = '<p class="hide-if-no-js howto" id="set-post-thumbnail-desc">'
-		. esc_html__( 'Click the YouTube thumbnail to edit or update', 'wpbuoy-video-sync')
+		. esc_html__( 'Click the YouTube thumbnail to edit or update', 'wby-video-sync')
 		. '</p>';
 
 	return $preview . $label . $content;
@@ -338,7 +318,7 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'wpbyvs_playlist_details',
-		__( 'WPBuoy Video Sync Playlist Details', 'wpbuoy-video-sync' ),
+		__( 'WPBuoy Video Sync Playlist Details', 'wby-video-sync' ),
 		'wpbyvs_render_playlist_metabox',
 		$post_type,
 		'normal',
@@ -379,7 +359,7 @@ add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): vo
 	}
 	add_meta_box(
 		'wpbyvs_channel_details',
-		__( 'WPBuoy Video Sync Channel Details', 'wpbuoy-video-sync' ),
+		__( 'WPBuoy Video Sync Channel Details', 'wby-video-sync' ),
 		'wpbyvs_render_channel_metabox',
 		$post_type,
 		'normal',

@@ -33,9 +33,9 @@ class WPBuoy_Video_Sync_Settings {
 	 */
 	public function add_settings_submenu() {
 		add_submenu_page(
-			'wpbuoy-video-sync',
-			__( 'WPBuoy Video Sync Settings', 'wpbuoy-video-sync'),
-			__( 'Settings', 'wpbuoy-video-sync'),
+			'wby-video-sync',
+			__( 'WPBuoy Video Sync Settings', 'wby-video-sync'),
+			__( 'Settings', 'wby-video-sync'),
 			'manage_options',
 			'wpbyvs_settings',
 			array( $this, 'settings_html' )
@@ -76,14 +76,14 @@ class WPBuoy_Video_Sync_Settings {
 
 		add_settings_section(
 			'wpbyvs_api_settings',
-			__( 'API Settings', 'wpbuoy-video-sync'),
+			__( 'API Settings', 'wby-video-sync'),
 			null,
 			'wpbyvs_settings'
 		);
 
 		add_settings_field(
 			'wpbyvs_api_key',
-			__( 'Google API Key', 'wpbuoy-video-sync'),
+			__( 'Google API Key', 'wby-video-sync'),
 			array( $this, 'api_key_html' ),
 			'wpbyvs_settings',
 			'wpbyvs_api_settings'
@@ -91,14 +91,14 @@ class WPBuoy_Video_Sync_Settings {
 
 		add_settings_section(
 			'wpbyvs_content_settings',
-			__( 'Content', 'wpbuoy-video-sync'),
+			__( 'Content', 'wby-video-sync'),
 			null,
 			'wpbyvs_settings'
 		);
 
 		add_settings_field(
 			'wpbyvs_youtube_image_as_featured',
-			__( 'Featured Images', 'wpbuoy-video-sync'),
+			__( 'Featured Images', 'wby-video-sync'),
 			array( $this, 'youtube_image_as_featured_html' ),
 			'wpbyvs_settings',
 			'wpbyvs_content_settings'
@@ -106,14 +106,14 @@ class WPBuoy_Video_Sync_Settings {
 
 		add_settings_section(
 			'wpbyvs_advanced_settings',
-			__( 'Advanced', 'wpbuoy-video-sync'),
+			__( 'Advanced', 'wby-video-sync'),
 			null,
 			'wpbyvs_settings'
 		);
 
 		add_settings_field(
 			'wpbyvs_delete_on_uninstall',
-			__( 'Uninstall Data', 'wpbuoy-video-sync'),
+			__( 'Uninstall Data', 'wby-video-sync'),
 			array( $this, 'delete_on_uninstall_html' ),
 			'wpbyvs_settings',
 			'wpbyvs_advanced_settings'
@@ -148,7 +148,7 @@ class WPBuoy_Video_Sync_Settings {
 		}
 
 		if ( empty( $input ) ) {
-			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_empty', __( 'API key cannot be empty.', 'wpbuoy-video-sync' ) );
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_empty', __( 'API key cannot be empty.', 'wby-video-sync' ) );
 			return get_option( 'wpbyvs_api_key', '' );
 		}
 
@@ -164,7 +164,7 @@ class WPBuoy_Video_Sync_Settings {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_request_error', __( 'Could not connect to YouTube API.', 'wpbuoy-video-sync') );
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_api_key_request_error', __( 'Could not connect to YouTube API.', 'wby-video-sync') );
 			return get_option( 'wpbyvs_api_key', '' );
 		}
 
@@ -177,7 +177,7 @@ class WPBuoy_Video_Sync_Settings {
 				'wpbyvs_api_key',
 				'wpbyvs_api_key_invalid',
 				/* translators: %s: Error message from YouTube API */
-				sprintf( __( 'YouTube API error: %s', 'wpbuoy-video-sync'), esc_html( $error_msg ) )
+				sprintf( __( 'YouTube API error: %s', 'wby-video-sync'), esc_html( $error_msg ) )
 			);
 			return get_option( 'wpbyvs_api_key', '' );
 		}
@@ -195,7 +195,7 @@ class WPBuoy_Video_Sync_Settings {
 	private function add_settings_saved_notice() {
 		$existing = wp_list_pluck( get_settings_errors( 'wpbyvs_api_key' ), 'code' );
 		if ( ! in_array( 'wpbyvs_settings_saved', $existing, true ) ) {
-			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_settings_saved', __( 'Settings saved.', 'wpbuoy-video-sync' ), 'updated' );
+			add_settings_error( 'wpbyvs_api_key', 'wpbyvs_settings_saved', __( 'Settings saved.', 'wby-video-sync' ), 'updated' );
 		}
 	}
 
@@ -209,10 +209,10 @@ class WPBuoy_Video_Sync_Settings {
 		?>
 		<label>
 			<input type="checkbox" name="wpbyvs_youtube_image_as_featured" value="1" <?php checked( $checked, true ); ?>>
-			<?php esc_html_e( 'Use the YouTube image as the featured image when none is set', 'wpbuoy-video-sync'); ?>
+			<?php esc_html_e( 'Use the YouTube image as the featured image when none is set', 'wby-video-sync'); ?>
 		</label>
 		<p class="description">
-			<?php esc_html_e( 'When enabled, synced videos, playlists, and channels show their YouTube thumbnail (or channel picture) as the featured image unless you set your own. Disable to leave synced posts without a featured image.', 'wpbuoy-video-sync'); ?>
+			<?php esc_html_e( 'When enabled, synced videos, playlists, and channels show their YouTube thumbnail (or channel picture) as the featured image unless you set your own. Disable to leave synced posts without a featured image.', 'wby-video-sync'); ?>
 		</p>
 		<?php
 	}
@@ -227,10 +227,10 @@ class WPBuoy_Video_Sync_Settings {
 		?>
 		<label>
 			<input type="checkbox" name="wpbyvs_delete_on_uninstall" value="1" <?php checked( $checked, true ); ?>>
-			<?php esc_html_e( 'Remove all WPBuoy Video Sync data when the plugin is deleted', 'wpbuoy-video-sync'); ?>
+			<?php esc_html_e( 'Remove all WPBuoy Video Sync data when the plugin is deleted', 'wby-video-sync'); ?>
 		</label>
 		<p class="description">
-			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'wpbuoy-video-sync'); ?>
+			<?php esc_html_e( 'When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later.', 'wby-video-sync'); ?>
 		</p>
 		<?php
 	}

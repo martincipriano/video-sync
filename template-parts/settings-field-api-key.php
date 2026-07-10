@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php
 	printf(
 		/* translators: %s: Link to YouTube Data API documentation */
-		esc_html__( 'This key allows WPBuoy Video Sync to access public data from any YouTube channel. You can create an API key in the Google Cloud Console by following the guide in the %s.', 'wpbuoy-video-sync'),
-		'<a href="https://developers.google.com/youtube/v3/getting-started" target="_blank" rel="noopener noreferrer">' . esc_html__( 'YouTube Data API Overview', 'wpbuoy-video-sync') . '</a>'
+		esc_html__( 'This key allows WPBuoy Video Sync to access public data from any YouTube channel. You can create an API key in the Google Cloud Console by following the guide in the %s.', 'wby-video-sync'),
+		'<a href="https://developers.google.com/youtube/v3/getting-started" target="_blank" rel="noopener noreferrer">' . esc_html__( 'YouTube Data API Overview', 'wby-video-sync') . '</a>'
 	);
 	?>
 </p>

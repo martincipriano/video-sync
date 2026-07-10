@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.5.1
+Stable tag: 2.6.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,36 +16,23 @@ WPBuoy Video Sync imports content from a YouTube channel into WordPress. Point i
 
 Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
 
-**Free features**
+**Features**
 
-* Sync from a single YouTube channel
+* Sync from a YouTube channel
 * Three sync actions: import **new videos**, import **new playlists**, or import the **channel** itself
 * Save synced items as **any post type** you choose (Posts, or a custom post type)
-* **Run once** — each rule imports immediately when you save it
+* **On-demand imports** — each rule runs immediately when you save it, so you decide exactly when content is imported
 * **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
-* **Thumbnails** imported and used as the featured image when no image is set
+* **Thumbnails** shown as the featured image when none is set; channel profile pictures and banners are downloaded into your media library
 * **Sync history** with the last-synced time and a per-rule error log
 * Stores all YouTube data in standard post meta (`_wpbyvs_*`) for easy use in your theme or queries
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
 
-**Need more?**
-
-[WPBuoy Video Sync Pro](https://wpbuoy.com/product/video-sync) adds power-user automation:
-
-* Unlimited channels
-* Recurring schedules (hourly, daily, weekly, monthly, or a custom interval)
-* Update metadata on existing posts, and update only the fields you choose
-* Assign synced items to categories, tags, and custom taxonomy terms
-* Map YouTube fields to custom meta keys
-* Filter conditions to sync only items that match your rules
-* Video protection to stop syncs from overwriting your manual edits
-* Gutenberg blocks and shortcodes for video metadata
-
 == Installation ==
 
-1. Upload the `wpbuoy-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
+1. Upload the `wby-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **WPBuoy Video Sync → Settings** and enter your Google API key.
 4. Go to **WPBuoy Video Sync → Channels** and add a YouTube channel.
@@ -62,7 +49,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 
 = Does WPBuoy Video Sync upload video files to my site? =
 
-No. WPBuoy Video Sync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Thumbnails are optionally downloaded as WordPress attachments.
+No. WPBuoy Video Sync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Channel profile pictures and banners are downloaded into your media library; video and playlist thumbnails are displayed from the URLs YouTube serves them at.
 
 = Where do synced items go? =
 
@@ -70,7 +57,7 @@ You choose. Each sync rule has a destination post type, so videos, playlists, an
 
 = How often does it sync? =
 
-In the free version every rule runs once, immediately after you save it. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [WPBuoy Video Sync Pro](https://wpbuoy.com/product/video-sync).
+Every rule runs once, immediately after you save it. To import again later — for example after publishing new videos — re-enable the rule and save, and it picks up anything new.
 
 = Why do I need a Google API key? =
 
@@ -90,9 +77,9 @@ WPBuoy Video Sync connects to the **YouTube Data API v3**, a service provided by
 
 **What it is used for:** retrieving public information about the YouTube channels, playlists, and videos you choose to sync — such as titles, descriptions, thumbnail URLs, view counts, publish dates, and channel/playlist/video IDs.
 
-**What data is sent and when:** requests are made only when you save a channel, run a sync (manually or on a schedule you configure), or use the pre-sync quota estimate. Each request is sent directly from your own server to Google's API endpoint (`https://www.googleapis.com/youtube/v3/`) and includes the Google API key you provide and the channel, playlist, or video identifier being synced. No personal data about your site's visitors or users is sent, and no data passes through any service operated by the plugin author or a third party.
+**What data is sent and when:** requests are made only when you save a channel, run a sync, or use the pre-sync quota estimate. Each request is sent directly from your own server to Google's API endpoint (`https://www.googleapis.com/youtube/v3/`) and includes the Google API key you provide and the channel, playlist, or video identifier being synced. No personal data about your site's visitors or users is sent, and no data passes through any service operated by the plugin author or a third party.
 
-**Images:** the thumbnail and channel banner image URLs returned by the YouTube Data API point to Google's own content delivery network (`i.ytimg.com` and `*.googleusercontent.com`). These provider-hosted image URLs are stored and referenced as-is, in the same way YouTube serves them — the plugin does not host, offload, or proxy any of these images from its author's servers.
+**Images:** channel profile pictures and banners are downloaded from the URLs the YouTube Data API returns and stored locally in your media library. Video and playlist thumbnail URLs returned by the API point to YouTube's own image host (`i.ytimg.com`) and are stored and referenced as-is, in the same way YouTube serves them — the plugin does not host, offload, or proxy any images from its author's servers.
 
 This service is provided by Google. By using it you agree to Google's terms and privacy policy:
 
@@ -176,6 +163,11 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
+= 2.6.0 =
+* New: Channel profile pictures and banners are now downloaded into the media library and attached to the channel post, instead of being referenced from YouTube's CDN.
+* Improved: Uninstall now also removes the channel configuration, per-channel sync history, plugin transients, and — when the "remove all data" setting is enabled — all synced posts and their attachments.
+* Improved: Internal code and documentation cleanup.
+
 = 2.5.1 =
 * Standardized internal code naming for consistency across WPBuoy plugins.
 * Simplified the single-channel architecture and removed unused legacy code. No changes to features or settings.
@@ -195,7 +187,7 @@ Example — add a tab only to the video metabox:
 = 2.2.3 =
 * New: Option to use the YouTube thumbnail as the post featured image (enabled by default) — disable it to keep your own featured images.
 * Fixed: Channel posts now reliably display their profile image (removed image sideloading that failed on extension-less YouTube CDN URLs).
-* Improved: Documented the YouTube / Google image CDN (i.ytimg.com, googleusercontent.com) in the readme's External services section, per WordPress.org review feedback.
+* Improved: Documented the YouTube image CDN in the readme's External services section, per WordPress.org review feedback.
 
 = 2.2.2 =
 * Improved: Added an "External services" section to the readme documenting the YouTube Data API v3 usage, in line with WordPress.org plugin guidelines.
@@ -209,7 +201,6 @@ Example — add a tab only to the video metabox:
 
 = 2.1.0 =
 * New: In-plugin Help tabs linking to the WPBuoy Video Sync knowledge base on every admin screen.
-* New: Pro-only sync rules are preserved (not deleted) when the plugin runs as the free version, so re-activating Pro restores them.
 * Improved: WordPress.org coding-standards compliance — prepared SQL statements, output escaping, and translator comments.
 * Improved: Tested up to WordPress 7.0.
 

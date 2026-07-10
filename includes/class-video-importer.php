@@ -4,9 +4,11 @@ declare(strict_types=1);
  * Video importer.
  *
  * Creates and updates synced video posts (in the per-rule destination post type) from normalised YouTube video data.
- * Thumbnails are stored as YouTube CDN URLs — no sideloading, no disk usage.
- * The post_thumbnail_html filter in wpbyvs.php serves the YouTube URL when
- * no featured image is explicitly set by the user.
+ * Video and playlist thumbnails are stored as the YouTube-served URLs the Data
+ * API returns. Channel profile pictures and banners are downloaded into the
+ * media library and attached to the channel post. The post_thumbnail_html
+ * filter in the main plugin file serves the image when no featured image is
+ * explicitly set by the user.
  *
  * @package WPBuoy_Video_Sync
  */
@@ -299,9 +301,11 @@ class Video_Importer {
 	/**
 	 * Import a YouTube channel as a new WordPress post.
 	 *
-	 * Deduplication key: _wpbyvs_channel_post. The channel profile picture
-	 * URL is stored in meta and served as the featured image on the frontend via the
-	 * post_thumbnail_html filter (a user-set featured image takes precedence).
+	 * Deduplication key: _wpbyvs_channel_post. The channel profile picture and
+	 * banner are sideloaded into the media library, attached to the channel post,
+	 * and their local URLs stored in meta. The profile picture is served as the
+	 * featured image on the frontend via the post_thumbnail_html filter (a
+	 * user-set featured image takes precedence).
 	 *
 	 * @param array  $channel_data              Channel data from YouTube_API::get_channel_data().
 	 * @param string $channel_id                YouTube channel ID.
@@ -343,8 +347,27 @@ class Video_Importer {
 		update_post_meta( $post_id, '_wpbyvs_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
 		update_post_meta( $post_id, '_wpbyvs_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
 		update_post_meta( $post_id, '_wpbyvs_etag',                $channel_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_profile_picture',    $channel_data['profile_picture']['url'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_banner_image',       $channel_data['banner_image']['url'] ?? '' );
+
+		// Download the channel images into the media library and store their
+		// local URLs. The channel post is created once per post type (deduped
+		// upstream), so this runs a single time per channel post.
+		$profile = $this->sideload_channel_image(
+			$channel_data['profile_picture']['url'] ?? '',
+			$post_id,
+			/* translators: %s: channel title */
+			sprintf( __( '%s profile picture', 'wby-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
+		);
+		$banner  = $this->sideload_channel_image(
+			$channel_data['banner_image']['url'] ?? '',
+			$post_id,
+			/* translators: %s: channel title */
+			sprintf( __( '%s banner', 'wby-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
+		);
+
+		update_post_meta( $post_id, '_wpbyvs_profile_picture',    $profile['url'] );
+		update_post_meta( $post_id, '_wpbyvs_profile_picture_id', $profile['id'] );
+		update_post_meta( $post_id, '_wpbyvs_banner_image',       $banner['url'] );
+		update_post_meta( $post_id, '_wpbyvs_banner_image_id',    $banner['id'] );
 		update_post_meta( $post_id, '_wpbyvs_source_type',         'channel' );
 		update_post_meta( $post_id, '_wpbyvs_last_synced',         time() );
 
@@ -358,6 +381,68 @@ class Video_Importer {
 		 * @param string $channel_id   YouTube channel ID.
 		 */
 		do_action( 'wpbyvs_channel_synced', $post_id, $channel_data, $channel_id );
+	}
+
+	/**
+	 * Download a channel image into the media library and attach it to a post.
+	 *
+	 * The YouTube Data API returns image URLs without a file extension, so the
+	 * file is downloaded first and its type detected from the image data before
+	 * it is registered as an attachment.
+	 *
+	 * @param string $url         Image URL returned by the YouTube Data API.
+	 * @param int    $post_id     Post to attach the image to.
+	 * @param string $description Attachment title / file name base.
+	 * @return array { id: int, url: string } Attachment ID and local URL, or 0/'' on failure.
+	 */
+	private function sideload_channel_image( string $url, int $post_id, string $description ): array {
+		$none = array(
+			'id'  => 0,
+			'url' => '',
+		);
+
+		if ( '' === $url ) {
+			return $none;
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$tmp = download_url( $url );
+		if ( is_wp_error( $tmp ) ) {
+			return $none;
+		}
+
+		$mime       = wp_get_image_mime( $tmp );
+		$extensions = array(
+			'image/jpeg' => 'jpg',
+			'image/png'  => 'png',
+			'image/gif'  => 'gif',
+			'image/webp' => 'webp',
+		);
+
+		if ( ! $mime || ! isset( $extensions[ $mime ] ) ) {
+			wp_delete_file( $tmp );
+			return $none;
+		}
+
+		$file_array = array(
+			'name'     => sanitize_file_name( $description . '.' . $extensions[ $mime ] ),
+			'tmp_name' => $tmp,
+		);
+
+		$attachment_id = media_handle_sideload( $file_array, $post_id, $description );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			wp_delete_file( $tmp );
+			return $none;
+		}
+
+		return array(
+			'id'  => (int) $attachment_id,
+			'url' => (string) wp_get_attachment_url( $attachment_id ),
+		);
 	}
 
 	/**

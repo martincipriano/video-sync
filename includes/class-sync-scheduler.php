@@ -3,12 +3,10 @@ declare(strict_types=1);
 /**
  * Sync scheduler.
  *
- * Manages WP Cron events for WPBuoy Video Sync sync rules.
- *
- * The free plugin manages a single channel and runs every rule as a one-time,
- * immediate sync. Each enabled rule fires a single
- * 'wpbyvs_channel_config_sync_rule' event with args [ $rule_index ]; the runner
- * auto-disables the rule once it has run.
+ * Queues sync rules as WP-Cron background jobs so imports run off the
+ * save request. Each enabled rule fires a single immediate
+ * 'wpbyvs_channel_config_sync_rule' event with args [ $rule_index ]; the
+ * runner auto-disables the rule once it has run.
  *
  * @package WPBuoy_Video_Sync
  */
@@ -76,12 +74,12 @@ class Sync_Scheduler {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * (Re)schedule cron events for all option-based channels.
+	 * (Re)queue cron events for the channel's rules.
 	 *
 	 * Called via the 'wpbyvs_reschedule_option_channels' action, which is
 	 * fired by Channels_Page::save_channels() after updating the option.
 	 *
-	 * Every enabled rule on the single channel fires a single immediate event.
+	 * Every enabled rule queues a single immediate background event.
 	 * Rules that fire are pre-marked as syncing before the redirect so the
 	 * server-rendered overlay has sync_status = 'syncing' in stored data.
 	 *

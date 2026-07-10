@@ -5,8 +5,8 @@ const delegationRoot   = channelsContainer || singleSyncRules
 if (delegationRoot) {
 
 /**
- * Update the rule label span from the selected action. Free runs every rule
- * once, so the schedule suffix is fixed.
+ * Update the rule label span from the selected action. Rules run immediately
+ * after saving, so the label suffix is fixed.
  */
 function updateRuleLabel(rule) {
 	const label = rule.querySelector('.wpbyvs-rule-heading')
@@ -487,10 +487,6 @@ function wizardBack(wizard, fromStep) {
 
 /**
  * Build the rule object from wizard inputs.
- *
- * Free rules carry only action, schedule (always 'once'), the per-run cap, and
- * the destination post type. Taxonomy, field mapping, conditions and metadata
- * updates are Pro and are not collected.
  */
 function collectWizardRule(wizard) {
 	const action    = wizard.querySelector('.wpbyvs-wizard-action-select')?.value ?? ''
@@ -499,7 +495,6 @@ function collectWizardRule(wizard) {
 
 	return {
 		action,
-		schedule:              'once', // Free always runs once; coerced server-side too.
 		max_videos:            maxVideos,
 		destination_post_type: postType,
 	}
@@ -771,7 +766,7 @@ delegationRoot.addEventListener('click', function(e) {
 
 	// Track structural changes (channels/rules added or removed).
 	// Ignore mutations triggered by the sync-progress polling (programmatic updates).
-	const observer = new MutationObserver(function() { if (!window._ysSyncUpdate) isDirty = true })
+	const observer = new MutationObserver(function() { if (!window._wpbyvsSyncUpdate) isDirty = true })
 	observer.observe(form, { childList: true, subtree: true })
 
 	// Clear on submit so the save redirect doesn't trigger the warning
@@ -909,7 +904,7 @@ delegationRoot.addEventListener('click', function(e) {
 	}
 
 	function onSyncDone(ruleEl, data) {
-		window._ysSyncUpdate = true
+		window._wpbyvsSyncUpdate = true
 
 		// Show final progress count in the overlay before removing it.
 		if (data.total > 0) {
@@ -922,7 +917,7 @@ delegationRoot.addEventListener('click', function(e) {
 			const overlay = ruleEl.querySelector('.wpbyvs-syncing-overlay')
 			if (overlay) overlay.remove()
 
-			// If rule was auto-disabled (once schedule), reflect that in the UI.
+			// If the rule was auto-disabled after its run, reflect that in the UI.
 			if (data.enabled === false) {
 				const toggle = ruleEl.querySelector('.wpbyvs-rule-toggle')
 				if (toggle) toggle.checked = false
@@ -935,7 +930,7 @@ delegationRoot.addEventListener('click', function(e) {
 				}
 			}
 
-			setTimeout(function () { window._ysSyncUpdate = false }, 0)
+			setTimeout(function () { window._wpbyvsSyncUpdate = false }, 0)
 
 			// Update "Last Sync" in the schedule tooltip if present.
 			if (data.last_synced_label) {

@@ -31,14 +31,14 @@ $post_types = get_post_types( array( 'public' => true ), 'objects' );
 // Dual-mode: Use provided $index or fall back to the {{INDEX}} placeholder for JavaScript.
 $rule_index = isset( $index ) ? $index : '{{INDEX}}';
 
-// Auto-generated rule label from the action. Free runs every rule once, immediately.
+// Auto-generated rule label from the action. Rules run immediately after saving.
 $_action_labels = array(
-	'channel_sync_new'   => __( 'Sync this channel', 'wpbuoy-video-sync' ),
-	'playlists_sync_new' => __( 'Sync new playlists', 'wpbuoy-video-sync' ),
-	'videos_sync_new'    => __( 'Sync new videos', 'wpbuoy-video-sync' ),
+	'channel_sync_new'   => __( 'Sync this channel', 'wby-video-sync' ),
+	'playlists_sync_new' => __( 'Sync new playlists', 'wby-video-sync' ),
+	'videos_sync_new'    => __( 'Sync new videos', 'wby-video-sync' ),
 );
-$rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'wpbuoy-video-sync' );
-$rule_schedule_suffix = __( 'immediately after enabling and saving', 'wpbuoy-video-sync' );
+$rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'wby-video-sync' );
+$rule_schedule_suffix = __( 'immediately after enabling and saving', 'wby-video-sync' );
 
 $sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
 $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
@@ -57,10 +57,7 @@ if ( strpos( $action, 'channel' ) === 0 ) {
 
 // Sync status line.
 $rule_last_synced = (int) ( $rule['last_synced'] ?? 0 );
-$rule_sync_errors = array_values( array_filter(
-	is_array( $rule['sync_errors'] ?? null ) ? $rule['sync_errors'] : array(),
-	fn( $e ) => ( $e['code'] ?? '' ) !== 'license_required'
-) );
+$rule_sync_errors = is_array( $rule['sync_errors'] ?? null ) ? array_values( $rule['sync_errors'] ) : array();
 $is_option_channel  = isset( $is_option_channel ) ? (bool) $is_option_channel : false;
 
 $_df                 = 'F j, Y g:i A';
@@ -69,16 +66,16 @@ $rule_stat_last_sync = $rule_last_synced ? wp_date( $_df, $rule_last_synced ) : 
 
 // Dynamic labels.
 $_max_items_label = $resource === 'video'
-	? __( 'Videos per run', 'wpbuoy-video-sync' )
+	? __( 'Videos per run', 'wby-video-sync' )
 	: ( $resource === 'playlist'
-		? __( 'Playlists per run', 'wpbuoy-video-sync' )
-		: __( 'Items per run', 'wpbuoy-video-sync' ) );
+		? __( 'Playlists per run', 'wby-video-sync' )
+		: __( 'Items per run', 'wby-video-sync' ) );
 
 $_post_type_label = 'playlists_sync_new' === $action
-	? __( 'Save synced playlists as post type', 'wpbuoy-video-sync' )
+	? __( 'Save synced playlists as post type', 'wby-video-sync' )
 	: ( 'channel_sync_new' === $action
-		? __( 'Save synced channel as post type', 'wpbuoy-video-sync' )
-		: __( 'Save synced videos as post type', 'wpbuoy-video-sync' )
+		? __( 'Save synced channel as post type', 'wby-video-sync' )
+		: __( 'Save synced videos as post type', 'wby-video-sync' )
 	);
 ?>
 
@@ -86,7 +83,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 
 	<?php if ( $is_syncing ) : ?>
 	<div class="wpbyvs-syncing-overlay" aria-hidden="true">
-		<span class="wpbyvs-syncing-badge"><?php esc_html_e( 'Syncing...', 'wpbuoy-video-sync' ); ?><span class="wpbyvs-syncing-progress"></span></span>
+		<span class="wpbyvs-syncing-badge"><?php esc_html_e( 'Syncing...', 'wby-video-sync' ); ?><span class="wpbyvs-syncing-progress"></span></span>
 	</div>
 	<?php endif; ?>
 
@@ -94,7 +91,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 		<div class="wpbyvs-rule-heading-wrap">
 			<div class="wpbyvs-rule-heading"><?php echo esc_html( $rule_action_label . ' ' . $rule_schedule_suffix . '.' ); ?></div>
 			<?php if ( ! $enabled ) : ?>
-			<p class="wpbyvs-rule-disabled-notice"><?php esc_html_e( 'This rule is disabled and won\'t run until re-enabled.', 'wpbuoy-video-sync' ); ?></p>
+			<p class="wpbyvs-rule-disabled-notice"><?php esc_html_e( 'This rule is disabled and won\'t run until re-enabled.', 'wby-video-sync' ); ?></p>
 			<?php endif; ?>
 		</div>
 		<div class="wpbyvs-rule-actions">
@@ -104,10 +101,10 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</label>
 			<?php $has_stat = ! empty( $rule['scheduled_at'] ) || $rule_last_synced; ?>
 			<?php if ( $has_stat ) : ?>
-				<button type="button" class="wpbyvs-schedule" aria-label="<?php esc_attr_e( 'Sync schedule info', 'wpbuoy-video-sync' ); ?>">
+				<button type="button" class="wpbyvs-schedule" aria-label="<?php esc_attr_e( 'Sync schedule info', 'wby-video-sync' ); ?>">
 					<div class="wpbyvs-schedule-tooltip" hidden>
-						<?php if ( ! empty( $rule['scheduled_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Created:', 'wpbuoy-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
-						<?php if ( $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Last Sync:', 'wpbuoy-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
+						<?php if ( ! empty( $rule['scheduled_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Created:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
+						<?php if ( $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Last Sync:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
 					</div>
 				</button>
 			<?php endif; ?>
@@ -120,17 +117,17 @@ $_post_type_label = 'playlists_sync_new' === $action
 		<div class="wpbyvs-2-columns wpbyvs-cols-3-1">
 			<div class="wpbyvs-form-group">
 				<label for="wpbyvs-action-<?php echo esc_attr( $rule_index ); ?>">
-					<?php esc_html_e( 'Action', 'wpbuoy-video-sync' ); ?>
+					<?php esc_html_e( 'Action', 'wby-video-sync' ); ?>
 					<span class="wpbyvs-help-wrap">
-						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wpbuoy-video-sync' ); ?>">?</button>
-						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Choose what to sync from your YouTube channel.', 'wpbuoy-video-sync' ); ?></span>
+						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wby-video-sync' ); ?>">?</button>
+						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Choose what to sync from your YouTube channel.', 'wby-video-sync' ); ?></span>
 					</span>
 				</label>
 				<select class="wpbyvs-select wpbyvs-action" id="wpbyvs-action-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][action]" required>
-					<option value=""><?php esc_html_e( '— Select action —', 'wpbuoy-video-sync' ); ?></option>
-					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'wpbuoy-video-sync' ); ?></option>
-					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'wpbuoy-video-sync' ); ?></option>
-					<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'wpbuoy-video-sync' ); ?></option>
+					<option value=""><?php esc_html_e( '— Select action —', 'wby-video-sync' ); ?></option>
+					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'wby-video-sync' ); ?></option>
+					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'wby-video-sync' ); ?></option>
+					<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'wby-video-sync' ); ?></option>
 				</select>
 				<p class="wpbyvs-quota-estimate wpbyvs-hidden"></p>
 			</div>
@@ -138,13 +135,13 @@ $_post_type_label = 'playlists_sync_new' === $action
 				<label for="wpbyvs-max-videos-<?php echo esc_attr( $rule_index ); ?>" class="wpbyvs-max-items-label">
 					<?php echo esc_html( $_max_items_label ); ?>
 					<span class="wpbyvs-help-wrap">
-						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wpbuoy-video-sync' ); ?>">?</button>
-						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Maximum number of items to process per run. Set to 0 for unlimited.', 'wpbuoy-video-sync' ); ?></span>
+						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wby-video-sync' ); ?>">?</button>
+						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Maximum number of items to process per run. Set to 0 for unlimited.', 'wby-video-sync' ); ?></span>
 					</span>
 				</label>
 				<span class="wpbyvs-limit-wrap">
 					<input class="wpbyvs-number wpbyvs-max-videos-input" id="wpbyvs-max-videos-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][max_videos]" type="number" value="<?php echo esc_attr( $max_videos ); ?>" min="0">
-					<span class="wpbyvs-unlimited-icon<?php echo 0 === $max_videos ? '' : ' wpbyvs-hidden'; ?>" title="<?php esc_attr_e( 'Unlimited — click to set a limit', 'wpbuoy-video-sync' ); ?>">
+					<span class="wpbyvs-unlimited-icon<?php echo 0 === $max_videos ? '' : ' wpbyvs-hidden'; ?>" title="<?php esc_attr_e( 'Unlimited — click to set a limit', 'wby-video-sync' ); ?>">
 						<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px" fill="#999" aria-hidden="true"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M18.6 6.62c-1.44 0-2.8.56-3.77 1.53L7.8 14.39c-.64.64-1.49.99-2.4.99-1.87 0-3.39-1.51-3.39-3.38S3.53 8.62 5.4 8.62c.91 0 1.76.35 2.44 1.03l1.13 1 1.51-1.34L9.22 8.2C8.2 7.18 6.84 6.62 5.4 6.62 2.42 6.62 0 9.04 0 12s2.42 5.38 5.4 5.38c1.44 0 2.8-.56 3.77-1.53l7.03-6.24c.64-.64 1.49-.99 2.4-.99 1.87 0 3.39 1.51 3.39 3.38s-1.52 3.38-3.39 3.38c-.9 0-1.76-.35-2.44-1.03l-1.14-1.01-1.51 1.34 1.27 1.12c1.02 1.01 2.37 1.57 3.82 1.57 2.98 0 5.4-2.41 5.4-5.38s-2.42-5.37-5.4-5.37z"/></svg>
 					</span>
 				</span>
@@ -158,12 +155,12 @@ $_post_type_label = 'playlists_sync_new' === $action
 				<label for="wpbyvs-dest-post-type-<?php echo esc_attr( $rule_index ); ?>" class="wpbyvs-post-type-label">
 					<?php echo esc_html( $_post_type_label ); ?>
 					<span class="wpbyvs-help-wrap">
-						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wpbuoy-video-sync' ); ?>">?</button>
-						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'The WordPress post type that synced items will be created as.', 'wpbuoy-video-sync' ); ?></span>
+						<button type="button" class="wpbyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'wby-video-sync' ); ?>">?</button>
+						<span class="wpbyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'The WordPress post type that synced items will be created as.', 'wby-video-sync' ); ?></span>
 					</span>
 				</label>
 				<select class="wpbyvs-select" id="wpbyvs-dest-post-type-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][destination_post_type]" required>
-					<option value=""><?php esc_html_e( '— Select post type —', 'wpbuoy-video-sync' ); ?></option>
+					<option value=""><?php esc_html_e( '— Select post type —', 'wby-video-sync' ); ?></option>
 					<?php foreach ( $post_types as $pt ) : ?>
 					<option value="<?php echo esc_attr( $pt->name ); ?>" <?php selected( $destination_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 					<?php endforeach; ?>
@@ -193,7 +190,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 
 	<div class="wpbyvs-rule-footer">
 		<button type="button" class="wpbyvs-remove-rule">
-			<?php esc_html_e( 'Remove sync rule', 'wpbuoy-video-sync' ); ?>
+			<?php esc_html_e( 'Remove sync rule', 'wby-video-sync' ); ?>
 		</button>
 	</div>
 

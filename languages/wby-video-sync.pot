@@ -2,36 +2,36 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.5.1\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpbuoy-video-sync\n"
+"Project-Id-Version: WPBuoy Video Sync 2.6.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wby-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-23T12:29:45+00:00\n"
+"POT-Creation-Date: 2026-07-10T05:01:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: wpbuoy-video-sync\n"
+"X-Domain: wby-video-sync\n"
 
 #. Plugin Name of the plugin
-#: wpbuoy-video-sync.php
-#: includes/class-channels-page.php:133
+#: wby-video-sync.php
+#: includes/class-channels-page.php:130
 msgid "WPBuoy Video Sync"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: wpbuoy-video-sync.php
+#: wby-video-sync.php
 msgid "https://wpbuoy.com/product/video-sync"
 msgstr ""
 
 #. Description of the plugin
-#: wpbuoy-video-sync.php
+#: wby-video-sync.php
 msgid "Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails."
 msgstr ""
 
 #. Author of the plugin
-#: wpbuoy-video-sync.php
+#: wby-video-sync.php
 msgid "Martin Cipriano"
 msgstr ""
 
@@ -45,181 +45,181 @@ msgid "How WPBuoy Video Sync works"
 msgstr ""
 
 #: includes/class-channels-page.php:59
-msgid "What's the difference between Free and Pro?"
-msgstr ""
-
-#: includes/class-channels-page.php:60
 msgid "Sync actions explained"
 msgstr ""
 
-#: includes/class-channels-page.php:61
+#: includes/class-channels-page.php:60
 msgid "Minimum requirements"
 msgstr ""
 
-#: includes/class-channels-page.php:62
+#: includes/class-channels-page.php:61
 msgid "Getting your Google API key"
 msgstr ""
 
-#: includes/class-channels-page.php:63
+#: includes/class-channels-page.php:62
 msgid "How to install"
 msgstr ""
 
-#: includes/class-channels-page.php:64
+#: includes/class-channels-page.php:63
 msgid "Initial configuration"
 msgstr ""
 
-#: includes/class-channels-page.php:65
+#: includes/class-channels-page.php:64
 msgid "Will syncing affect my site?"
 msgstr ""
 
-#: includes/class-channels-page.php:66
+#: includes/class-channels-page.php:65
 msgid "Privacy and data collection"
 msgstr ""
 
-#: includes/class-channels-page.php:72
-#: includes/class-channels-page.php:74
+#: includes/class-channels-page.php:71
+#: includes/class-channels-page.php:73
 msgid "Connecting to YouTube"
 msgstr ""
 
-#: includes/class-channels-page.php:76
+#: includes/class-channels-page.php:75
 msgid "How to get a Google API key"
 msgstr ""
 
-#: includes/class-channels-page.php:77
+#: includes/class-channels-page.php:76
 msgid "API key vs OAuth — which does WPBuoy Video Sync use?"
 msgstr ""
 
-#: includes/class-channels-page.php:78
+#: includes/class-channels-page.php:77
 msgid "Keeping your API key secure"
 msgstr ""
 
-#: includes/class-channels-page.php:79
+#: includes/class-channels-page.php:78
 msgid "Understanding your YouTube API quota"
 msgstr ""
 
-#: includes/class-channels-page.php:80
+#: includes/class-channels-page.php:79
 msgid "The pre-sync quota estimate"
 msgstr ""
 
-#: includes/class-channels-page.php:81
+#: includes/class-channels-page.php:80
 msgid "Conserving quota"
 msgstr ""
 
-#: includes/class-channels-page.php:82
+#: includes/class-channels-page.php:81
 msgid "Requesting a higher quota"
 msgstr ""
 
-#: includes/class-channels-page.php:83
+#: includes/class-channels-page.php:82
 msgid "Fixing API key and quota errors"
 msgstr ""
 
-#: includes/class-channels-page.php:89
-#: includes/class-channels-page.php:91
+#: includes/class-channels-page.php:88
+#: includes/class-channels-page.php:90
 msgid "Features & Usage"
 msgstr ""
 
-#: includes/class-channels-page.php:93
+#: includes/class-channels-page.php:92
 msgid "Choosing what to import"
 msgstr ""
 
-#: includes/class-channels-page.php:94
+#: includes/class-channels-page.php:93
 msgid "Destination post type"
 msgstr ""
 
-#: includes/class-channels-page.php:95
-msgid "Run-once vs recurring schedules"
-msgstr ""
-
-#: includes/class-channels-page.php:96
+#: includes/class-channels-page.php:94
 msgid "Thumbnails and featured images"
 msgstr ""
 
-#: includes/class-channels-page.php:97
+#: includes/class-channels-page.php:95
 msgid "Sync history and error logs"
 msgstr ""
 
-#: includes/class-channels-page.php:98
+#: includes/class-channels-page.php:96
 msgid "The post metabox and copy buttons"
 msgstr ""
 
-#: includes/class-channels-page.php:99
+#: includes/class-channels-page.php:97
 msgid "Post meta reference"
 msgstr ""
 
-#: includes/class-channels-page.php:100
+#: includes/class-channels-page.php:98
 msgid "Compatibility"
 msgstr ""
 
+#: includes/class-channels-page.php:104
 #: includes/class-channels-page.php:106
-#: includes/class-channels-page.php:108
 msgid "Troubleshooting"
 msgstr ""
 
-#: includes/class-channels-page.php:110
+#: includes/class-channels-page.php:108
 msgid "API key or quota errors"
 msgstr ""
 
-#: includes/class-channels-page.php:111
+#: includes/class-channels-page.php:109
 msgid "The channel can't be found"
 msgstr ""
 
-#: includes/class-channels-page.php:112
+#: includes/class-channels-page.php:110
 msgid "I'm seeing duplicate posts"
 msgstr ""
 
-#: includes/class-channels-page.php:113
-msgid "I can't activate my license"
-msgstr ""
-
-#: includes/class-channels-page.php:114
+#: includes/class-channels-page.php:111
 msgid "How to get support"
 msgstr ""
 
-#: includes/class-channels-page.php:119
+#: includes/class-channels-page.php:116
 msgid "For more information:"
 msgstr ""
 
-#: includes/class-channels-page.php:120
+#: includes/class-channels-page.php:117
 msgid "Knowledge Base"
 msgstr ""
 
-#: includes/class-channels-page.php:121
+#: includes/class-channels-page.php:118
 msgid "Support"
 msgstr ""
 
-#: includes/class-channels-page.php:134
+#: includes/class-channels-page.php:131
 msgid "Video Sync"
 msgstr ""
 
-#: includes/class-channels-page.php:145
-#: includes/class-channels-page.php:146
+#: includes/class-channels-page.php:142
+#: includes/class-channels-page.php:143
 msgid "Channels"
 msgstr ""
 
-#: includes/class-channels-page.php:211
+#: includes/class-channels-page.php:208
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-channels-page.php:215
+#: includes/class-channels-page.php:212
 msgid "You do not have permission to do this."
 msgstr ""
 
 #. translators: %d: number of candidate videos
-#: includes/class-sync-runner.php:347
+#: includes/class-sync-runner.php:335
 #, php-format
 msgid "No videos were imported. %d candidate was fetched from the API but could not be saved."
 msgid_plural "No videos were imported. %d candidates were fetched from the API but none could be saved."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-sync-runner.php:559
+#: includes/class-sync-runner.php:545
 msgid "No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved."
 msgstr ""
 
 #. translators: %s: post type slug
-#: includes/class-sync-runner.php:563
+#: includes/class-sync-runner.php:549
 #, php-format
 msgid "The destination post type \"%s\" is no longer registered. Choose a valid post type for this rule."
+msgstr ""
+
+#. translators: %s: channel title
+#: includes/class-video-importer.php:358
+#, php-format
+msgid "%s profile picture"
+msgstr ""
+
+#. translators: %s: channel title
+#: includes/class-video-importer.php:364
+#, php-format
+msgid "%s banner"
 msgstr ""
 
 #: includes/class-youtube-api.php:125
@@ -379,9 +379,9 @@ msgid "Default Post Type"
 msgstr ""
 
 #: template-parts/channel-group.php:181
-#: template-parts/sync-rule.php:125
-#: template-parts/sync-rule.php:141
-#: template-parts/sync-rule.php:161
+#: template-parts/sync-rule.php:122
+#: template-parts/sync-rule.php:138
+#: template-parts/sync-rule.php:158
 msgid "More info"
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 
 #: template-parts/channel-group.php:190
 #: template-parts/sync-rule-wizard.php:73
-#: template-parts/sync-rule.php:166
+#: template-parts/sync-rule.php:163
 msgid "— Select post type —"
 msgstr ""
 
@@ -402,14 +402,14 @@ msgstr ""
 #: template-parts/channel-group.php:208
 #: template-parts/sync-rule-wizard.php:45
 #: template-parts/sync-rule.php:38
-#: template-parts/sync-rule.php:131
+#: template-parts/sync-rule.php:128
 msgid "Sync new videos"
 msgstr ""
 
 #: template-parts/channel-group.php:209
 #: template-parts/sync-rule-wizard.php:46
 #: template-parts/sync-rule.php:37
-#: template-parts/sync-rule.php:132
+#: template-parts/sync-rule.php:129
 msgid "Sync new playlists"
 msgstr ""
 
@@ -659,28 +659,28 @@ msgid "What should this rule do?"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:42
-#: template-parts/sync-rule.php:123
+#: template-parts/sync-rule.php:120
 msgid "Action"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:44
-#: template-parts/sync-rule.php:130
+#: template-parts/sync-rule.php:127
 msgid "— Select action —"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:47
 #: template-parts/sync-rule.php:36
-#: template-parts/sync-rule.php:133
+#: template-parts/sync-rule.php:130
 msgid "Sync this channel"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:51
-#: template-parts/sync-rule.php:75
+#: template-parts/sync-rule.php:72
 msgid "Items per run"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:54
-#: template-parts/sync-rule.php:147
+#: template-parts/sync-rule.php:144
 msgid "Unlimited — click to set a limit"
 msgstr ""
 
@@ -716,78 +716,78 @@ msgstr ""
 msgid "immediately after enabling and saving"
 msgstr ""
 
-#: template-parts/sync-rule.php:72
+#: template-parts/sync-rule.php:69
 msgid "Videos per run"
 msgstr ""
 
-#: template-parts/sync-rule.php:74
+#: template-parts/sync-rule.php:71
 msgid "Playlists per run"
 msgstr ""
 
-#: template-parts/sync-rule.php:78
+#: template-parts/sync-rule.php:75
 msgid "Save synced playlists as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:80
+#: template-parts/sync-rule.php:77
 msgid "Save synced channel as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:81
+#: template-parts/sync-rule.php:78
 msgid "Save synced videos as post type"
 msgstr ""
 
-#: template-parts/sync-rule.php:89
+#: template-parts/sync-rule.php:86
 msgid "Syncing..."
 msgstr ""
 
-#: template-parts/sync-rule.php:97
+#: template-parts/sync-rule.php:94
 msgid "This rule is disabled and won't run until re-enabled."
 msgstr ""
 
-#: template-parts/sync-rule.php:107
+#: template-parts/sync-rule.php:104
 msgid "Sync schedule info"
 msgstr ""
 
-#: template-parts/sync-rule.php:109
+#: template-parts/sync-rule.php:106
 msgid "Created:"
 msgstr ""
 
-#: template-parts/sync-rule.php:110
+#: template-parts/sync-rule.php:107
 msgid "Last Sync:"
 msgstr ""
 
-#: template-parts/sync-rule.php:126
+#: template-parts/sync-rule.php:123
 msgid "Choose what to sync from your YouTube channel."
 msgstr ""
 
-#: template-parts/sync-rule.php:142
+#: template-parts/sync-rule.php:139
 msgid "Maximum number of items to process per run. Set to 0 for unlimited."
 msgstr ""
 
-#: template-parts/sync-rule.php:162
+#: template-parts/sync-rule.php:159
 msgid "The WordPress post type that synced items will be created as."
 msgstr ""
 
-#: template-parts/sync-rule.php:196
+#: template-parts/sync-rule.php:193
 msgid "Remove sync rule"
 msgstr ""
 
-#: wpbuoy-video-sync.php:179
+#: wby-video-sync.php:159
 msgid "WPBuoy Video Sync Video Details"
 msgstr ""
 
-#: wpbuoy-video-sync.php:319
+#: wby-video-sync.php:299
 msgid "Click to set a custom featured image"
 msgstr ""
 
-#: wpbuoy-video-sync.php:323
+#: wby-video-sync.php:303
 msgid "Click the YouTube thumbnail to edit or update"
 msgstr ""
 
-#: wpbuoy-video-sync.php:341
+#: wby-video-sync.php:321
 msgid "WPBuoy Video Sync Playlist Details"
 msgstr ""
 
-#: wpbuoy-video-sync.php:382
+#: wby-video-sync.php:362
 msgid "WPBuoy Video Sync Channel Details"
 msgstr ""

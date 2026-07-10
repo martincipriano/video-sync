@@ -25,14 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Runner {
 
 	/**
-	 * Maximum videos/playlists processed per cron run.
-	 *
-	 * Prevents PHP timeout on large channels. Scheduled rules pick up remaining
-	 * items on the next run. "Once" rules are exempt — users expect full execution.
-	 */
-	private const BATCH_CAP = 500;
-
-	/**
 	 * Seconds before a sync lock is considered stale and ignored.
 	 *
 	 * Matches the progress-transient TTL. A crashed run self-clears after this.
@@ -152,10 +144,9 @@ class Sync_Runner {
 
 		$action  = $rule['action'] ?? '';
 
-		// Free runs every rule as a one-time sync. These runs bypass the per-run
-		// batch cap and may import an entire channel in a single execution — lift
-		// PHP limits so a large back-catalog completes instead of timing out
-		// mid-import. The imported set is unchanged; this only prevents truncation.
+		// A sync may import an entire channel back-catalog in a single execution —
+		// lift PHP limits so a large import completes instead of timing out
+		// mid-run. The imported set is unchanged; this only prevents truncation.
 		if ( function_exists( 'set_time_limit' ) ) {
 			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required so a large back-catalog import completes in one run instead of timing out.
 		}
@@ -207,12 +198,10 @@ class Sync_Runner {
 		} finally {
 			$this->clear_syncing( $source_type, $term_id, $rule_index );
 
-			// Auto-disable once rules here (inside finally) so it runs even on
+			// Auto-disable the rule here (inside finally) so it runs even on
 			// fatal errors caught by the shutdown function — preventing the rule
 			// from firing a second time if the cron event somehow re-queues.
-			if ( 'once' === ( $rule['schedule'] ?? '' ) ) {
-				$this->disable_once_rule( $source_type, $term_id, $rule_index );
-			}
+			$this->disable_completed_rule( $source_type, $term_id, $rule_index );
 
 			if ( null !== $lock_key ) {
 				delete_transient( $lock_key );
@@ -335,8 +324,7 @@ class Sync_Runner {
 		$max = (int) ( $rule['max_videos'] ?? 0 );
 
 		// Batch-fetch full video details and import.
-		$is_once                 = 'once' === ( $rule['schedule'] ?? 'once' );
-		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $max, ! $is_once );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $max );
 		$this->current_run_count = $imported;
 
 		// Warn when candidates were available but nothing could be saved.
@@ -348,7 +336,7 @@ class Sync_Runner {
 					'No videos were imported. %d candidate was fetched from the API but could not be saved.',
 					'No videos were imported. %d candidates were fetched from the API but none could be saved.',
 					$candidate_count,
-					'wpbuoy-video-sync'
+					'wby-video-sync'
 				),
 				$candidate_count
 			);
@@ -489,11 +477,9 @@ class Sync_Runner {
 		string $source_type,
 		int $term_id,
 		string $destination_post_type = '',
-		int $max = 0,
-		bool $apply_cap = true
+		int $max = 0
 	): int {
-		$cap     = $apply_cap ? self::BATCH_CAP : PHP_INT_MAX;
-		$cap     = $max > 0 ? min( $max, $cap ) : $cap;
+		$cap     = $max > 0 ? $max : PHP_INT_MAX;
 		$chunks  = array_chunk( $video_ids, 50 );
 		$total   = min( $cap, count( $video_ids ) );
 		$scanned = 0;
@@ -556,11 +542,11 @@ class Sync_Runner {
 	 */
 	private function invalid_post_type_message( string $post_type ): string {
 		if ( '' === $post_type ) {
-			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'wpbuoy-video-sync' );
+			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'wby-video-sync' );
 		}
 		return sprintf(
 			/* translators: %s: post type slug */
-			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'wpbuoy-video-sync' ),
+			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'wby-video-sync' ),
 			$post_type
 		);
 	}
@@ -618,9 +604,9 @@ class Sync_Runner {
 	/**
 	 * Return the current channel's source data.
 	 *
-	 * The free runner only ever syncs the single option-based channel, so this
-	 * returns the in-memory source_data_override that run_config_channel() loaded
-	 * from wpbyvs_channel_config. (Params retained for the call signature.)
+	 * The runner syncs the single option-based channel, so this returns the
+	 * in-memory source_data_override that run_config_channel() loaded from
+	 * wpbyvs_channel_config. (Params retained for the call signature.)
 	 *
 	 * @return array|null Channel data array, or null if not set.
 	 */
@@ -840,17 +826,17 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Set a 'once' rule's enabled flag to false after it fires.
+	 * Set a rule's enabled flag to false after it fires.
 	 *
-	 * The rule remains visible in the UI with the toggle off so the user
-	 * can see it ran and optionally re-enable it.
+	 * Rules run once per save; the rule remains visible in the UI with the
+	 * toggle off so the user can see it ran and re-enable it to run again.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
 	 * @param int    $term_id     Term ID.
 	 * @param int    $rule_index  Index of the rule to disable.
 	 * @return void
 	 */
-	private function disable_once_rule( string $source_type, int $term_id, int $rule_index ): void {
+	private function disable_completed_rule( string $source_type, int $term_id, int $rule_index ): void {
 		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
 			return;
