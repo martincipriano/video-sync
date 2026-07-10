@@ -527,7 +527,7 @@ class YouTube_API {
 			if ( is_wp_error( $response ) ) {
 				$last_error = new \WP_Error(
 					'youtube_network_error',
-					'Could not reach YouTube. This is usually temporary — the next scheduled sync will try again. (' . $response->get_error_message() . ')'
+					'Could not reach YouTube. This is usually temporary — it will be retried the next time the sync runs. (' . $response->get_error_message() . ')'
 				);
 				continue; // Network errors are always transient — retry.
 			}
@@ -540,7 +540,7 @@ class YouTube_API {
 				if ( ! is_array( $decoded ) ) {
 					return new \WP_Error(
 						'youtube_api_json_error',
-						'YouTube returned an unexpected response. This is usually temporary — the next scheduled sync will try again.'
+						'YouTube returned an unexpected response. This is usually temporary — it will be retried the next time the sync runs.'
 					);
 				}
 				return $decoded;
@@ -574,7 +574,7 @@ class YouTube_API {
 	private function friendly_error_message( int $status, string $reason, string $api_message ): string {
 		// Quota exceeded — permanent until midnight Pacific, but not a config error.
 		if ( in_array( $reason, array( 'quotaExceeded', 'dailyLimitExceeded' ), true ) ) {
-			return 'YouTube API daily quota exceeded. Syncing will automatically resume on the next scheduled run tomorrow.';
+			return 'YouTube API daily quota exceeded. The quota resets daily — run the sync again tomorrow.';
 		}
 
 		switch ( $status ) {
@@ -594,17 +594,17 @@ class YouTube_API {
 				return 'YouTube could not find the requested channel or playlist. Please verify your Channel ID or Playlist ID.';
 
 			case 429:
-				return 'Too many requests sent to YouTube. This is temporary — the next scheduled sync will try again.';
+				return 'Too many requests sent to YouTube. This is temporary — it will be retried the next time the sync runs.';
 
 			case 500:
 			case 502:
 			case 503:
 			case 504:
-				return "YouTube's servers are temporarily unavailable (HTTP {$status}). This is temporary — the next scheduled sync will try again.";
+				return "YouTube's servers are temporarily unavailable (HTTP {$status}). This is temporary — it will be retried the next time the sync runs.";
 
 			default:
 				$detail = $api_message ?: "HTTP {$status}";
-				return "YouTube API returned an unexpected error ({$detail}). The next scheduled sync will try again.";
+				return "YouTube API returned an unexpected error ({$detail}). It will be retried the next time the sync runs.";
 		}
 	}
 

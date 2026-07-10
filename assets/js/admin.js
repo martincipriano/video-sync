@@ -934,9 +934,9 @@ delegationRoot.addEventListener('click', function(e) {
 
 			// Update "Last Sync" in the schedule tooltip if present.
 			if (data.last_synced_label) {
-				const tooltip  = ruleEl.querySelector('.wpbyvs-schedule-tooltip')
+				const tooltip  = ruleEl.querySelector('.wpbyvs-sync-info-tooltip')
 				if (tooltip) {
-					let lastSyncItem = Array.from(tooltip.querySelectorAll('.wpbyvs-schedule-item')).find(function (el) {
+					let lastSyncItem = Array.from(tooltip.querySelectorAll('.wpbyvs-sync-info-item')).find(function (el) {
 						return el.textContent.indexOf('Last Sync') !== -1
 					})
 					if (lastSyncItem) {
@@ -945,12 +945,12 @@ delegationRoot.addEventListener('click', function(e) {
 					} else {
 						// Insert "Last Sync" item before the first item.
 						const item = document.createElement('span')
-						item.className = 'wpbyvs-schedule-item'
+						item.className = 'wpbyvs-sync-info-item'
 						item.innerHTML = '<span>Last Sync:</span><span>' + data.last_synced_label + '</span>'
 						tooltip.insertBefore(item, tooltip.firstChild)
 					}
 					// Make sure the schedule button is visible.
-					const scheduleBtn = ruleEl.querySelector('.wpbyvs-schedule')
+					const scheduleBtn = ruleEl.querySelector('.wpbyvs-sync-info')
 					if (scheduleBtn) scheduleBtn.hidden = false
 				}
 			}

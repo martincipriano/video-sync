@@ -101,10 +101,10 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</label>
 			<?php $has_stat = ! empty( $rule['scheduled_at'] ) || $rule_last_synced; ?>
 			<?php if ( $has_stat ) : ?>
-				<button type="button" class="wpbyvs-schedule" aria-label="<?php esc_attr_e( 'Sync schedule info', 'wby-video-sync' ); ?>">
-					<div class="wpbyvs-schedule-tooltip" hidden>
-						<?php if ( ! empty( $rule['scheduled_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Created:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
-						<?php if ( $rule_last_synced ) : ?><span class="wpbyvs-schedule-item"><span><?php esc_html_e( 'Last Sync:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
+				<button type="button" class="wpbyvs-sync-info" aria-label="<?php esc_attr_e( 'Sync info', 'wby-video-sync' ); ?>">
+					<div class="wpbyvs-sync-info-tooltip" hidden>
+						<?php if ( ! empty( $rule['scheduled_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-sync-info-item"><span><?php esc_html_e( 'Created:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
+						<?php if ( $rule_last_synced ) : ?><span class="wpbyvs-sync-info-item"><span><?php esc_html_e( 'Last Sync:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
 					</div>
 				</button>
 			<?php endif; ?>
