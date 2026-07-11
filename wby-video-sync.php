@@ -99,18 +99,14 @@ function wpbyvs_return_template_part( $slug, $name = null, $args = array() ) {
 }
 
 /**
- * Plugin activation — flag that cron events need rescheduling.
- *
- * Taxonomies are not registered during the activation hook, so the actual
- * rescheduling is deferred to init priority 20 on the next page load.
+ * Plugin activation.
  */
 register_activation_hook( WPBYVS_PLUGIN_FILE, function () {
-	update_option( 'wpbyvs_reschedule_on_activation', true );
 	flush_rewrite_rules();
 } );
 
 /**
- * Plugin deactivation — remove scheduled events and clear any stale syncing locks.
+ * Plugin deactivation — clear any queued sync jobs.
  */
 register_deactivation_hook( WPBYVS_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'wpbyvs_channel_config_sync_rule' );
@@ -124,16 +120,16 @@ require_once WPBYVS_PLUGIN_DIR . 'includes/class-youtube-api.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/class-video-importer.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/class-sync-runner.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/class-sync-history.php';
-require_once WPBYVS_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
+require_once WPBYVS_PLUGIN_DIR . 'includes/class-sync-queue.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/class-channels-page.php';
 require_once WPBYVS_PLUGIN_DIR . 'includes/class-blocks.php';
 
 /**
  * Instantiate the sync engine.
  *
- * Priority 5 — before Channel and Playlist constructors which hook into
- * 'init' at default priority 10. This ensures the scheduler is ready to
- * attach its priority-20 hooks when the taxonomy save hooks fire.
+ * Priority 5 — before other constructors which hook into 'init' at default
+ * priority 10, so the queue's cron listener is registered before anything
+ * that might fire it.
  */
 add_action(
 	'init',
@@ -141,7 +137,7 @@ add_action(
 		$api      = new \WPBuoy_Video_Sync\YouTube_API( get_option( 'wpbyvs_api_key', '' ) );
 		$importer = new \WPBuoy_Video_Sync\Video_Importer();
 		$runner   = new \WPBuoy_Video_Sync\Sync_Runner( $api, $importer );
-		new \WPBuoy_Video_Sync\Sync_Scheduler( $runner );
+		new \WPBuoy_Video_Sync\Sync_Queue( $runner );
 	},
 	5
 );

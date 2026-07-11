@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 /**
- * Sync scheduler.
+ * Sync queue.
  *
  * Queues sync rules as WP-Cron background jobs so imports run off the
  * save request. Each enabled rule fires a single immediate
@@ -19,11 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Sync_Scheduler
+ * Class Sync_Queue
  *
- * Registers and deregisters WP Cron events for sync rules.
+ * Queues and clears the WP-Cron background jobs that run sync rules.
  */
-class Sync_Scheduler {
+class Sync_Queue {
 
 	/**
 	 * Cron hook name used for option-based channel sync rules (Channels Page).
@@ -49,8 +49,8 @@ class Sync_Scheduler {
 		// Listener for option-based channel sync rules (Channels Page).
 		add_action( self::CRON_HOOK_CONFIG, array( $this, 'dispatch_config_sync' ), 10, 1 );
 
-		// Reschedule option-based channel events when the Channels Page is saved.
-		add_action( 'wpbyvs_reschedule_option_channels', array( $this, 'reschedule_option_channels' ) );
+		// Re-queue the channel's rule jobs when the Channels Page is saved.
+		add_action( 'wpbyvs_queue_channel_rules', array( $this, 'queue_channel_rules' ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -70,14 +70,14 @@ class Sync_Scheduler {
 	}
 
 	// -------------------------------------------------------------------------
-	// Reschedule entry points
+	// Queue entry points
 	// -------------------------------------------------------------------------
 
 	/**
-	 * (Re)queue cron events for the channel's rules.
+	 * (Re)queue the background jobs for the channel's rules.
 	 *
-	 * Called via the 'wpbyvs_reschedule_option_channels' action, which is
-	 * fired by Channels_Page::save_channels() after updating the option.
+	 * Called via the 'wpbyvs_queue_channel_rules' action, which is fired by
+	 * Channels_Page::save_channels() after updating the option.
 	 *
 	 * Every enabled rule queues a single immediate background event.
 	 * Rules that fire are pre-marked as syncing before the redirect so the
@@ -85,9 +85,9 @@ class Sync_Scheduler {
 	 *
 	 * @return void
 	 */
-	public function reschedule_option_channels(): void {
-		// Clear all existing option-channel events first.
-		$this->unschedule_all_option_rules();
+	public function queue_channel_rules(): void {
+		// Clear all existing queued events first.
+		$this->clear_queued_events();
 
 		$channel    = wpbyvs_get_channel_config();
 		$immediate  = array();
@@ -113,7 +113,7 @@ class Sync_Scheduler {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Unschedule every existing wpbyvs_channel_config_sync_rule event.
+	 * Clear every queued wpbyvs_channel_config_sync_rule event.
 	 *
 	 * Sweeps the live cron array and removes all events for this hook, whatever
 	 * their [ rule_index ] args. This also clears orphaned events left behind
@@ -121,7 +121,7 @@ class Sync_Scheduler {
 	 *
 	 * @return void
 	 */
-	private function unschedule_all_option_rules(): void {
+	private function clear_queued_events(): void {
 		$crons = _get_cron_array();
 		if ( empty( $crons ) ) {
 			return;

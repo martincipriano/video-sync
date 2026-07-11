@@ -33,7 +33,7 @@ function wpbyvs_run_uninstall(): void {
 	// phpcs:disable WordPress.DB
 
 	// ---------------------------------------------------------------------
-	// Always: unschedule all sync cron events.
+	// Always: clear all queued sync cron events.
 	// ---------------------------------------------------------------------
 	wp_unschedule_hook( 'wpbyvs_sync_rule' );
 	wp_unschedule_hook( 'wpbyvs_channel_config_sync_rule' );
@@ -81,7 +81,7 @@ function wpbyvs_run_uninstall(): void {
 		'wpbyvs_youtube_image_as_featured',
 		'wpbyvs_active_archives',
 		'wpbyvs_delete_on_uninstall',
-		'wpbyvs_reschedule_on_activation',
+		'wpbyvs_reschedule_on_activation', // Written by pre-2.8 activations; no longer set.
 		'wpbyvs_sync_log',
 	);
 

@@ -112,7 +112,7 @@ class Sync_Runner {
 	/**
 	 * Execute a sync rule.
 	 *
-	 * Called by Sync_Scheduler::dispatch_sync() when a WP Cron event fires.
+	 * Called by Sync_Queue::dispatch_config_sync() when a WP Cron event fires.
 	 *
 	 * @param string $source_type  'channel' or 'playlist'.
 	 * @param int    $term_id      WordPress term ID of the source.
@@ -218,7 +218,7 @@ class Sync_Runner {
 	 * save_source_data() transparently read/write wp_options instead of
 	 * term meta, then delegates to the standard run() method with term_id = 0.
 	 *
-	 * Called by Sync_Scheduler::dispatch_config_sync() when a
+	 * Called by Sync_Queue::dispatch_config_sync() when a
 	 * wpbyvs_channel_config_sync_rule cron event fires.
 	 *
 	 * @param int $rule_index 0-based rule index within the channel's sync_rules.

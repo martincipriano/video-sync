@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.7.0\n"
+"Project-Id-Version: WPBuoy Video Sync 2.8.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wby-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-11T03:15:40+00:00\n"
+"POT-Creation-Date: 2026-07-11T03:30:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wby-video-sync\n"
@@ -801,23 +801,23 @@ msgstr ""
 msgid "Remove sync rule"
 msgstr ""
 
-#: wby-video-sync.php:160
+#: wby-video-sync.php:156
 msgid "WPBuoy Video Sync Video Details"
 msgstr ""
 
-#: wby-video-sync.php:300
+#: wby-video-sync.php:296
 msgid "Click to set a custom featured image"
 msgstr ""
 
-#: wby-video-sync.php:304
+#: wby-video-sync.php:300
 msgid "Click the YouTube thumbnail to edit or update"
 msgstr ""
 
-#: wby-video-sync.php:322
+#: wby-video-sync.php:318
 msgid "WPBuoy Video Sync Playlist Details"
 msgstr ""
 
-#: wby-video-sync.php:363
+#: wby-video-sync.php:359
 msgid "WPBuoy Video Sync Channel Details"
 msgstr ""
 

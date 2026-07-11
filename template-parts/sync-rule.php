@@ -61,7 +61,7 @@ $rule_sync_errors = is_array( $rule['sync_errors'] ?? null ) ? array_values( $ru
 $is_option_channel  = isset( $is_option_channel ) ? (bool) $is_option_channel : false;
 
 $_df                 = 'F j, Y g:i A';
-$rule_stat_created   = ! empty( $rule['scheduled_at'] ) ? wp_date( $_df, (int) $rule['scheduled_at'] ) : '—';
+$rule_stat_created   = ! empty( $rule['created_at'] ) ? wp_date( $_df, (int) $rule['created_at'] ) : '—';
 $rule_stat_last_sync = $rule_last_synced ? wp_date( $_df, $rule_last_synced ) : '—';
 
 // Dynamic labels.
@@ -99,11 +99,11 @@ $_post_type_label = 'playlists_sync_new' === $action
 				<input <?php checked( $enabled, true ); ?> class="wpbyvs-rule-toggle" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][enabled]" type="checkbox" value="1">
 				<span class="wpbyvs-toggle-slider"></span>
 			</label>
-			<?php $has_stat = ! empty( $rule['scheduled_at'] ) || $rule_last_synced; ?>
+			<?php $has_stat = ! empty( $rule['created_at'] ) || $rule_last_synced; ?>
 			<?php if ( $has_stat ) : ?>
 				<button type="button" class="wpbyvs-sync-info" aria-label="<?php esc_attr_e( 'Sync info', 'wby-video-sync' ); ?>">
 					<div class="wpbyvs-sync-info-tooltip" hidden>
-						<?php if ( ! empty( $rule['scheduled_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-sync-info-item"><span><?php esc_html_e( 'Created:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
+						<?php if ( ! empty( $rule['created_at'] ) && ! $rule_last_synced ) : ?><span class="wpbyvs-sync-info-item"><span><?php esc_html_e( 'Created:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
 						<?php if ( $rule_last_synced ) : ?><span class="wpbyvs-sync-info-item"><span><?php esc_html_e( 'Last Sync:', 'wby-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
 					</div>
 				</button>

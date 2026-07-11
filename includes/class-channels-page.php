@@ -214,7 +214,7 @@ class Channels_Page {
 
 		// Delete channel — short-circuits the normal save entirely. Purges the
 		// channel's sync history (keyed by YouTube ID, so it would otherwise
-		// outlive the channel) and reschedules cron against the now-empty
+		// outlive the channel) and re-queues against the now-empty
 		// config, which clears any pending events for it.
 		if ( ! empty( $_POST['wpbyvs_delete_channel'] ) ) {
 			$old_youtube_id = wpbyvs_get_channel_config()['youtube_id'] ?? '';
@@ -225,7 +225,7 @@ class Channels_Page {
 				Sync_History::delete( $old_youtube_id );
 			}
 
-			do_action( 'wpbyvs_reschedule_option_channels' );
+			do_action( 'wpbyvs_queue_channel_rules' );
 
 			wp_safe_redirect( add_query_arg( 'wpbyvs-channel-deleted', '1', admin_url( 'admin.php?page=wby-video-sync' ) ) );
 			exit;
@@ -267,7 +267,7 @@ class Channels_Page {
 		}
 
 		// Sync rules — sanitize the posted rules, carrying per-rule runtime
-		// state (status, counts, errors, scheduled_at) from the matching stored rule.
+		// state (status, counts, errors, created_at) from the matching stored rule.
 		$old_rules = array_values( $old_ch['sync_rules'] ?? array() );
 		if ( isset( $ch_data['sync_rules'] ) && is_array( $ch_data['sync_rules'] ) ) {
 			$new_rules = array_values( array_map( 'wpbyvs_sanitize_sync_rule', $ch_data['sync_rules'] ) );
@@ -278,9 +278,9 @@ class Channels_Page {
 					$new_rule['last_synced'] = $old_rules[ $i ]['last_synced'] ?? 0;
 					$new_rule['sync_count']  = $old_rules[ $i ]['sync_count'] ?? 0;
 					$new_rule['sync_errors'] = $old_rules[ $i ]['sync_errors'] ?? array();
-					$new_rule['scheduled_at'] = ! empty( $old_rules[ $i ]['scheduled_at'] ) ? $old_rules[ $i ]['scheduled_at'] : time();
+					$new_rule['created_at'] = ! empty( $old_rules[ $i ]['created_at'] ) ? $old_rules[ $i ]['created_at'] : time();
 				} else {
-					$new_rule['scheduled_at'] = time();
+					$new_rule['created_at'] = time();
 				}
 			}
 			unset( $new_rule );
@@ -327,8 +327,8 @@ class Channels_Page {
 		// Persist the single flat channel.
 		update_option( 'wpbyvs_channel_config', $channel );
 
-		// Schedule cron events for the channel's rules.
-		do_action( 'wpbyvs_reschedule_option_channels' );
+		// Queue the background jobs for the channel's rules.
+		do_action( 'wpbyvs_queue_channel_rules' );
 
 		if ( ! empty( $save_errors ) ) {
 			set_transient( 'wpbyvs_ch_errors_' . get_current_user_id(), $save_errors, 60 );
@@ -356,7 +356,7 @@ class Channels_Page {
 
 		$rule                  = wpbyvs_sanitize_sync_rule( $raw_rule );
 		$rule['enabled']       = true; // A rule created via the wizard is active and runs on save.
-		$rule['scheduled_at']  = time();
+		$rule['created_at']  = time();
 		$rule['sync_status']   = '';
 		$rule['last_synced']   = 0;
 		$rule['sync_count']    = 0;
@@ -374,9 +374,9 @@ class Channels_Page {
 		$rule_index = array_key_last( $channel['sync_rules'] );
 
 		update_option( 'wpbyvs_channel_config', $channel );
-		do_action( 'wpbyvs_reschedule_option_channels' );
+		do_action( 'wpbyvs_queue_channel_rules' );
 
-		// Re-read so the rendered card reflects the scheduler's state — a newly
+		// Re-read so the rendered card reflects the queue's state — a newly
 		// added rule is marked 'syncing' and runs immediately after this save.
 		$fresh       = wpbyvs_get_channel_config();
 		$render_rule = $fresh['sync_rules'][ $rule_index ] ?? $rule;
