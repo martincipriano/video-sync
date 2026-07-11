@@ -35,13 +35,7 @@ function wpbyvs_run_uninstall(): void {
 	// ---------------------------------------------------------------------
 	// Always: clear all queued sync cron events.
 	// ---------------------------------------------------------------------
-	wp_unschedule_hook( 'wpbyvs_sync_rule' );
 	wp_unschedule_hook( 'wpbyvs_channel_config_sync_rule' );
-
-	// ---------------------------------------------------------------------
-	// Always: remove dismissed-notice user meta.
-	// ---------------------------------------------------------------------
-	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => 'wpbyvs_cron_notice_dismissed' ) );
 
 	// ---------------------------------------------------------------------
 	// Optional: remove synced content when the user opted in.
@@ -79,10 +73,7 @@ function wpbyvs_run_uninstall(): void {
 		'wpbyvs_api_key',
 		'wpbyvs_channel_config',
 		'wpbyvs_youtube_image_as_featured',
-		'wpbyvs_active_archives',
 		'wpbyvs_delete_on_uninstall',
-		'wpbyvs_reschedule_on_activation', // Written by pre-2.8 activations; no longer set.
-		'wpbyvs_sync_log',
 	);
 
 	foreach ( $options as $option ) {
