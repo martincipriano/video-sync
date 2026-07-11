@@ -653,6 +653,8 @@ delegationRoot.addEventListener('click', function(e) {
 	// form.submit() (unlike a normal click or .requestSubmit()) does not fire
 	// the 'submit' event at all, so it bypasses the Channel ID validation
 	// above — there's nothing to validate when deleting the channel.
+	// submit_button() renders <input name="submit">, which shadows the form's
+	// submit() method, so it must be invoked via the prototype.
 	container.addEventListener('click', function(e) {
 		const btn = e.target.closest('.wpbyvs-remove-channel')
 		if (!btn) return
@@ -670,7 +672,7 @@ delegationRoot.addEventListener('click', function(e) {
 		}
 		flag.value = '1'
 
-		channelsForm.submit()
+		HTMLFormElement.prototype.submit.call(channelsForm)
 	})
 
 	/**
