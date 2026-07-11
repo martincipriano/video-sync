@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-10T14:36:46+00:00\n"
+"POT-Creation-Date: 2026-07-11T03:15:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wby-video-sync\n"
@@ -41,7 +41,7 @@ msgid "Video Sync"
 msgstr ""
 
 #. translators: %d: post ID
-#: includes/class-blocks.php:218
+#: includes/class-blocks.php:228
 #, php-format
 msgid "Post #%d"
 msgstr ""
@@ -464,6 +464,10 @@ msgstr ""
 msgid "%ds"
 msgstr ""
 
+#: template-parts/channel-group.php:286
+msgid "Delete channel"
+msgstr ""
+
 #: template-parts/channels-page.php:26
 msgid "API key required"
 msgstr ""
@@ -490,7 +494,11 @@ msgstr ""
 msgid "Channel configuration saved."
 msgstr ""
 
-#: template-parts/channels-page.php:63
+#: template-parts/channels-page.php:53
+msgid "Channel deleted."
+msgstr ""
+
+#: template-parts/channels-page.php:70
 msgid "Save Changes"
 msgstr ""
 

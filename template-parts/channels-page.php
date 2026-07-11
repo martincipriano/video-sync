@@ -47,6 +47,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<?php endif; ?>
 
+	<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
+	<?php if ( isset( $_GET['wpbyvs-channel-deleted'] ) && '1' === $_GET['wpbyvs-channel-deleted'] ) : ?>
+	<div class="notice notice-success is-dismissible">
+		<p><?php esc_html_e( 'Channel deleted.', 'wby-video-sync' ); ?></p>
+	</div>
+	<?php endif; ?>
+
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<?php wp_nonce_field( 'wpbyvs_save_channels', 'wpbyvs_channels_nonce' ); ?>
 		<input type="hidden" name="action" value="wpbyvs_save_channels">

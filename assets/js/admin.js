@@ -649,6 +649,30 @@ delegationRoot.addEventListener('click', function(e) {
 		}, true)
 	}
 
+	// Delete Channel — clears the single flat channel via a dedicated flag.
+	// form.submit() (unlike a normal click or .requestSubmit()) does not fire
+	// the 'submit' event at all, so it bypasses the Channel ID validation
+	// above — there's nothing to validate when deleting the channel.
+	container.addEventListener('click', function(e) {
+		const btn = e.target.closest('.wpbyvs-remove-channel')
+		if (!btn) return
+		e.preventDefault()
+
+		if (!window.confirm('Are you sure you want to delete this channel? All its sync rules will be removed.')) return
+		if (!channelsForm) return
+
+		let flag = channelsForm.querySelector('input[name="wpbyvs_delete_channel"]')
+		if (!flag) {
+			flag = document.createElement('input')
+			flag.type = 'hidden'
+			flag.name = 'wpbyvs_delete_channel'
+			channelsForm.appendChild(flag)
+		}
+		flag.value = '1'
+
+		channelsForm.submit()
+	})
+
 	/**
 	 * Toggle accordion expand/collapse on a channel group header.
 	 */

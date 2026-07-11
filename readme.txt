@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 2.7.0
+Stable tag: 2.8.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -27,6 +27,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Sync history** with the last-synced time and a per-rule error log
 * Stores all YouTube data in standard post meta (`_wpbyvs_*`) for easy use in your theme or queries
 * **`[video-sync]` shortcode** and **three Gutenberg blocks** (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site — no code required
+* **Delete channel** — clear the configured channel and its sync history in one click when you want to start over or point at a different channel
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
@@ -67,6 +68,10 @@ YouTube data is fetched from the official YouTube Data API v3, which requires a 
 = How much API quota does a sync use? =
 
 Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. WPBuoy Video Sync shows an estimate before you run a sync.
+
+= Can I switch to syncing a different channel? =
+
+Yes. Edit the Channel field on the Channels page and save — the plugin resolves the new URL/@handle/ID and switches to it, keeping your existing sync rules attached to the new channel. To stop syncing entirely, use the **Delete channel** button at the bottom of the channel card, which also clears its sync history.
 
 = What happens to my data if I uninstall WPBuoy Video Sync? =
 
@@ -182,6 +187,9 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 2.8.0 =
+* New: "Delete channel" button on the Channels page — clears the configured channel and its sync history, so you can start over or switch to a different channel without manually resetting the plugin.
 
 = 2.7.0 =
 * New: `[video-sync]` shortcode and three Gutenberg blocks (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site.

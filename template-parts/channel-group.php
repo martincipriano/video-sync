@@ -280,4 +280,11 @@ $name_prefix = 'channel[sync_rules]';
 
 		</div><!-- .wpbyvs-channel-tabs-content -->
 	</div><!-- .wpbyvs-channel-body -->
+	<?php if ( $youtube_id ) : ?>
+	<div class="wpbyvs-channel-footer">
+		<button type="button" class="wpbyvs-remove-channel">
+			<?php esc_html_e( 'Delete channel', 'wby-video-sync' ); ?>
+		</button>
+	</div>
+	<?php endif; ?>
 </div>

@@ -128,6 +128,22 @@ class Sync_History {
 	}
 
 	/**
+	 * Delete a channel's history log and read-at marker.
+	 *
+	 * Called when the channel is deleted, so its history does not outlive it.
+	 *
+	 * @param string $youtube_id YouTube channel ID.
+	 * @return void
+	 */
+	public static function delete( string $youtube_id ): void {
+		if ( '' === $youtube_id ) {
+			return;
+		}
+		delete_option( self::option_key( $youtube_id ) );
+		delete_option( self::read_option_key( $youtube_id ) );
+	}
+
+	/**
 	 * Return the wp_options key for the read-at timestamp.
 	 *
 	 * @param string $youtube_id YouTube channel ID.

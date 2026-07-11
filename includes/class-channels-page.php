@@ -212,6 +212,25 @@ class Channels_Page {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'wby-video-sync' ) );
 		}
 
+		// Delete channel — short-circuits the normal save entirely. Purges the
+		// channel's sync history (keyed by YouTube ID, so it would otherwise
+		// outlive the channel) and reschedules cron against the now-empty
+		// config, which clears any pending events for it.
+		if ( ! empty( $_POST['wpbyvs_delete_channel'] ) ) {
+			$old_youtube_id = wpbyvs_get_channel_config()['youtube_id'] ?? '';
+
+			update_option( 'wpbyvs_channel_config', array() );
+
+			if ( $old_youtube_id ) {
+				Sync_History::delete( $old_youtube_id );
+			}
+
+			do_action( 'wpbyvs_reschedule_option_channels' );
+
+			wp_safe_redirect( add_query_arg( 'wpbyvs-channel-deleted', '1', admin_url( 'admin.php?page=wby-video-sync' ) ) );
+			exit;
+		}
+
 		$old_ch  = wpbyvs_get_channel_config();
 		$api_key = get_option( 'wpbyvs_api_key', '' );
 		$save_errors = array();
