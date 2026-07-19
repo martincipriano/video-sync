@@ -2,8 +2,8 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WPBuoy Video Sync 2.8.1\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wby-video-sync\n"
+"Project-Id-Version: Buoy Video Sync 2.8.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/buoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,26 +12,26 @@ msgstr ""
 "POT-Creation-Date: 2026-07-11T11:23:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: wby-video-sync\n"
+"X-Domain: buoy-video-sync\n"
 
 #. Plugin Name of the plugin
-#: wby-video-sync.php
+#: buoy-video-sync.php
 #: includes/class-channels-page.php:130
-msgid "WPBuoy Video Sync"
+msgid "Buoy Video Sync"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: wby-video-sync.php
+#: buoy-video-sync.php
 msgid "https://wpbuoy.com/product/video-sync"
 msgstr ""
 
 #. Description of the plugin
-#: wby-video-sync.php
+#: buoy-video-sync.php
 msgid "Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails."
 msgstr ""
 
 #. Author of the plugin
-#: wby-video-sync.php
+#: buoy-video-sync.php
 msgid "Martin Cipriano"
 msgstr ""
 
@@ -52,7 +52,7 @@ msgid "Getting Started"
 msgstr ""
 
 #: includes/class-channels-page.php:58
-msgid "How WPBuoy Video Sync works"
+msgid "How Buoy Video Sync works"
 msgstr ""
 
 #: includes/class-channels-page.php:59
@@ -93,7 +93,7 @@ msgid "How to get a Google API key"
 msgstr ""
 
 #: includes/class-channels-page.php:76
-msgid "API key vs OAuth — which does WPBuoy Video Sync use?"
+msgid "API key vs OAuth — which does Buoy Video Sync use?"
 msgstr ""
 
 #: includes/class-channels-page.php:77
@@ -253,7 +253,7 @@ msgstr ""
 
 #: includes/settings.php:37
 #: template-parts/settings-page.php:15
-msgid "WPBuoy Video Sync Settings"
+msgid "Buoy Video Sync Settings"
 msgstr ""
 
 #: includes/settings.php:38
@@ -312,7 +312,7 @@ msgid "When enabled, synced videos, playlists, and channels show their YouTube t
 msgstr ""
 
 #: includes/settings.php:230
-msgid "Remove all WPBuoy Video Sync data when the plugin is deleted"
+msgid "Remove all Buoy Video Sync data when the plugin is deleted"
 msgstr ""
 
 #: includes/settings.php:233
@@ -672,7 +672,7 @@ msgstr ""
 #. translators: %s: Link to YouTube Data API documentation
 #: template-parts/settings-field-api-key.php:26
 #, php-format
-msgid "This key allows WPBuoy Video Sync to access public data from any YouTube channel. You can create an API key in the Google Cloud Console by following the guide in the %s."
+msgid "This key allows Buoy Video Sync to access public data from any YouTube channel. You can create an API key in the Google Cloud Console by following the guide in the %s."
 msgstr ""
 
 #: template-parts/settings-field-api-key.php:27
@@ -801,24 +801,24 @@ msgstr ""
 msgid "Remove sync rule"
 msgstr ""
 
-#: wby-video-sync.php:156
-msgid "WPBuoy Video Sync Video Details"
+#: buoy-video-sync.php:156
+msgid "Buoy Video Sync Video Details"
 msgstr ""
 
-#: wby-video-sync.php:296
+#: buoy-video-sync.php:296
 msgid "Click to set a custom featured image"
 msgstr ""
 
-#: wby-video-sync.php:300
+#: buoy-video-sync.php:300
 msgid "Click the YouTube thumbnail to edit or update"
 msgstr ""
 
-#: wby-video-sync.php:318
-msgid "WPBuoy Video Sync Playlist Details"
+#: buoy-video-sync.php:318
+msgid "Buoy Video Sync Playlist Details"
 msgstr ""
 
-#: wby-video-sync.php:359
-msgid "WPBuoy Video Sync Channel Details"
+#: buoy-video-sync.php:359
+msgid "Buoy Video Sync Channel Details"
 msgstr ""
 
 #: blocks/embed/index.js:26

@@ -34,8 +34,8 @@ test.describe('Channels page layout', () => {
     await goToChannels(page);
 
     await expect(page.locator('input[name="channel_id"]')).toBeVisible();
-    await expect(page.locator('#wpbyvs-sync-rules')).toBeVisible();
-    await expect(page.locator('#wpbyvs-add-rule')).toBeVisible();
+    await expect(page.locator('#buoyvs-sync-rules')).toBeVisible();
+    await expect(page.locator('#buoyvs-add-rule')).toBeVisible();
   });
 
   test('channel list table has expected columns', async ({ page }) => {
@@ -93,38 +93,38 @@ test.describe('Sync Rules', () => {
   });
 
   test('clicking "Add sync rule" appends a new rule block', async ({ page }) => {
-    const rulesBefore = await page.locator('.wpbyvs-sync-rule').count();
-    await page.locator('#wpbyvs-add-rule').click();
-    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(rulesBefore + 1);
+    const rulesBefore = await page.locator('.buoyvs-sync-rule').count();
+    await page.locator('#buoyvs-add-rule').click();
+    await expect(page.locator('.buoyvs-sync-rule')).toHaveCount(rulesBefore + 1);
   });
 
   test('can add multiple sync rules', async ({ page }) => {
-    await page.locator('#wpbyvs-add-rule').click();
-    await page.locator('#wpbyvs-add-rule').click();
-    const count = await page.locator('.wpbyvs-sync-rule').count();
+    await page.locator('#buoyvs-add-rule').click();
+    await page.locator('#buoyvs-add-rule').click();
+    const count = await page.locator('.buoyvs-sync-rule').count();
     expect(count).toBeGreaterThanOrEqual(2);
   });
 
   test('clicking "Remove" deletes a sync rule', async ({ page }) => {
-    await page.locator('#wpbyvs-add-rule').click();
-    const countBefore = await page.locator('.wpbyvs-sync-rule').count();
+    await page.locator('#buoyvs-add-rule').click();
+    const countBefore = await page.locator('.buoyvs-sync-rule').count();
 
-    await page.locator('.wpbyvs-remove-rule').last().click();
+    await page.locator('.buoyvs-remove-rule').last().click();
 
     // Wait for the removal animation (300 ms) to complete
     await page.waitForTimeout(400);
-    await expect(page.locator('.wpbyvs-sync-rule')).toHaveCount(countBefore - 1);
+    await expect(page.locator('.buoyvs-sync-rule')).toHaveCount(countBefore - 1);
   });
 
   test('sync rule toggle is enabled by default', async ({ page }) => {
-    await page.locator('#wpbyvs-add-rule').click();
-    const toggle = page.locator('.wpbyvs-sync-rule').last().locator('.wpbyvs-rule-toggle');
+    await page.locator('#buoyvs-add-rule').click();
+    const toggle = page.locator('.buoyvs-sync-rule').last().locator('.buoyvs-rule-toggle');
     await expect(toggle).toBeChecked();
   });
 
   test('toggle can be switched off', async ({ page }) => {
-    await page.locator('#wpbyvs-add-rule').click();
-    const toggle = page.locator('.wpbyvs-sync-rule').last().locator('.wpbyvs-rule-toggle');
+    await page.locator('#buoyvs-add-rule').click();
+    const toggle = page.locator('.buoyvs-sync-rule').last().locator('.buoyvs-rule-toggle');
     await toggle.uncheck({ force: true });
     await expect(toggle).not.toBeChecked();
   });
@@ -137,37 +137,37 @@ test.describe('Sync Rules', () => {
 test.describe('Sync Rule – Schedule', () => {
   test.beforeEach(async ({ page }) => {
     await goToChannels(page);
-    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('#buoyvs-add-rule').click();
   });
 
   test('schedule dropdown defaults are visible', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const schedule = rule.locator('.wpbyvs-sync-schedule');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const schedule = rule.locator('.buoyvs-sync-schedule');
     await expect(schedule).toBeVisible();
   });
 
   test('custom schedule input is disabled when a preset is selected', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const schedule = rule.locator('.wpbyvs-sync-schedule');
-    const custom = rule.locator('.wpbyvs-custom-sync-schedule');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const schedule = rule.locator('.buoyvs-sync-schedule');
+    const custom = rule.locator('.buoyvs-custom-sync-schedule');
 
     await schedule.selectOption('daily');
     await expect(custom).toBeDisabled();
   });
 
   test('custom schedule input is enabled when "Custom" is selected', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const schedule = rule.locator('.wpbyvs-sync-schedule');
-    const custom = rule.locator('.wpbyvs-custom-sync-schedule');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const schedule = rule.locator('.buoyvs-sync-schedule');
+    const custom = rule.locator('.buoyvs-custom-sync-schedule');
 
     await schedule.selectOption('custom');
     await expect(custom).toBeEnabled();
   });
 
   test('custom schedule accepts a numeric hour value', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-sync-schedule').selectOption('custom');
-    const custom = rule.locator('.wpbyvs-custom-sync-schedule');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-sync-schedule').selectOption('custom');
+    const custom = rule.locator('.buoyvs-custom-sync-schedule');
     await custom.fill('48');
     await expect(custom).toHaveValue('48');
   });
@@ -180,34 +180,34 @@ test.describe('Sync Rule – Schedule', () => {
 test.describe('Sync Rule – Action dropdown', () => {
   test.beforeEach(async ({ page }) => {
     await goToChannels(page);
-    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('#buoyvs-add-rule').click();
   });
 
   test('action dropdown is visible', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await expect(rule.locator('.wpbyvs-action')).toBeVisible();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await expect(rule.locator('.buoyvs-action')).toBeVisible();
   });
 
   test('specific metadata wrapper is hidden by default', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await expect(rule.locator('.wpbyvs-specific-metadata-wrapper')).toHaveClass(/wpbyvs-hidden/);
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await expect(rule.locator('.buoyvs-specific-metadata-wrapper')).toHaveClass(/buoyvs-hidden/);
   });
 
   test('specific metadata wrapper appears when "update_specific" action is chosen', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const action = rule.locator('.wpbyvs-action');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const action = rule.locator('.buoyvs-action');
 
     // Find an option whose value includes "update_specific"
     const specificOption = action.locator('option[value*="update_specific"]').first();
     const specificValue = await specificOption.getAttribute('value');
 
     await action.selectOption(specificValue);
-    await expect(rule.locator('.wpbyvs-specific-metadata-wrapper')).not.toHaveClass(/wpbyvs-hidden/);
+    await expect(rule.locator('.buoyvs-specific-metadata-wrapper')).not.toHaveClass(/buoyvs-hidden/);
   });
 
   test('specific metadata wrapper hides again when a non-specific action is chosen', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const action = rule.locator('.wpbyvs-action');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const action = rule.locator('.buoyvs-action');
 
     const specificOption = action.locator('option[value*="update_specific"]').first();
     const specificValue = await specificOption.getAttribute('value');
@@ -215,7 +215,7 @@ test.describe('Sync Rule – Action dropdown', () => {
     await action.selectOption(specificValue);
     await action.selectOption('videos_sync_new');
 
-    await expect(rule.locator('.wpbyvs-specific-metadata-wrapper')).toHaveClass(/wpbyvs-hidden/);
+    await expect(rule.locator('.buoyvs-specific-metadata-wrapper')).toHaveClass(/buoyvs-hidden/);
   });
 });
 
@@ -226,31 +226,31 @@ test.describe('Sync Rule – Action dropdown', () => {
 test.describe('Sync Rule – Specific Metadata options', () => {
   test.beforeEach(async ({ page }) => {
     await goToChannels(page);
-    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('#buoyvs-add-rule').click();
   });
 
   test('channel_update_specific shows profile_picture and banner_image options', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('channel_update_specific');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('channel_update_specific');
 
-    const select = rule.locator('.wpbyvs-specific-metadata');
+    const select = rule.locator('.buoyvs-specific-metadata');
     await expect(select.locator('option[value="profile_picture"]')).toBeAttached();
     await expect(select.locator('option[value="banner_image"]')).toBeAttached();
   });
 
   test('channel_update_specific does not show a generic thumbnail option', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('channel_update_specific');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('channel_update_specific');
 
-    const select = rule.locator('.wpbyvs-specific-metadata');
+    const select = rule.locator('.buoyvs-specific-metadata');
     await expect(select.locator('option[value="thumbnail"]')).not.toBeAttached();
   });
 
   test('channel_update_specific shows channel title and description options', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('channel_update_specific');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('channel_update_specific');
 
-    const select = rule.locator('.wpbyvs-specific-metadata');
+    const select = rule.locator('.buoyvs-specific-metadata');
     await expect(select.locator('option[value="channel_title"]')).toBeAttached();
     await expect(select.locator('option[value="channel_description"]')).toBeAttached();
     await expect(select.locator('option[value="subscriber_count"]')).toBeAttached();
@@ -258,18 +258,18 @@ test.describe('Sync Rule – Specific Metadata options', () => {
   });
 
   test('videos_update_specific_all shows thumbnail option for videos', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_update_specific_all');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_update_specific_all');
 
-    const select = rule.locator('.wpbyvs-specific-metadata');
+    const select = rule.locator('.buoyvs-specific-metadata');
     await expect(select.locator('option[value="thumbnail"]')).toBeAttached();
   });
 
   test('videos_update_specific_all shows all expected video metadata options', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_update_specific_all');
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_update_specific_all');
 
-    const select = rule.locator('.wpbyvs-specific-metadata');
+    const select = rule.locator('.buoyvs-specific-metadata');
     await expect(select.locator('option[value="title"]')).toBeAttached();
     await expect(select.locator('option[value="description"]')).toBeAttached();
     await expect(select.locator('option[value="thumbnail"]')).toBeAttached();
@@ -280,12 +280,12 @@ test.describe('Sync Rule – Specific Metadata options', () => {
   });
 
   test('thumbnail does not appear in condition field options for video actions', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await expect(condition.locator('.wpbyvs-condition-field option[value="thumbnail"]')).not.toBeAttached();
+    const condition = rule.locator('.buoyvs-condition').last();
+    await expect(condition.locator('.buoyvs-condition-field option[value="thumbnail"]')).not.toBeAttached();
   });
 });
 
@@ -296,52 +296,52 @@ test.describe('Sync Rule – Specific Metadata options', () => {
 test.describe('Sync Rule – Conditions', () => {
   test.beforeEach(async ({ page }) => {
     await goToChannels(page);
-    await page.locator('#wpbyvs-add-rule').click();
+    await page.locator('#buoyvs-add-rule').click();
   });
 
   test('"Add condition" link is visible inside a sync rule', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await expect(rule.locator('.wpbyvs-add-condition')).toBeVisible();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await expect(rule.locator('.buoyvs-add-condition')).toBeVisible();
   });
 
   test('clicking "Add condition" adds a condition row', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    const condsBefore = await rule.locator('.wpbyvs-condition').count();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    const condsBefore = await rule.locator('.buoyvs-condition').count();
 
-    await rule.locator('.wpbyvs-add-condition').click();
-    await expect(rule.locator('.wpbyvs-condition')).toHaveCount(condsBefore + 1);
+    await rule.locator('.buoyvs-add-condition').click();
+    await expect(rule.locator('.buoyvs-condition')).toHaveCount(condsBefore + 1);
   });
 
   test('condition row contains Field, Operator, and Value inputs', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await expect(condition.locator('.wpbyvs-condition-field')).toBeVisible();
-    await expect(condition.locator('.wpbyvs-condition-operator')).toBeVisible();
-    await expect(condition.locator('.wpbyvs-condition-value')).toBeVisible();
+    const condition = rule.locator('.buoyvs-condition').last();
+    await expect(condition.locator('.buoyvs-condition-field')).toBeVisible();
+    await expect(condition.locator('.buoyvs-condition-operator')).toBeVisible();
+    await expect(condition.locator('.buoyvs-condition-value')).toBeVisible();
   });
 
   test('operator and value are disabled until a field is selected', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await expect(condition.locator('.wpbyvs-condition-operator')).toBeDisabled();
-    await expect(condition.locator('.wpbyvs-condition-value')).toBeDisabled();
+    const condition = rule.locator('.buoyvs-condition').last();
+    await expect(condition.locator('.buoyvs-condition-operator')).toBeDisabled();
+    await expect(condition.locator('.buoyvs-condition-value')).toBeDisabled();
   });
 
   test('selecting a text field populates text operators', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
+    const rule = page.locator('.buoyvs-sync-rule').last();
 
     // Select a video action so video fields are available
-    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
-    await rule.locator('.wpbyvs-add-condition').click();
+    await rule.locator('.buoyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await condition.locator('.wpbyvs-condition-field').selectOption('title');
+    const condition = rule.locator('.buoyvs-condition').last();
+    await condition.locator('.buoyvs-condition-field').selectOption('title');
 
-    const operator = condition.locator('.wpbyvs-condition-operator');
+    const operator = condition.locator('.buoyvs-condition-operator');
     await expect(operator).toBeEnabled();
     await expect(operator.locator('option[value="contains"]')).toBeAttached();
     await expect(operator.locator('option[value="not_contains"]')).toBeAttached();
@@ -350,14 +350,14 @@ test.describe('Sync Rule – Conditions', () => {
   });
 
   test('selecting a numeric field populates numeric operators', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await condition.locator('.wpbyvs-condition-field').selectOption('view_count');
+    const condition = rule.locator('.buoyvs-condition').last();
+    await condition.locator('.buoyvs-condition-field').selectOption('view_count');
 
-    const operator = condition.locator('.wpbyvs-condition-operator');
+    const operator = condition.locator('.buoyvs-condition-operator');
     await expect(operator).toBeEnabled();
     await expect(operator.locator('option[value="greater_than"]')).toBeAttached();
     await expect(operator.locator('option[value="less_than"]')).toBeAttached();
@@ -365,50 +365,50 @@ test.describe('Sync Rule – Conditions', () => {
   });
 
   test('selecting a date field populates date operators', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await condition.locator('.wpbyvs-condition-field').selectOption('published_date');
+    const condition = rule.locator('.buoyvs-condition').last();
+    await condition.locator('.buoyvs-condition-field').selectOption('published_date');
 
-    const operator = condition.locator('.wpbyvs-condition-operator');
+    const operator = condition.locator('.buoyvs-condition-operator');
     await expect(operator).toBeEnabled();
     await expect(operator.locator('option[value="before"]')).toBeAttached();
     await expect(operator.locator('option[value="after"]')).toBeAttached();
   });
 
   test('value input is enabled after field and operator are selected', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-action').selectOption('videos_sync_new');
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-action').selectOption('videos_sync_new');
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const condition = rule.locator('.wpbyvs-condition').last();
-    await condition.locator('.wpbyvs-condition-field').selectOption('title');
-    await condition.locator('.wpbyvs-condition-operator').selectOption('contains');
+    const condition = rule.locator('.buoyvs-condition').last();
+    await condition.locator('.buoyvs-condition-field').selectOption('title');
+    await condition.locator('.buoyvs-condition-operator').selectOption('contains');
 
-    await expect(condition.locator('.wpbyvs-condition-value')).toBeEnabled();
+    await expect(condition.locator('.buoyvs-condition-value')).toBeEnabled();
   });
 
   test('removing a condition reduces the condition count', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-add-condition').click();
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-add-condition').click();
+    await rule.locator('.buoyvs-add-condition').click();
 
-    const countBefore = await rule.locator('.wpbyvs-condition').count();
-    await rule.locator('.wpbyvs-remove-condition').last().click();
+    const countBefore = await rule.locator('.buoyvs-condition').count();
+    await rule.locator('.buoyvs-remove-condition').last().click();
 
     await page.waitForTimeout(400);
-    await expect(rule.locator('.wpbyvs-condition')).toHaveCount(countBefore - 1);
+    await expect(rule.locator('.buoyvs-condition')).toHaveCount(countBefore - 1);
   });
 
   test('can add multiple conditions to the same rule', async ({ page }) => {
-    const rule = page.locator('.wpbyvs-sync-rule').last();
-    await rule.locator('.wpbyvs-add-condition').click();
-    await rule.locator('.wpbyvs-add-condition').click();
-    await rule.locator('.wpbyvs-add-condition').click();
+    const rule = page.locator('.buoyvs-sync-rule').last();
+    await rule.locator('.buoyvs-add-condition').click();
+    await rule.locator('.buoyvs-add-condition').click();
+    await rule.locator('.buoyvs-add-condition').click();
 
-    await expect(rule.locator('.wpbyvs-condition')).toHaveCount(3);
+    await expect(rule.locator('.buoyvs-condition')).toHaveCount(3);
   });
 });
 

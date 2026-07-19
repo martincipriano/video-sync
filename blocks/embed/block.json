@@ -1,12 +1,12 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
-  "name": "wby-video-sync/embed",
+  "name": "buoy-video-sync/embed",
   "title": "Video Sync Embed",
-  "category": "wby-video-sync",
+  "category": "buoy-video-sync",
   "description": "Embed a synced video's YouTube player.",
   "keywords": ["video sync", "youtube", "embed", "video", "player"],
-  "textdomain": "wby-video-sync",
+  "textdomain": "buoy-video-sync",
   "attributes": {
     "postId": { "type": "number", "default": 0 },
     "isEditorPreview": { "type": "boolean", "default": false }

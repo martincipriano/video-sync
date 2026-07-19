@@ -10,10 +10,10 @@ declare(strict_types=1);
  * filter in the main plugin file serves the image when no featured image is
  * explicitly set by the user.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -62,7 +62,7 @@ class Video_Importer {
 			return $post_id;
 		}
 
-		// 2. Save all internal _wpbyvs_* meta keys.
+		// 2. Save all internal _buoyvs_* meta keys.
 		$this->save_all_meta( $post_id, $video_data, $source_type, $source_term_id );
 
 		return $post_id;
@@ -94,7 +94,7 @@ class Video_Importer {
 				"SELECT pm.meta_value
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-				 WHERE pm.meta_key = '_wpbyvs_video_id'
+				 WHERE pm.meta_key = '_buoyvs_video_id'
 				   AND p.post_type = %s
 				   AND p.post_status IN ( $placeholders )",
 				array_merge( array( $post_type ), $statuses )
@@ -104,7 +104,7 @@ class Video_Importer {
 				"SELECT pm.meta_value
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-				 WHERE pm.meta_key = '_wpbyvs_video_id'
+				 WHERE pm.meta_key = '_buoyvs_video_id'
 				   AND p.post_status IN ( $placeholders )",
 				$statuses
 			);
@@ -143,24 +143,24 @@ class Video_Importer {
 			);
 		}
 
-		update_post_meta( $post_id, '_wpbyvs_video_id',             $video_data['video_id'] );
-		update_post_meta( $post_id, '_wpbyvs_video_url',            'https://www.youtube.com/watch?v=' . $video_data['video_id'] );
-		update_post_meta( $post_id, '_wpbyvs_channel_id',           $video_data['channel_id'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_channel_title',        $video_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_etag',                 $video_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_source_type',          $source_type );
-		update_post_meta( $post_id, '_wpbyvs_source_id',            $source_id );
-		update_post_meta( $post_id, '_wpbyvs_original_title',       $video_data['title'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_original_description', $video_data['description'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_published_at',         $video_data['published_at'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_duration_seconds',     (int) ( $video_data['duration_seconds'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_view_count',           (int) ( $video_data['view_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_like_count',           (int) ( $video_data['like_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_comment_count',        (int) ( $video_data['comment_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_video_id',             $video_data['video_id'] );
+		update_post_meta( $post_id, '_buoyvs_video_url',            'https://www.youtube.com/watch?v=' . $video_data['video_id'] );
+		update_post_meta( $post_id, '_buoyvs_channel_id',           $video_data['channel_id'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_channel_title',        $video_data['channel_title'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_etag',                 $video_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_source_type',          $source_type );
+		update_post_meta( $post_id, '_buoyvs_source_id',            $source_id );
+		update_post_meta( $post_id, '_buoyvs_original_title',       $video_data['title'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_original_description', $video_data['description'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_published_at',         $video_data['published_at'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_duration_seconds',     (int) ( $video_data['duration_seconds'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_view_count',           (int) ( $video_data['view_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_like_count',           (int) ( $video_data['like_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_comment_count',        (int) ( $video_data['comment_count'] ?? 0 ) );
 		$best_thumb = static::get_best_thumbnail( $thumbnails );
-		update_post_meta( $post_id, '_wpbyvs_thumbnails',           $thumbnails );
-		update_post_meta( $post_id, '_wpbyvs_thumbnail_url',        $best_thumb['url'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_last_synced',          time() );
+		update_post_meta( $post_id, '_buoyvs_thumbnails',           $thumbnails );
+		update_post_meta( $post_id, '_buoyvs_thumbnail_url',        $best_thumb['url'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_last_synced',          time() );
 
 		/**
 		 * Fires after a video's metadata has been written during sync.
@@ -173,7 +173,7 @@ class Video_Importer {
 		 * @param string $source_type Sync source type: 'channel', 'playlist', or 'video'.
 		 * @param int    $source_id   Source term ID the video was synced from.
 		 */
-		do_action( 'wpbyvs_video_synced', $post_id, $video_data, $source_type, $source_id );
+		do_action( 'buoyvs_video_synced', $post_id, $video_data, $source_type, $source_id );
 	}
 
 	// -------------------------------------------------------------------------
@@ -194,10 +194,10 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _wpbyvs_* ID meta is required to match a YouTube item; there is no non-meta alternative.
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _buoyvs_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
-						'key'   => '_wpbyvs_playlist_id',
+						'key'   => '_buoyvs_playlist_id',
 						'value' => $playlist_id,
 					),
 				),
@@ -243,14 +243,14 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_playlist_meta( int $post_id, array $playlist_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_wpbyvs_playlist_id',          $playlist_data['playlist_id'] );
-		update_post_meta( $post_id, '_wpbyvs_channel_id',           $channel_id );
-		update_post_meta( $post_id, '_wpbyvs_playlist_title',       $playlist_data['playlist_title'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_playlist_description', $playlist_data['playlist_description'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_playlist_video_count', (int) ( $playlist_data['playlist_video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_etag',                 $playlist_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_last_synced',          time() );
+		update_post_meta( $post_id, '_buoyvs_playlist_id',          $playlist_data['playlist_id'] );
+		update_post_meta( $post_id, '_buoyvs_channel_id',           $channel_id );
+		update_post_meta( $post_id, '_buoyvs_playlist_title',       $playlist_data['playlist_title'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_playlist_description', $playlist_data['playlist_description'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_playlist_video_count', (int) ( $playlist_data['playlist_video_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_etag',                 $playlist_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_last_synced',          time() );
 
 		/**
 		 * Fires after a playlist's metadata has been written during sync.
@@ -261,7 +261,7 @@ class Video_Importer {
 		 * @param array  $playlist_data Playlist data from the YouTube API.
 		 * @param string $channel_id    Source channel ID the playlist belongs to.
 		 */
-		do_action( 'wpbyvs_playlist_synced', $post_id, $playlist_data, $channel_id );
+		do_action( 'buoyvs_playlist_synced', $post_id, $playlist_data, $channel_id );
 	}
 
 	// -------------------------------------------------------------------------
@@ -271,7 +271,7 @@ class Video_Importer {
 	/**
 	 * Find an existing post by its YouTube channel ID.
 	 *
-	 * Uses _wpbyvs_channel_post as the dedup key (distinct from _wpbyvs_channel_id,
+	 * Uses _buoyvs_channel_post as the dedup key (distinct from _buoyvs_channel_id,
 	 * which stores the source channel ID on video/playlist posts).
 	 *
 	 * @param string $channel_id YouTube channel ID.
@@ -285,10 +285,10 @@ class Video_Importer {
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _wpbyvs_* ID meta is required to match a YouTube item; there is no non-meta alternative.
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Lookup by the _buoyvs_* ID meta is required to match a YouTube item; there is no non-meta alternative.
 				'meta_query'     => array(
 					array(
-						'key'   => '_wpbyvs_channel_post',
+						'key'   => '_buoyvs_channel_post',
 						'value' => $channel_id,
 					),
 				),
@@ -301,7 +301,7 @@ class Video_Importer {
 	/**
 	 * Import a YouTube channel as a new WordPress post.
 	 *
-	 * Deduplication key: _wpbyvs_channel_post. The channel profile picture and
+	 * Deduplication key: _buoyvs_channel_post. The channel profile picture and
 	 * banner are sideloaded into the media library, attached to the channel post,
 	 * and their local URLs stored in meta. The profile picture is served as the
 	 * featured image on the frontend via the post_thumbnail_html filter (a
@@ -340,13 +340,13 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_channel_meta( int $post_id, array $channel_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_wpbyvs_channel_post',        $channel_id );
-		update_post_meta( $post_id, '_wpbyvs_channel_id',          $channel_id );
-		update_post_meta( $post_id, '_wpbyvs_channel_title',       $channel_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_channel_description', $channel_data['channel_description'] ?? '' );
-		update_post_meta( $post_id, '_wpbyvs_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_wpbyvs_etag',                $channel_data['etag'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_channel_post',        $channel_id );
+		update_post_meta( $post_id, '_buoyvs_channel_id',          $channel_id );
+		update_post_meta( $post_id, '_buoyvs_channel_title',       $channel_data['channel_title'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_channel_description', $channel_data['channel_description'] ?? '' );
+		update_post_meta( $post_id, '_buoyvs_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
+		update_post_meta( $post_id, '_buoyvs_etag',                $channel_data['etag'] ?? '' );
 
 		// Download the channel images into the media library and store their
 		// local URLs. The channel post is created once per post type (deduped
@@ -355,21 +355,21 @@ class Video_Importer {
 			$channel_data['profile_picture']['url'] ?? '',
 			$post_id,
 			/* translators: %s: channel title */
-			sprintf( __( '%s profile picture', 'wby-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
+			sprintf( __( '%s profile picture', 'buoy-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
 		);
 		$banner  = $this->sideload_channel_image(
 			$channel_data['banner_image']['url'] ?? '',
 			$post_id,
 			/* translators: %s: channel title */
-			sprintf( __( '%s banner', 'wby-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
+			sprintf( __( '%s banner', 'buoy-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
 		);
 
-		update_post_meta( $post_id, '_wpbyvs_profile_picture',    $profile['url'] );
-		update_post_meta( $post_id, '_wpbyvs_profile_picture_id', $profile['id'] );
-		update_post_meta( $post_id, '_wpbyvs_banner_image',       $banner['url'] );
-		update_post_meta( $post_id, '_wpbyvs_banner_image_id',    $banner['id'] );
-		update_post_meta( $post_id, '_wpbyvs_source_type',         'channel' );
-		update_post_meta( $post_id, '_wpbyvs_last_synced',         time() );
+		update_post_meta( $post_id, '_buoyvs_profile_picture',    $profile['url'] );
+		update_post_meta( $post_id, '_buoyvs_profile_picture_id', $profile['id'] );
+		update_post_meta( $post_id, '_buoyvs_banner_image',       $banner['url'] );
+		update_post_meta( $post_id, '_buoyvs_banner_image_id',    $banner['id'] );
+		update_post_meta( $post_id, '_buoyvs_source_type',         'channel' );
+		update_post_meta( $post_id, '_buoyvs_last_synced',         time() );
 
 		/**
 		 * Fires after a channel's metadata has been written during sync.
@@ -380,7 +380,7 @@ class Video_Importer {
 		 * @param array  $channel_data Channel data from the YouTube API.
 		 * @param string $channel_id   YouTube channel ID.
 		 */
-		do_action( 'wpbyvs_channel_synced', $post_id, $channel_data, $channel_id );
+		do_action( 'buoyvs_channel_synced', $post_id, $channel_data, $channel_id );
 	}
 
 	/**
@@ -448,9 +448,9 @@ class Video_Importer {
 	/**
 	 * Get the URL of the largest available thumbnail.
 	 *
-	 * Used by the post_thumbnail_html filter in wpbyvs.php.
+	 * Used by the post_thumbnail_html filter in buoyvs.php.
 	 *
-	 * @param array $thumbnails Thumbnails array from _wpbyvs_video meta.
+	 * @param array $thumbnails Thumbnails array from _buoyvs_video meta.
 	 * @return array|null Thumbnail array (url, width, height) or null if none found.
 	 */
 	public static function get_best_thumbnail( array $thumbnails ): ?array {

@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 /**
- * WPBuoy Video Sync — General helper functions.
+ * Buoy Video Sync — General helper functions.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
 // Exit if accessed directly.
@@ -16,19 +16,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return string[]
  */
-function wpbyvs_valid_actions(): array {
+function buoyvs_valid_actions(): array {
 	return array( '', 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' );
 }
 
 /**
  * Get the configured channel as a single flat object.
  *
- * The channel is stored as a flat object in the wpbyvs_channel_config option.
+ * The channel is stored as a flat object in the buoyvs_channel_config option.
  *
  * @return array The channel config, or an empty array if none.
  */
-function wpbyvs_get_channel_config(): array {
-	$config = get_option( 'wpbyvs_channel_config', array() );
+function buoyvs_get_channel_config(): array {
+	$config = get_option( 'buoyvs_channel_config', array() );
 	return is_array( $config ) ? $config : array();
 }
 
@@ -40,10 +40,10 @@ function wpbyvs_get_channel_config(): array {
  * @param array $rule Raw rule data from $_POST.
  * @return array Sanitized rule.
  */
-function wpbyvs_sanitize_sync_rule( $rule ) {
+function buoyvs_sanitize_sync_rule( $rule ) {
 	$action = isset( $rule['action'] ) ? sanitize_text_field( $rule['action'] ) : '';
 	// Unknown values sanitize to '' so the rule renders as unconfigured.
-	if ( ! in_array( $action, wpbyvs_valid_actions(), true ) ) {
+	if ( ! in_array( $action, buoyvs_valid_actions(), true ) ) {
 		$action = '';
 	}
 
@@ -65,7 +65,7 @@ function wpbyvs_sanitize_sync_rule( $rule ) {
  * @param int    $post_id Current post ID.
  * @return array<int,array> Validated tabs, each [ 'slug', 'label', 'render' ].
  */
-function wpbyvs_get_metabox_tabs( string $type, int $post_id ): array {
+function buoyvs_get_metabox_tabs( string $type, int $post_id ): array {
 	/**
 	 * Filter the extra tabs shown in the video/playlist/channel metabox.
 	 *
@@ -77,7 +77,7 @@ function wpbyvs_get_metabox_tabs( string $type, int $post_id ): array {
 	 * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
 	 * @param int    $post_id Current post ID.
 	 */
-	$tabs = apply_filters( 'wpbyvs_metabox_tabs', array(), $type, $post_id );
+	$tabs = apply_filters( 'buoyvs_metabox_tabs', array(), $type, $post_id );
 
 	$valid = array();
 	if ( is_array( $tabs ) ) {
@@ -91,16 +91,16 @@ function wpbyvs_get_metabox_tabs( string $type, int $post_id ): array {
 }
 
 /**
- * Render extra metabox tab buttons (call inside .wpbyvs-channel-tabs-nav).
+ * Render extra metabox tab buttons (call inside .buoyvs-channel-tabs-nav).
  *
  * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
  * @param int    $post_id Current post ID.
  * @return void
  */
-function wpbyvs_render_extra_tab_nav( string $type, int $post_id ): void {
-	foreach ( wpbyvs_get_metabox_tabs( $type, $post_id ) as $tab ) {
+function buoyvs_render_extra_tab_nav( string $type, int $post_id ): void {
+	foreach ( buoyvs_get_metabox_tabs( $type, $post_id ) as $tab ) {
 		printf(
-			'<button type="button" class="wpbyvs-channel-tab-btn" data-tab="%1$s" role="tab" aria-selected="false">%2$s</button>',
+			'<button type="button" class="buoyvs-channel-tab-btn" data-tab="%1$s" role="tab" aria-selected="false">%2$s</button>',
 			esc_attr( $tab['slug'] ),
 			esc_html( $tab['label'] )
 		);
@@ -108,16 +108,16 @@ function wpbyvs_render_extra_tab_nav( string $type, int $post_id ): void {
 }
 
 /**
- * Render extra metabox tab panels (call inside .wpbyvs-channel-tabs-content).
+ * Render extra metabox tab panels (call inside .buoyvs-channel-tabs-content).
  *
  * @param string $type    Metabox type: 'video', 'playlist', or 'channel'.
  * @param int    $post_id Current post ID.
  * @return void
  */
-function wpbyvs_render_extra_tab_panels( string $type, int $post_id ): void {
-	foreach ( wpbyvs_get_metabox_tabs( $type, $post_id ) as $tab ) {
+function buoyvs_render_extra_tab_panels( string $type, int $post_id ): void {
+	foreach ( buoyvs_get_metabox_tabs( $type, $post_id ) as $tab ) {
 		printf(
-			'<div class="wpbyvs-channel-tab-panel wpbyvs-hidden" data-panel="%s" role="tabpanel">',
+			'<div class="buoyvs-channel-tab-panel buoyvs-hidden" data-panel="%s" role="tabpanel">',
 			esc_attr( $tab['slug'] )
 		);
 		call_user_func( $tab['render'], $post_id );

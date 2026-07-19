@@ -4,10 +4,10 @@ declare(strict_types=1);
  * Registers Gutenberg blocks, the [video-sync] shortcode, and the REST endpoint
  * used by the block editor post selector.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,17 +29,17 @@ class Blocks {
 
 	public function enqueue_editor_assets(): void {
 		wp_enqueue_style(
-			'wby-video-sync-block-editor',
-			WPBYVS_PLUGIN_URL . 'blocks/editor.css',
+			'buoy-video-sync-block-editor',
+			BUOYVS_PLUGIN_URL . 'blocks/editor.css',
 			array( 'wp-block-editor' ),
-			WPBYVS_VERSION
+			BUOYVS_VERSION
 		);
 	}
 
 	public function register_block_category( array $categories ): array {
 		array_unshift( $categories, array(
-			'slug'  => 'wby-video-sync',
-			'title' => __( 'Video Sync', 'wby-video-sync' ),
+			'slug'  => 'buoy-video-sync',
+			'title' => __( 'Video Sync', 'buoy-video-sync' ),
 			'icon'  => null,
 		) );
 		return $categories;
@@ -58,7 +58,7 @@ class Blocks {
 
 		foreach ( $blocks as $slug => $callback ) {
 			register_block_type(
-				WPBYVS_PLUGIN_DIR . 'blocks/' . $slug,
+				BUOYVS_PLUGIN_DIR . 'blocks/' . $slug,
 				array( 'render_callback' => $callback )
 			);
 		}
@@ -176,7 +176,7 @@ class Blocks {
 
 	public function register_rest_routes(): void {
 		register_rest_route(
-			'wby-video-sync/v1',
+			'buoy-video-sync/v1',
 			'/posts',
 			array(
 				'methods'             => 'GET',
@@ -199,11 +199,11 @@ class Blocks {
 
 		$type      = $request->get_param( 'type' );
 		$meta_keys = array(
-			'video'    => '_wpbyvs_video_id',
-			'playlist' => '_wpbyvs_playlist_id',
-			'channel'  => '_wpbyvs_channel_post',
+			'video'    => '_buoyvs_video_id',
+			'playlist' => '_buoyvs_playlist_id',
+			'channel'  => '_buoyvs_channel_post',
 		);
-		$meta_key  = $meta_keys[ $type ] ?? '_wpbyvs_video_id';
+		$meta_key  = $meta_keys[ $type ] ?? '_buoyvs_video_id';
 		$statuses  = array( 'publish', 'draft', 'private' );
 
 		// Direct, indexed lookup by meta_key — avoids the meta_query overhead
@@ -225,7 +225,7 @@ class Blocks {
 		$data = array_map(
 			function ( $row ) {
 				/* translators: %d: post ID */
-				return array( 'id' => (int) $row->ID, 'title' => $row->post_title ?: sprintf( __( 'Post #%d', 'wby-video-sync' ), $row->ID ) );
+				return array( 'id' => (int) $row->ID, 'title' => $row->post_title ?: sprintf( __( 'Post #%d', 'buoy-video-sync' ), $row->ID ) );
 			},
 			$ids
 		);
@@ -244,13 +244,13 @@ class Blocks {
 	 * @return string 'video', 'playlist', 'channel', or '' if not a synced post.
 	 */
 	private function post_kind( int $post_id ): string {
-		if ( get_post_meta( $post_id, '_wpbyvs_video_id', true ) ) {
+		if ( get_post_meta( $post_id, '_buoyvs_video_id', true ) ) {
 			return 'video';
 		}
-		if ( get_post_meta( $post_id, '_wpbyvs_playlist_id', true ) ) {
+		if ( get_post_meta( $post_id, '_buoyvs_playlist_id', true ) ) {
 			return 'playlist';
 		}
-		if ( get_post_meta( $post_id, '_wpbyvs_channel_post', true ) ) {
+		if ( get_post_meta( $post_id, '_buoyvs_channel_post', true ) ) {
 			return 'channel';
 		}
 		return '';
@@ -269,8 +269,8 @@ class Blocks {
 	 */
 	private function field_meta_key( string $kind, string $field ): string {
 		$shared = array(
-			'title'       => array( 'video' => '_wpbyvs_original_title', 'playlist' => '_wpbyvs_playlist_title', 'channel' => '_wpbyvs_channel_title' ),
-			'description' => array( 'video' => '_wpbyvs_original_description', 'playlist' => '_wpbyvs_playlist_description', 'channel' => '_wpbyvs_channel_description' ),
+			'title'       => array( 'video' => '_buoyvs_original_title', 'playlist' => '_buoyvs_playlist_title', 'channel' => '_buoyvs_channel_title' ),
+			'description' => array( 'video' => '_buoyvs_original_description', 'playlist' => '_buoyvs_playlist_description', 'channel' => '_buoyvs_channel_description' ),
 		);
 		if ( isset( $shared[ $field ][ $kind ] ) ) {
 			return $shared[ $field ][ $kind ];
@@ -278,25 +278,25 @@ class Blocks {
 
 		$by_kind = array(
 			'video' => array(
-				'video_id'      => '_wpbyvs_video_id',
-				'video_url'     => '_wpbyvs_video_url',
-				'channel_id'    => '_wpbyvs_channel_id',
-				'channel'       => '_wpbyvs_channel_title',
-				'published_date' => '_wpbyvs_published_at',
-				'duration'      => '_wpbyvs_duration_seconds',
-				'view_count'    => '_wpbyvs_view_count',
-				'like_count'    => '_wpbyvs_like_count',
-				'comment_count' => '_wpbyvs_comment_count',
+				'video_id'      => '_buoyvs_video_id',
+				'video_url'     => '_buoyvs_video_url',
+				'channel_id'    => '_buoyvs_channel_id',
+				'channel'       => '_buoyvs_channel_title',
+				'published_date' => '_buoyvs_published_at',
+				'duration'      => '_buoyvs_duration_seconds',
+				'view_count'    => '_buoyvs_view_count',
+				'like_count'    => '_buoyvs_like_count',
+				'comment_count' => '_buoyvs_comment_count',
 			),
 			'playlist' => array(
-				'playlist_id'          => '_wpbyvs_playlist_id',
-				'channel_id'           => '_wpbyvs_channel_id',
-				'playlist_video_count' => '_wpbyvs_playlist_video_count',
+				'playlist_id'          => '_buoyvs_playlist_id',
+				'channel_id'           => '_buoyvs_channel_id',
+				'playlist_video_count' => '_buoyvs_playlist_video_count',
 			),
 			'channel' => array(
-				'channel_id'       => '_wpbyvs_channel_id',
-				'subscriber_count' => '_wpbyvs_subscriber_count',
-				'video_count'      => '_wpbyvs_channel_video_count',
+				'channel_id'       => '_buoyvs_channel_id',
+				'subscriber_count' => '_buoyvs_subscriber_count',
+				'video_count'      => '_buoyvs_channel_video_count',
 			),
 		);
 
@@ -341,42 +341,42 @@ class Blocks {
 		}
 
 		if ( 'playlist_thumbnail' === $field ) {
-			$url = (string) get_post_meta( $post_id, '_wpbyvs_playlist_thumbnail', true );
+			$url = (string) get_post_meta( $post_id, '_buoyvs_playlist_thumbnail', true );
 			if ( ! $url ) {
 				return '';
 			}
-			return '<img src="' . esc_url( $url ) . '" alt="" class="wpbyvs-playlist-thumbnail">';
+			return '<img src="' . esc_url( $url ) . '" alt="" class="buoyvs-playlist-thumbnail">';
 		}
 
 		if ( 'profile_photo' === $field ) {
-			$url = (string) get_post_meta( $post_id, '_wpbyvs_profile_picture', true );
+			$url = (string) get_post_meta( $post_id, '_buoyvs_profile_picture', true );
 			if ( ! $url ) {
 				return '';
 			}
-			$alt = esc_attr( (string) get_post_meta( $post_id, '_wpbyvs_channel_title', true ) );
-			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="wby-video-sync-profile-photo">';
+			$alt = esc_attr( (string) get_post_meta( $post_id, '_buoyvs_channel_title', true ) );
+			return '<img src="' . esc_url( $url ) . '" alt="' . $alt . '" class="buoy-video-sync-profile-photo">';
 		}
 
 		if ( 'banner_image' === $field ) {
-			$url = (string) get_post_meta( $post_id, '_wpbyvs_banner_image', true );
+			$url = (string) get_post_meta( $post_id, '_buoyvs_banner_image', true );
 			if ( ! $url ) {
 				return '';
 			}
-			return '<img src="' . esc_url( $url ) . '" alt="" class="wpbyvs-banner-image">';
+			return '<img src="' . esc_url( $url ) . '" alt="" class="buoyvs-banner-image">';
 		}
 
 		return '';
 	}
 
 	private function render_embed( int $post_id ): string {
-		$video_id = (string) get_post_meta( $post_id, '_wpbyvs_video_id', true );
+		$video_id = (string) get_post_meta( $post_id, '_buoyvs_video_id', true );
 
 		if ( ! $video_id ) {
 			return '';
 		}
 
 		// Fill the parent width and scale height via a 16:9 aspect ratio.
-		return '<div class="wpbyvs-embed" style="width:100%;">'
+		return '<div class="buoyvs-embed" style="width:100%;">'
 			. '<iframe'
 			. ' src="' . esc_url( 'https://www.youtube.com/embed/' . $video_id ) . '"'
 			. ' style="display:block;width:100%;aspect-ratio:16/9;height:auto;border:0;"'
@@ -397,7 +397,7 @@ class Blocks {
 	 * @return string
 	 */
 	private function render_embed_preview( int $post_id ): string {
-		$video_id = (string) get_post_meta( $post_id, '_wpbyvs_video_id', true );
+		$video_id = (string) get_post_meta( $post_id, '_buoyvs_video_id', true );
 
 		if ( ! $video_id ) {
 			return '';
@@ -406,13 +406,13 @@ class Blocks {
 		// Reuse the thumbnail URL already stored by the sync (same source the
 		// Image block and featured-image fallback use) instead of requesting a
 		// new URL from a different YouTube host.
-		$thumb = (string) get_post_meta( $post_id, '_wpbyvs_thumbnail_url', true );
+		$thumb = (string) get_post_meta( $post_id, '_buoyvs_thumbnail_url', true );
 		if ( ! $thumb ) {
 			return '';
 		}
 		$alt = esc_attr( get_the_title( $post_id ) );
 
-		return '<div class="wpbyvs-embed wpbyvs-embed--preview" style="position:relative;display:block;width:100%;line-height:0;">'
+		return '<div class="buoyvs-embed buoyvs-embed--preview" style="position:relative;display:block;width:100%;line-height:0;">'
 			. '<img src="' . esc_url( $thumb ) . '" alt="' . $alt . '" style="display:block;width:100%;height:auto;">'
 			. '<span aria-hidden="true" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:68px;height:48px;background:rgba(0,0,0,0.75);border-radius:14%;">'
 			. '<span style="border-style:solid;border-width:10px 0 10px 17px;border-color:transparent transparent transparent #fff;margin-left:3px;"></span>'
@@ -421,7 +421,7 @@ class Blocks {
 	}
 
 	private function render_thumbnail( int $post_id, string $size ): string {
-		$thumbnails = get_post_meta( $post_id, '_wpbyvs_thumbnails', true );
+		$thumbnails = get_post_meta( $post_id, '_buoyvs_thumbnails', true );
 
 		if ( ! is_array( $thumbnails ) || empty( $thumbnails[ $size ] ) ) {
 			return '';
@@ -430,7 +430,7 @@ class Blocks {
 		$thumb = $thumbnails[ $size ];
 		$w     = ! empty( $thumb['width'] )  ? ' width="' . (int) $thumb['width'] . '"'  : '';
 		$h     = ! empty( $thumb['height'] ) ? ' height="' . (int) $thumb['height'] . '"' : '';
-		$class = 'wpbyvs-thumbnail wpbyvs-thumbnail--' . esc_attr( $size );
+		$class = 'buoyvs-thumbnail buoyvs-thumbnail--' . esc_attr( $size );
 
 		// width/height attributes preserve the intrinsic aspect ratio (no layout
 		// shift); the inline style makes the thumbnail fill its container width.

@@ -5,12 +5,12 @@ declare(strict_types=1);
  *
  * Executes one sync rule end-to-end: reads the channel config, calls the
  * YouTube API, imports videos/playlists/channel data, and writes results
- * back to wpbyvs_channel_config.
+ * back to buoyvs_channel_config.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -133,7 +133,7 @@ class Sync_Runner {
 		// the Channels page pre-sets to 'syncing' before the cron fires.
 		$lock_key = null;
 		if ( $this->is_option_channel ) {
-			$lock_key = 'wpbyvs_lock_' . $rule_index;
+			$lock_key = 'buoyvs_lock_' . $rule_index;
 			if ( get_transient( $lock_key ) ) {
 				return;
 			}
@@ -187,7 +187,7 @@ class Sync_Runner {
 
 				default:
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					error_log( "WPBuoy Video Sync: unknown action '{$action}' (term {$term_id}, rule {$rule_index})." );
+					error_log( "Buoy Video Sync: unknown action '{$action}' (term {$term_id}, rule {$rule_index})." );
 					return;
 			}
 
@@ -212,20 +212,20 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Execute a sync rule for an option-based channel (Channels Page / wpbyvs_channel_config).
+	 * Execute a sync rule for an option-based channel (Channels Page / buoyvs_channel_config).
 	 *
 	 * Sets up the source data override so that get_channel_data() and
 	 * save_source_data() transparently read/write wp_options instead of
 	 * term meta, then delegates to the standard run() method with term_id = 0.
 	 *
 	 * Called by Sync_Queue::dispatch_config_sync() when a
-	 * wpbyvs_channel_config_sync_rule cron event fires.
+	 * buoyvs_channel_config_sync_rule cron event fires.
 	 *
 	 * @param int $rule_index 0-based rule index within the channel's sync_rules.
 	 * @return void
 	 */
 	public function run_config_channel( int $rule_index ): void {
-		$ch_data = wpbyvs_get_channel_config();
+		$ch_data = buoyvs_get_channel_config();
 
 		if ( empty( $ch_data['youtube_id'] ) ) {
 			return;
@@ -336,7 +336,7 @@ class Sync_Runner {
 					'No videos were imported. %d candidate was fetched from the API but could not be saved.',
 					'No videos were imported. %d candidates were fetched from the API but none could be saved.',
 					$candidate_count,
-					'wby-video-sync'
+					'buoy-video-sync'
 				),
 				$candidate_count
 			);
@@ -352,7 +352,7 @@ class Sync_Runner {
 	 * Handle the channel_sync_new action.
 	 *
 	 * Fetches fresh channel data from the API and creates a WordPress post for the channel.
-	 * If a post for this channel already exists (deduped by _wpbyvs_channel_post), nothing
+	 * If a post for this channel already exists (deduped by _buoyvs_channel_post), nothing
 	 * is done — channel update actions handle refreshing an existing post.
 	 *
 	 * @param int   $term_id Channel term ID (0 for option-based channels).
@@ -542,11 +542,11 @@ class Sync_Runner {
 	 */
 	private function invalid_post_type_message( string $post_type ): string {
 		if ( '' === $post_type ) {
-			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'wby-video-sync' );
+			return __( 'No destination post type is set for this rule. Choose a post type so synced items have somewhere to be saved.', 'buoy-video-sync' );
 		}
 		return sprintf(
 			/* translators: %s: post type slug */
-			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'wby-video-sync' ),
+			__( 'The destination post type "%s" is no longer registered. Choose a valid post type for this rule.', 'buoy-video-sync' ),
 			$post_type
 		);
 	}
@@ -606,7 +606,7 @@ class Sync_Runner {
 	 *
 	 * The runner syncs the single option-based channel, so this returns the
 	 * in-memory source_data_override that run_config_channel() loaded from
-	 * wpbyvs_channel_config. (Params retained for the call signature.)
+	 * buoyvs_channel_config. (Params retained for the call signature.)
 	 *
 	 * @return array|null Channel data array, or null if not set.
 	 */
@@ -615,7 +615,7 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Persist the channel's source data to wpbyvs_channel_config and refresh the
+	 * Persist the channel's source data to buoyvs_channel_config and refresh the
 	 * in-memory override so later reads in the same run see the update.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
@@ -629,7 +629,7 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Write the updated single channel back to wpbyvs_channel_config (flat).
+	 * Write the updated single channel back to buoyvs_channel_config (flat).
 	 *
 	 * Preserves the youtube_id key (the option stores youtube_id; the runner
 	 * temporarily adds channel_id as an alias — we don't store it).
@@ -642,7 +642,7 @@ class Sync_Runner {
 			$data['youtube_id'] = $data['channel_id'];
 		}
 
-		update_option( 'wpbyvs_channel_config', $data );
+		update_option( 'buoyvs_channel_config', $data );
 	}
 
 	// -------------------------------------------------------------------------
@@ -867,7 +867,7 @@ class Sync_Runner {
 			return;
 		}
 		set_transient(
-			'wpbyvs_prog_' . $this->current_rule_index,
+			'buoyvs_prog_' . $this->current_rule_index,
 			array( 'current' => $current, 'total' => $total ),
 			1800
 		);

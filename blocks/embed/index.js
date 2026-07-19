@@ -20,11 +20,11 @@
 
 		return el('div', blockProps,
 			currentPostId
-				? el(ServerSideRender, { block: 'wby-video-sync/embed', attributes: previewAttrs })
+				? el(ServerSideRender, { block: 'buoy-video-sync/embed', attributes: previewAttrs })
 				: el(Placeholder, {
 					icon:         'video-alt3',
-					label:        __( 'Video Sync Embed', 'wby-video-sync' ),
-					instructions: __( 'This block embeds the current post\'s YouTube video.', 'wby-video-sync' ),
+					label:        __( 'Video Sync Embed', 'buoy-video-sync' ),
+					instructions: __( 'This block embeds the current post\'s YouTube video.', 'buoy-video-sync' ),
 				})
 		)
 	}
@@ -33,7 +33,7 @@
 		el('path', { d: 'M360-320h80v-120h120v-80H440v-120h-80v120H240v80h120zM160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h480q33 0 56.5 23.5T720-720v180l160-160v440L720-420v180q0 33-23.5 56.5T640-160zm0-80h480v-480H160zm0 0v-480z' })
 	)
 
-	wp.blocks.registerBlockType('wby-video-sync/embed', {
+	wp.blocks.registerBlockType('buoy-video-sync/embed', {
 		icon: blockIcon,
 		edit: EmbedEdit,
 		save: function () { return null },

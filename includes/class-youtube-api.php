@@ -7,10 +7,10 @@ declare(strict_types=1);
  * (which costs 100 quota units per call). Every method here costs 1 unit
  * per page of up to 50 items.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -122,7 +122,7 @@ class YouTube_API {
 	public function resolve_channel_id( string $input ): string|\WP_Error {
 		$input = trim( $input );
 		if ( '' === $input ) {
-			return new \WP_Error( 'wpbyvs_channel_empty', __( 'Enter a channel URL or ID.', 'wby-video-sync' ) );
+			return new \WP_Error( 'buoyvs_channel_empty', __( 'Enter a channel URL or ID.', 'buoy-video-sync' ) );
 		}
 
 		// Already a channel ID.
@@ -165,8 +165,8 @@ class YouTube_API {
 		}
 
 		return new \WP_Error(
-			'wpbyvs_channel_unresolved',
-			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'wby-video-sync' )
+			'buoyvs_channel_unresolved',
+			__( 'Could not find a channel for that link. Paste the channel URL, @handle, or ID.', 'buoy-video-sync' )
 		);
 	}
 
@@ -182,7 +182,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['id'] ?? '';
-		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
+		return $id ?: new \WP_Error( 'buoyvs_channel_not_found', __( 'No channel matched that link.', 'buoy-video-sync' ) );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class YouTube_API {
 			return $data;
 		}
 		$id = $data['items'][0]['snippet']['channelId'] ?? '';
-		return $id ?: new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that video.', 'wby-video-sync' ) );
+		return $id ?: new \WP_Error( 'buoyvs_channel_not_found', __( 'No channel matched that video.', 'buoy-video-sync' ) );
 	}
 
 	/**
@@ -222,10 +222,10 @@ class YouTube_API {
 
 		$response = wp_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error( 'wpbyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'wby-video-sync' ) );
+			return new \WP_Error( 'buoyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'buoy-video-sync' ) );
 		}
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
+			return new \WP_Error( 'buoyvs_channel_not_found', __( 'No channel matched that link.', 'buoy-video-sync' ) );
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -242,7 +242,7 @@ class YouTube_API {
 			}
 		}
 
-		return new \WP_Error( 'wpbyvs_channel_not_found', __( 'No channel matched that link.', 'wby-video-sync' ) );
+		return new \WP_Error( 'buoyvs_channel_not_found', __( 'No channel matched that link.', 'buoy-video-sync' ) );
 	}
 
 	/**
@@ -582,13 +582,13 @@ class YouTube_API {
 				return 'YouTube rejected the request. This may indicate an invalid Channel ID or Playlist ID — please double-check your settings.';
 
 			case 401:
-				return 'YouTube API authentication failed. Please check your API key in WPBuoy Video Sync → Settings.';
+				return 'YouTube API authentication failed. Please check your API key in Buoy Video Sync → Settings.';
 
 			case 403:
 				if ( in_array( $reason, array( 'keyInvalid', 'accessNotConfigured', 'forbidden' ), true ) ) {
-					return 'YouTube API access denied. Your API key may be invalid or the YouTube Data API v3 may not be enabled for it. Check WPBuoy Video Sync → Settings.';
+					return 'YouTube API access denied. Your API key may be invalid or the YouTube Data API v3 may not be enabled for it. Check Buoy Video Sync → Settings.';
 				}
-				return 'YouTube API returned a "Forbidden" error. Check your API key in WPBuoy Video Sync → Settings.';
+				return 'YouTube API returned a "Forbidden" error. Check your API key in Buoy Video Sync → Settings.';
 
 			case 404:
 				return 'YouTube could not find the requested channel or playlist. Please verify your Channel ID or Playlist ID.';

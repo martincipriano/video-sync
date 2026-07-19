@@ -13,21 +13,21 @@
 	var ServerSideRender   = wp.serverSideRender
 
 	var FIELD_OPTIONS = [
-		{ label: __( '— Video —', 'wby-video-sync' ),    value: '__video_group', disabled: true },
-		{ label: __( 'Thumbnail', 'wby-video-sync' ),    value: 'thumbnail' },
-		{ label: __( '— Playlist —', 'wby-video-sync' ), value: '__playlist_group', disabled: true },
-		{ label: __( 'Thumbnail', 'wby-video-sync' ),    value: 'playlist_thumbnail' },
-		{ label: __( '— Channel —', 'wby-video-sync' ),  value: '__channel_group', disabled: true },
-		{ label: __( 'Profile Photo', 'wby-video-sync' ), value: 'profile_photo' },
-		{ label: __( 'Banner Image', 'wby-video-sync' ),  value: 'banner_image' },
+		{ label: __( '— Video —', 'buoy-video-sync' ),    value: '__video_group', disabled: true },
+		{ label: __( 'Thumbnail', 'buoy-video-sync' ),    value: 'thumbnail' },
+		{ label: __( '— Playlist —', 'buoy-video-sync' ), value: '__playlist_group', disabled: true },
+		{ label: __( 'Thumbnail', 'buoy-video-sync' ),    value: 'playlist_thumbnail' },
+		{ label: __( '— Channel —', 'buoy-video-sync' ),  value: '__channel_group', disabled: true },
+		{ label: __( 'Profile Photo', 'buoy-video-sync' ), value: 'profile_photo' },
+		{ label: __( 'Banner Image', 'buoy-video-sync' ),  value: 'banner_image' },
 	]
 
 	var SIZE_OPTIONS = [
-		{ label: __( 'Max Res (1280×720)', 'wby-video-sync' ), value: 'maxres' },
-		{ label: __( 'Standard (640×480)', 'wby-video-sync' ), value: 'standard' },
-		{ label: __( 'High (480×360)', 'wby-video-sync' ),     value: 'high' },
-		{ label: __( 'Medium (320×180)', 'wby-video-sync' ),   value: 'medium' },
-		{ label: __( 'Default (120×90)', 'wby-video-sync' ),   value: 'default' },
+		{ label: __( 'Max Res (1280×720)', 'buoy-video-sync' ), value: 'maxres' },
+		{ label: __( 'Standard (640×480)', 'buoy-video-sync' ), value: 'standard' },
+		{ label: __( 'High (480×360)', 'buoy-video-sync' ),     value: 'high' },
+		{ label: __( 'Medium (320×180)', 'buoy-video-sync' ),   value: 'medium' },
+		{ label: __( 'Default (120×90)', 'buoy-video-sync' ),   value: 'default' },
 	]
 
 	function ImageEdit(props) {
@@ -46,15 +46,15 @@
 
 		return el(Fragment, null,
 			el(InspectorControls, null,
-				el(PanelBody, { title: __( 'Image Settings', 'wby-video-sync' ), initialOpen: true },
+				el(PanelBody, { title: __( 'Image Settings', 'buoy-video-sync' ), initialOpen: true },
 					el(SelectControl, {
-						label:    __( 'Image', 'wby-video-sync' ),
+						label:    __( 'Image', 'buoy-video-sync' ),
 						value:    field,
 						options:  FIELD_OPTIONS,
 						onChange: function (val) { setAttributes({ field: val }) },
 					}),
 					field === 'thumbnail' && el(SelectControl, {
-						label:    __( 'Size', 'wby-video-sync' ),
+						label:    __( 'Size', 'buoy-video-sync' ),
 						value:    size,
 						options:  SIZE_OPTIONS,
 						onChange: function (val) { setAttributes({ size: val }) },
@@ -63,11 +63,11 @@
 			),
 			el('div', blockProps,
 				isConfigured && currentPostId
-					? el(ServerSideRender, { block: 'wby-video-sync/image', attributes: previewAttrs })
+					? el(ServerSideRender, { block: 'buoy-video-sync/image', attributes: previewAttrs })
 					: el(Placeholder, {
 						icon:         'format-image',
-						label:        __( 'Video Sync Image', 'wby-video-sync' ),
-						instructions: __( 'Select an image type in the block settings panel.', 'wby-video-sync' ),
+						label:        __( 'Video Sync Image', 'buoy-video-sync' ),
+						instructions: __( 'Select an image type in the block settings panel.', 'buoy-video-sync' ),
 					})
 			)
 		)
@@ -77,7 +77,7 @@
 		el('path', { d: 'M200-320h400L462-500l-92 120-62-80zm-40 160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h480q33 0 56.5 23.5T720-720v180l160-160v440L720-420v180q0 33-23.5 56.5T640-160zm0-80h480v-480H160zm0 0v-480z' })
 	)
 
-	wp.blocks.registerBlockType('wby-video-sync/image', {
+	wp.blocks.registerBlockType('buoy-video-sync/image', {
 		icon: blockIcon,
 		edit: ImageEdit,
 		save: function () { return null },

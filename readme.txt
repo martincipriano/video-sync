@@ -1,4 +1,4 @@
-=== WPBuoy Video Sync ===
+=== Buoy Video Sync ===
 Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
@@ -12,7 +12,7 @@ Sync new videos, playlists, and channel data from a YouTube channel into WordPre
 
 == Description ==
 
-WPBuoy Video Sync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and WPBuoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
+Buoy Video Sync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and Buoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
 
 Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
 
@@ -25,7 +25,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
 * **Thumbnails** shown as the featured image when none is set; channel profile pictures and banners are downloaded into your media library
 * **Sync history** with the last-synced time and a per-rule error log
-* Stores all YouTube data in standard post meta (`_wpbyvs_*`) for easy use in your theme or queries
+* Stores all YouTube data in standard post meta (`_buoyvs_*`) for easy use in your theme or queries
 * **`[video-sync]` shortcode** and **three Gutenberg blocks** (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site — no code required
 * **Delete channel** — clear the configured channel and its sync history in one click when you want to start over or point at a different channel
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
@@ -34,10 +34,10 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 
 == Installation ==
 
-1. Upload the `wby-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
+1. Upload the `buoy-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Go to **WPBuoy Video Sync → Settings** and enter your Google API key.
-4. Go to **WPBuoy Video Sync → Channels** and add a YouTube channel.
+3. Go to **Buoy Video Sync → Settings** and enter your Google API key.
+4. Go to **Buoy Video Sync → Channels** and add a YouTube channel.
 5. Add a sync rule to the channel — pick an action and a destination post type — then save to import.
 
 **Getting a Google API key**
@@ -45,13 +45,13 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 1. Visit [Google Cloud Console](https://console.cloud.google.com/).
 2. Create a project and enable the **YouTube Data API v3**.
 3. Generate an API key under **Credentials**.
-4. Paste the key into **WPBuoy Video Sync → Settings**.
+4. Paste the key into **Buoy Video Sync → Settings**.
 
 == Frequently Asked Questions ==
 
-= Does WPBuoy Video Sync upload video files to my site? =
+= Does Buoy Video Sync upload video files to my site? =
 
-No. WPBuoy Video Sync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Channel profile pictures and banners are downloaded into your media library; video and playlist thumbnails are displayed from the URLs YouTube serves them at.
+No. Buoy Video Sync imports metadata (title, description, thumbnail URL, view counts, and so on) and saves it in WordPress. The video files stay on YouTube. Channel profile pictures and banners are downloaded into your media library; video and playlist thumbnails are displayed from the URLs YouTube serves them at.
 
 = Where do synced items go? =
 
@@ -63,23 +63,23 @@ Every rule runs once, immediately after you save it. To import again later — f
 
 = Why do I need a Google API key? =
 
-YouTube data is fetched from the official YouTube Data API v3, which requires a key. The key is yours and stays on your server; WPBuoy Video Sync never sends your data to a third party.
+YouTube data is fetched from the official YouTube Data API v3, which requires a key. The key is yours and stays on your server; Buoy Video Sync never sends your data to a third party.
 
 = How much API quota does a sync use? =
 
-Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. WPBuoy Video Sync shows an estimate before you run a sync.
+Each API call costs 1 quota unit. Importing from a channel needs at least 2 calls (channel data plus playlist items), and roughly 1 more call per 50 videos for metadata. Google provides 10,000 free units per day. Buoy Video Sync shows an estimate before you run a sync.
 
 = Can I switch to syncing a different channel? =
 
 Yes. Edit the Channel field on the Channels page and save — the plugin resolves the new URL/@handle/ID and switches to it, keeping your existing sync rules attached to the new channel. To stop syncing entirely, use the **Delete channel** button at the bottom of the channel card, which also clears its sync history.
 
-= What happens to my data if I uninstall WPBuoy Video Sync? =
+= What happens to my data if I uninstall Buoy Video Sync? =
 
-By default your synced posts and settings are kept. If you want everything removed, enable **Remove all WPBuoy Video Sync data when the plugin is deleted** in **WPBuoy Video Sync → Settings** before deleting the plugin.
+By default your synced posts and settings are kept. If you want everything removed, enable **Remove all Buoy Video Sync data when the plugin is deleted** in **Buoy Video Sync → Settings** before deleting the plugin.
 
 == External services ==
 
-WPBuoy Video Sync connects to the **YouTube Data API v3**, a service provided by Google, to fetch the public metadata it imports into WordPress.
+Buoy Video Sync connects to the **YouTube Data API v3**, a service provided by Google, to fetch the public metadata it imports into WordPress.
 
 **What it is used for:** retrieving public information about the YouTube channels, playlists, and videos you choose to sync — such as titles, descriptions, thumbnail URLs, view counts, publish dates, and channel/playlist/video IDs.
 
@@ -113,34 +113,34 @@ Add a **Video Sync Field**, **Video Sync Image**, or **Video Sync Embed** block 
 
 == For Developers ==
 
-WPBuoy Video Sync fires action hooks after each item's metadata is saved, so you can run your own code whenever a video, playlist, or channel is synced. Each hook fires on both the initial import and every re-sync, after all metadata has been written. The synced data is passed to the hook, so you can identify or filter items without making another API call.
+Buoy Video Sync fires action hooks after each item's metadata is saved, so you can run your own code whenever a video, playlist, or channel is synced. Each hook fires on both the initial import and every re-sync, after all metadata has been written. The synced data is passed to the hook, so you can identify or filter items without making another API call.
 
-= wpbyvs_video_synced =
+= buoyvs_video_synced =
 
 Fires after a video's metadata is saved.
 
-`do_action( 'wpbyvs_video_synced', int $post_id, array $video_data, string $source_type, int $source_id );`
+`do_action( 'buoyvs_video_synced', int $post_id, array $video_data, string $source_type, int $source_id );`
 
 * `$post_id` — the video post ID.
 * `$video_data` — video data from the YouTube Data API (title, description, view_count, like_count, comment_count, video_id, and more).
 * `$source_type` — how it was synced: `channel`, `playlist`, or `video`.
 * `$source_id` — the source term ID the video was synced from.
 
-= wpbyvs_playlist_synced =
+= buoyvs_playlist_synced =
 
 Fires after a playlist's metadata is saved.
 
-`do_action( 'wpbyvs_playlist_synced', int $post_id, array $playlist_data, string $channel_id );`
+`do_action( 'buoyvs_playlist_synced', int $post_id, array $playlist_data, string $channel_id );`
 
 * `$post_id` — the playlist post ID.
 * `$playlist_data` — playlist data from the YouTube Data API.
 * `$channel_id` — the source channel ID the playlist belongs to.
 
-= wpbyvs_channel_synced =
+= buoyvs_channel_synced =
 
 Fires after a channel's metadata is saved.
 
-`do_action( 'wpbyvs_channel_synced', int $post_id, array $channel_data, string $channel_id );`
+`do_action( 'buoyvs_channel_synced', int $post_id, array $channel_data, string $channel_id );`
 
 * `$post_id` — the channel post ID.
 * `$channel_data` — channel data from the YouTube Data API.
@@ -148,16 +148,16 @@ Fires after a channel's metadata is saved.
 
 = Example =
 
-`add_action( 'wpbyvs_video_synced', function ( $post_id, $video_data ) {
+`add_action( 'buoyvs_video_synced', function ( $post_id, $video_data ) {
     // Runs each time a video is synced.
     error_log( sprintf( 'Synced video %d (%s)', $post_id, $video_data['video_id'] ?? '' ) );
 }, 10, 2 );`
 
-= wpbyvs_metabox_tabs =
+= buoyvs_metabox_tabs =
 
 Add your own tab to the video, playlist, or channel metabox on the post edit screen. Return an array of tabs, each with a `slug`, a `label`, and a `render` callback that echoes the panel's content.
 
-`apply_filters( 'wpbyvs_metabox_tabs', array $tabs, string $type, int $post_id );`
+`apply_filters( 'buoyvs_metabox_tabs', array $tabs, string $type, int $post_id );`
 
 * `$tabs` — list of tabs to add. Each: `[ 'slug' => string, 'label' => string, 'render' => callable( int $post_id ) ]`.
 * `$type` — which metabox is rendering: `video`, `playlist`, or `channel`.
@@ -165,7 +165,7 @@ Add your own tab to the video, playlist, or channel metabox on the post edit scr
 
 Example — add a tab only to the video metabox:
 
-`add_filter( 'wpbyvs_metabox_tabs', function ( $tabs, $type, $post_id ) {
+`add_filter( 'buoyvs_metabox_tabs', function ( $tabs, $type, $post_id ) {
     if ( 'video' !== $type ) {
         return $tabs;
     }
@@ -188,6 +188,9 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
+= 2.8.1 =
+* Fixed: The "Delete channel" button did nothing after confirming — the Save button's `name="submit"` attribute shadowed the form's native `submit()` method, so the form silently failed to send.
+
 = 2.8.0 =
 * New: "Delete channel" button on the Channels page — clears the configured channel and its sync history, so you can start over or switch to a different channel without manually resetting the plugin.
 
@@ -205,10 +208,10 @@ Example — add a tab only to the video metabox:
 * Simplified the single-channel architecture and removed unused legacy code. No changes to features or settings.
 
 = 2.4.0 =
-* New: `wpbyvs_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.
+* New: `buoyvs_metabox_tabs` filter for adding custom tabs to the video, playlist, and channel metaboxes.
 
 = 2.3.0 =
-* New: Action hooks fire after each video, playlist, and channel is synced — `wpbyvs_video_synced`, `wpbyvs_playlist_synced`, `wpbyvs_channel_synced`.
+* New: Action hooks fire after each video, playlist, and channel is synced — `buoyvs_video_synced`, `buoyvs_playlist_synced`, `buoyvs_channel_synced`.
 
 = 2.2.5 =
 * Maintenance release.
@@ -228,11 +231,11 @@ Example — add a tab only to the video metabox:
 * Fixed: Sync history status icons now render as inline SVG and no longer load an external font, removing the Google Fonts (Material Icons) dependency for full WordPress.org compliance.
 
 = 2.2.0 =
-* New: Paste a channel URL or @handle in the Channel field — WPBuoy Video Sync resolves it to the channel ID automatically (supports channel URLs, @handles, /user/ and /c/ URLs, and video links).
+* New: Paste a channel URL or @handle in the Channel field — Buoy Video Sync resolves it to the channel ID automatically (supports channel URLs, @handles, /user/ and /c/ URLs, and video links).
 * Improved: The Settings page shows a generic "Settings saved." notice and no longer re-validates the API key when it hasn't changed.
 
 = 2.1.0 =
-* New: In-plugin Help tabs linking to the WPBuoy Video Sync knowledge base on every admin screen.
+* New: In-plugin Help tabs linking to the Buoy Video Sync knowledge base on every admin screen.
 * Improved: WordPress.org coding-standards compliance — prepared SQL statements, output escaping, and translator comments.
 * Improved: Tested up to WordPress 7.0.
 

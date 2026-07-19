@@ -6,10 +6,10 @@ declare(strict_types=1);
  * Stores the last 50 sync run entries (max 90 days) for each channel
  * in a non-autoloaded wp_options entry keyed by YouTube channel ID.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,7 +31,7 @@ class Sync_History {
 	 * @return string
 	 */
 	public static function option_key( string $youtube_id ): string {
-		return 'wpbyvs_sync_history_' . sanitize_key( $youtube_id );
+		return 'buoyvs_sync_history_' . sanitize_key( $youtube_id );
 	}
 
 	/**
@@ -150,7 +150,7 @@ class Sync_History {
 	 * @return string
 	 */
 	private static function read_option_key( string $youtube_id ): string {
-		return 'wpbyvs_history_read_at_' . sanitize_key( $youtube_id );
+		return 'buoyvs_history_read_at_' . sanitize_key( $youtube_id );
 	}
 
 	/**

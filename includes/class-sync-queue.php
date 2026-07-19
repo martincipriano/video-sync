@@ -5,13 +5,13 @@ declare(strict_types=1);
  *
  * Queues sync rules as WP-Cron background jobs so imports run off the
  * save request. Each enabled rule fires a single immediate
- * 'wpbyvs_channel_config_sync_rule' event with args [ $rule_index ]; the
+ * 'buoyvs_channel_config_sync_rule' event with args [ $rule_index ]; the
  * runner auto-disables the rule once it has run.
  *
- * @package WPBuoy_Video_Sync
+ * @package Buoy_Video_Sync
  */
 
-namespace WPBuoy_Video_Sync;
+namespace Buoy_Video_Sync;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,7 @@ class Sync_Queue {
 	 * Cron hook name used for option-based channel sync rules (Channels Page).
 	 * Args: [ $rule_index ] — single channel, no term ID needed.
 	 */
-	private const CRON_HOOK_CONFIG = 'wpbyvs_channel_config_sync_rule';
+	private const CRON_HOOK_CONFIG = 'buoyvs_channel_config_sync_rule';
 
 	/**
 	 * Sync runner instance.
@@ -50,7 +50,7 @@ class Sync_Queue {
 		add_action( self::CRON_HOOK_CONFIG, array( $this, 'dispatch_config_sync' ), 10, 1 );
 
 		// Re-queue the channel's rule jobs when the Channels Page is saved.
-		add_action( 'wpbyvs_queue_channel_rules', array( $this, 'queue_channel_rules' ) );
+		add_action( 'buoyvs_queue_channel_rules', array( $this, 'queue_channel_rules' ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -60,7 +60,7 @@ class Sync_Queue {
 	/**
 	 * Dispatch a sync rule for an option-based channel when the cron event fires.
 	 *
-	 * Called by WP Cron via the 'wpbyvs_channel_config_sync_rule' hook.
+	 * Called by WP Cron via the 'buoyvs_channel_config_sync_rule' hook.
 	 *
 	 * @param int $rule_index Rule index within the channel's sync_rules.
 	 * @return void
@@ -76,7 +76,7 @@ class Sync_Queue {
 	/**
 	 * (Re)queue the background jobs for the channel's rules.
 	 *
-	 * Called via the 'wpbyvs_queue_channel_rules' action, which is fired by
+	 * Called via the 'buoyvs_queue_channel_rules' action, which is fired by
 	 * Channels_Page::save_channels() after updating the option.
 	 *
 	 * Every enabled rule queues a single immediate background event.
@@ -89,7 +89,7 @@ class Sync_Queue {
 		// Clear all existing queued events first.
 		$this->clear_queued_events();
 
-		$channel    = wpbyvs_get_channel_config();
+		$channel    = buoyvs_get_channel_config();
 		$immediate  = array();
 		foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
 			if ( empty( $rule['enabled'] ) ) {
@@ -104,7 +104,7 @@ class Sync_Queue {
 				$channel['sync_rules'][ $rule_idx ]['sync_status']     = 'syncing';
 				$channel['sync_rules'][ $rule_idx ]['sync_started_at'] = time();
 			}
-			update_option( 'wpbyvs_channel_config', $channel );
+			update_option( 'buoyvs_channel_config', $channel );
 		}
 	}
 
@@ -113,7 +113,7 @@ class Sync_Queue {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Clear every queued wpbyvs_channel_config_sync_rule event.
+	 * Clear every queued buoyvs_channel_config_sync_rule event.
 	 *
 	 * Sweeps the live cron array and removes all events for this hook, whatever
 	 * their [ rule_index ] args. This also clears orphaned events left behind
