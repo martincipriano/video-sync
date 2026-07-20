@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Buoy Video Sync 2.8.1\n"
+"Project-Id-Version: Buoy Video Sync 3.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/buoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-11T11:23:13+00:00\n"
+"POT-Creation-Date: 2026-07-20T03:53:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: buoy-video-sync\n"
@@ -33,6 +33,26 @@ msgstr ""
 #. Author of the plugin
 #: buoy-video-sync.php
 msgid "Martin Cipriano"
+msgstr ""
+
+#: buoy-video-sync.php:156
+msgid "Buoy Video Sync Video Details"
+msgstr ""
+
+#: buoy-video-sync.php:296
+msgid "Click to set a custom featured image"
+msgstr ""
+
+#: buoy-video-sync.php:300
+msgid "Click the YouTube thumbnail to edit or update"
+msgstr ""
+
+#: buoy-video-sync.php:318
+msgid "Buoy Video Sync Playlist Details"
+msgstr ""
+
+#: buoy-video-sync.php:359
+msgid "Buoy Video Sync Channel Details"
 msgstr ""
 
 #: includes/class-blocks.php:42
@@ -799,26 +819,6 @@ msgstr ""
 
 #: template-parts/sync-rule.php:193
 msgid "Remove sync rule"
-msgstr ""
-
-#: buoy-video-sync.php:156
-msgid "Buoy Video Sync Video Details"
-msgstr ""
-
-#: buoy-video-sync.php:296
-msgid "Click to set a custom featured image"
-msgstr ""
-
-#: buoy-video-sync.php:300
-msgid "Click the YouTube thumbnail to edit or update"
-msgstr ""
-
-#: buoy-video-sync.php:318
-msgid "Buoy Video Sync Playlist Details"
-msgstr ""
-
-#: buoy-video-sync.php:359
-msgid "Buoy Video Sync Channel Details"
 msgstr ""
 
 #: blocks/embed/index.js:26
