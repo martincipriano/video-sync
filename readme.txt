@@ -188,6 +188,9 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
+= 3.0.0 =
+* Changed: Renamed to Buoy Video Sync (previously WPBuoy Video Sync) per WordPress.org naming requirements — plugin slug, text domain, and internal identifiers updated accordingly.
+
 = 2.8.1 =
 * Fixed: The "Delete channel" button did nothing after confirming — the Save button's `name="submit"` attribute shadowed the form's native `submit()` method, so the form silently failed to send.
 
