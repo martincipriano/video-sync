@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -190,7 +190,7 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
-= 3.0.1 =
+= 3.0.2 =
 * Security: the block editor's post-selector REST endpoint now checks read access to each returned post individually, instead of relying on a blanket `edit_posts` check — draft/private synced posts no longer leak titles to users who can't otherwise read them.
 * Changed: the `[video-sync]` shortcode is now registered as `[buoyvs_video_sync]` for uniqueness; `[video-sync]` still works as a back-compat alias.
 
