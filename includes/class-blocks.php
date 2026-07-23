@@ -222,15 +222,20 @@ class Blocks {
 			)
 		);
 
-		$data = array_map(
-			function ( $row ) {
-				/* translators: %d: post ID */
-				return array( 'id' => (int) $row->ID, 'title' => $row->post_title ?: sprintf( __( 'Post #%d', 'buoy-video-sync' ), $row->ID ) );
-			},
-			$ids
-		);
+		// The destination post type is chosen per sync rule and can be any
+		// registered type, so `edit_posts` alone doesn't tell us this user can
+		// see a given draft/private row — its post type or author may not be
+		// theirs. Gate each row with WP's own per-post capability mapping.
+		$data = array();
+		foreach ( $ids as $row ) {
+			if ( ! current_user_can( 'read_post', $row->ID ) ) {
+				continue;
+			}
+			/* translators: %d: post ID */
+			$data[] = array( 'id' => (int) $row->ID, 'title' => $row->post_title ?: sprintf( __( 'Post #%d', 'buoy-video-sync' ), $row->ID ) );
+		}
 
-		return new \WP_REST_Response( array_values( $data ) );
+		return new \WP_REST_Response( $data );
 	}
 
 	// -------------------------------------------------------------------------

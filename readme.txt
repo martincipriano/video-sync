@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -187,6 +187,9 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 3.0.1 =
+* Security: the block editor's post-selector REST endpoint now checks read access to each returned post individually, instead of relying on a blanket `edit_posts` check — draft/private synced posts no longer leak titles to users who can't otherwise read them.
 
 = 3.0.0 =
 * Changed: Renamed to Buoy Video Sync (previously WPBuoy Video Sync) per WordPress.org naming requirements — plugin slug, text domain, and internal identifiers updated accordingly.
