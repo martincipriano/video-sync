@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 /**
- * Registers Gutenberg blocks, the [video-sync] shortcode, and the REST endpoint
- * used by the block editor post selector.
+ * Registers Gutenberg blocks, the [buoyvs_video_sync] shortcode (with a
+ * [video-sync] back-compat alias), and the REST endpoint used by the block
+ * editor post selector.
  *
  * @package Buoy_Video_Sync
  */
@@ -23,7 +24,8 @@ class Blocks {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
-		add_shortcode( 'video-sync', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'buoyvs_video_sync', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'video-sync', array( $this, 'render_shortcode' ) ); // Back-compat alias for content saved before the prefixed tag existed.
 		add_filter( 'block_categories_all', array( $this, 'register_block_category' ) );
 	}
 
@@ -129,16 +131,21 @@ class Blocks {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * [video-sync id="123" field="title"]
-	 * [video-sync id="123" field="thumbnail" size="maxres"]
-	 * [video-sync id="123" field="profile_photo"]
-	 * [video-sync id="123" field="banner_image"]
-	 * [video-sync id="123" type="embed"]
+	 * [buoyvs_video_sync id="123" field="title"]
+	 * [buoyvs_video_sync id="123" field="thumbnail" size="maxres"]
+	 * [buoyvs_video_sync id="123" field="profile_photo"]
+	 * [buoyvs_video_sync id="123" field="banner_image"]
+	 * [buoyvs_video_sync id="123" type="embed"]
 	 *
-	 * @param array|string $atts Shortcode attributes.
+	 * Also registered under the legacy `video-sync` tag for content saved
+	 * before the prefixed tag existed.
+	 *
+	 * @param array|string $atts    Shortcode attributes.
+	 * @param string|null  $content Shortcode content (unused).
+	 * @param string       $tag     Which registered tag invoked this callback.
 	 * @return string
 	 */
-	public function render_shortcode( $atts ): string {
+	public function render_shortcode( $atts, $content = null, string $tag = 'buoyvs_video_sync' ): string {
 		$atts = shortcode_atts(
 			array(
 				'id'    => 0,
@@ -147,7 +154,7 @@ class Blocks {
 				'type'  => '',
 			),
 			$atts,
-			'video-sync'
+			$tag
 		);
 
 		$post_id = (int) $atts['id'];

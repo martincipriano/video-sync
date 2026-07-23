@@ -26,7 +26,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 * **Thumbnails** shown as the featured image when none is set; channel profile pictures and banners are downloaded into your media library
 * **Sync history** with the last-synced time and a per-rule error log
 * Stores all YouTube data in standard post meta (`_buoyvs_*`) for easy use in your theme or queries
-* **`[video-sync]` shortcode** and **three Gutenberg blocks** (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site — no code required
+* **`[buoyvs_video_sync]` shortcode** and **three Gutenberg blocks** (Field, Image, Embed) to display synced titles, descriptions, stats, thumbnails, and the YouTube player anywhere on your site — no code required
 * **Delete channel** — clear the configured channel and its sync history in one click when you want to start over or point at a different channel
 * Optional "remove all data on uninstall" setting — your content stays unless you ask for it to be removed
 
@@ -87,7 +87,7 @@ Buoy Video Sync connects to the **YouTube Data API v3**, a service provided by G
 
 **Images:** channel profile pictures and banners are downloaded from the URLs the YouTube Data API returns and stored locally in your media library. Video and playlist thumbnail URLs returned by the API point to YouTube's own image host (`i.ytimg.com`) and are stored and referenced as-is, in the same way YouTube serves them — the plugin does not host, offload, or proxy any images from its author's servers.
 
-**Video player:** the optional Embed block and the `[video-sync type="embed"]` shortcode display YouTube's own embedded player in an iframe pointed at `https://www.youtube.com/embed/`, the same way pasting a YouTube link into the block editor does via WordPress's built-in oEmbed support. No plugin code or data is involved in loading the player — the visitor's browser requests it directly from YouTube.
+**Video player:** the optional Embed block and the `[buoyvs_video_sync type="embed"]` shortcode display YouTube's own embedded player in an iframe pointed at `https://www.youtube.com/embed/`, the same way pasting a YouTube link into the block editor does via WordPress's built-in oEmbed support. No plugin code or data is involved in loading the player — the visitor's browser requests it directly from YouTube.
 
 This service is provided by Google. By using it you agree to Google's terms and privacy policy:
 
@@ -96,14 +96,16 @@ This service is provided by Google. By using it you agree to Google's terms and 
 
 == Using synced data on your site ==
 
-Every synced video, playlist, and channel is a regular WordPress post, so you can already query and template it however you like. For everyone else, the `[video-sync]` shortcode and three Gutenberg blocks put the same data on the page without writing any code.
+Every synced video, playlist, and channel is a regular WordPress post, so you can already query and template it however you like. For everyone else, the `[buoyvs_video_sync]` shortcode and three Gutenberg blocks put the same data on the page without writing any code.
 
 **Shortcode**
 
-`[video-sync id="123" field="title"]`
-`[video-sync id="123" field="view_count"]`
-`[video-sync id="123" field="thumbnail" size="maxres"]`
-`[video-sync id="123" type="embed"]`
+`[buoyvs_video_sync id="123" field="title"]`
+`[buoyvs_video_sync id="123" field="view_count"]`
+`[buoyvs_video_sync id="123" field="thumbnail" size="maxres"]`
+`[buoyvs_video_sync id="123" type="embed"]`
+
+The older `[video-sync]` tag still works for content saved before the prefixed tag was introduced.
 
 `id` is the post ID of the synced video, playlist, or channel post. Available `field` values depend on the post: `title`, `description`, and, for videos, `video_url`, `published_date`, `duration`, `view_count`, `like_count`, `comment_count`; for playlists, `playlist_video_count`; for channels, `subscriber_count`, `video_count`. Image fields are `thumbnail` (video), `playlist_thumbnail`, `profile_photo`, and `banner_image` (channel).
 
@@ -190,6 +192,7 @@ Example — add a tab only to the video metabox:
 
 = 3.0.1 =
 * Security: the block editor's post-selector REST endpoint now checks read access to each returned post individually, instead of relying on a blanket `edit_posts` check — draft/private synced posts no longer leak titles to users who can't otherwise read them.
+* Changed: the `[video-sync]` shortcode is now registered as `[buoyvs_video_sync]` for uniqueness; `[video-sync]` still works as a back-compat alias.
 
 = 3.0.0 =
 * Changed: Renamed to Buoy Video Sync (previously WPBuoy Video Sync) per WordPress.org naming requirements — plugin slug, text domain, and internal identifiers updated accordingly.
