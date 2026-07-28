@@ -262,6 +262,105 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
+/* Pro teasers — static, disabled markup only (see docs/roadmap.md Phase F2) */
+.buoyvs-pro-badge {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="33" height="16"><defs><linearGradient id="a" x1="100%25" x2="-62.207%25" y1="51.161%25" y2="51.161%25"><stop offset="0%25" stop-color="%231a7dab"/><stop offset="100%25" stop-color="%2303142d"/></linearGradient></defs><g fill="none" fill-rule="evenodd"><path fill="url(%23a)" d="M8 0h16.604a8 8 0 1 1 0 16H8A8 8 0 1 1 8 0"/><path fill="%23fff" d="m18.012 8.995 1.446 2.845h-1.713L16.43 9.237h-1.688v2.603H13.23V4.16h3.38q.118 0 .315.008.198.008.353.035.717.106 1.176.453t.676.872.217 1.17q0 .966-.5 1.651a1.95 1.95 0 0 1-.835.646M6 11.84V4.16h3.381q.117 0 .314.008.198.008.354.035.717.106 1.176.453t.675.872.217 1.17q0 .645-.22 1.171-.219.525-.678.872t-1.17.454a6.246 6.246 0 0 1-.667.043h-1.87v2.602zm18.118.16q-1.2 0-2.071-.501a3.4 3.4 0 0 1-1.34-1.403q-.47-.901-.47-2.096 0-1.194.47-2.096.47-.9 1.34-1.403Q22.917 4 24.118 4t2.072.501 1.34 1.403T28 8t-.47 2.096q-.47.9-1.34 1.403-.87.501-2.072.501M7.513 7.883h1.801q.117 0 .256-.011.14-.01.256-.043a.9.9 0 0 0 .473-.269q.167-.19.23-.421.065-.233.065-.44 0-.209-.064-.44a1.06 1.06 0 0 0-.231-.422.9.9 0 0 0-.473-.269 1.4 1.4 0 0 0-.256-.043 3 3 0 0 0-.256-.01H7.513zm7.23 0h1.801q.117 0 .256-.011t.256-.043a.9.9 0 0 0 .472-.269q.167-.19.231-.421.064-.233.064-.44 0-.209-.064-.44a1.06 1.06 0 0 0-.23-.422.9.9 0 0 0-.473-.269 1.4 1.4 0 0 0-.256-.043 3 3 0 0 0-.256-.01h-1.802zm9.375 2.752q.762.01 1.268-.315t.76-.923q.252-.597.252-1.397t-.253-1.387a2 2 0 0 0-.759-.912q-.506-.325-1.268-.336-.762-.01-1.268.315-.505.325-.759.923-.253.597-.253 1.397t.253 1.387.76.912 1.267.336"/></g></svg>');
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: inline-block;
+  flex-shrink: 0;
+  height: 16px;
+  vertical-align: middle;
+  width: 33px;
+}
+
+.buoyvs-conditions:not(:has(.buoyvs-condition))::before {
+  border: 1px dashed #c3c4c7;
+  color: #8c8f94;
+  content: "There are no conditions yet.";
+  display: block;
+  font-size: 13px;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+.buoyvs-field-mapping-rows:not(:has(.buoyvs-field-mapping-row))::before {
+  border: 1px dashed #c3c4c7;
+  color: #8c8f94;
+  content: "No mappings \2014 uses default Buoy Video Sync metadata.";
+  display: block;
+  font-size: 13px;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+.buoyvs-taxonomy-terms:not(:has(.buoyvs-taxonomy-term-row))::before {
+  border: 1px dashed #c3c4c7;
+  color: #8c8f94;
+  content: "There are no taxonomy terms yet.";
+  display: block;
+  font-size: 13px;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+.buoyvs-add-condition-locked,
+.buoyvs-add-field-mapping-row-locked,
+.buoyvs-add-taxonomy-term-locked {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #a7aaad;
+  cursor: not-allowed;
+  display: flex;
+  font-weight: 500;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 0;
+}
+
+.buoyvs-add-condition-locked::before {
+  background-color: #a7aaad;
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  height: 24px;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160zm40-308 198-252H282zm0 0"/></svg>')
+    center / contain no-repeat;
+  -webkit-mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M440-160q-17 0-28.5-11.5T400-200v-240L168-736q-15-20-4.5-42t36.5-22h560q26 0 36.5 22t-4.5 42L560-440v240q0 17-11.5 28.5T520-160zm40-308 198-252H282zm0 0"/></svg>')
+    center / contain no-repeat;
+  width: 24px;
+}
+
+.buoyvs-add-field-mapping-row-locked::before {
+  background-color: #a7aaad;
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  height: 24px;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M160-440v-80h304l200-200H560v-80h240v240h-80v-104L496-440H160Zm400 280v-80h104L536-366l58-58 126 128v-104h80v240H560Z"/></svg>')
+    center / contain no-repeat;
+  -webkit-mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960"><path d="M160-440v-80h304l200-200H560v-80h240v240h-80v-104L496-440H160Zm400 280v-80h104L536-366l58-58 126 128v-104h80v240H560Z"/></svg>')
+    center / contain no-repeat;
+  width: 24px;
+}
+
+.buoyvs-add-taxonomy-term-locked::before {
+  background-color: #a7aaad;
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  height: 24px;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="m12 2-5.5 9h11zm0 3.84L13.93 9h-3.87zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5m0 7a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5M3 21.5h8v-8H3zm2-6h4v4H5z"/></svg>')
+    center / contain no-repeat;
+  -webkit-mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="m12 2-5.5 9h11zm0 3.84L13.93 9h-3.87zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5m0 7a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5M3 21.5h8v-8H3zm2-6h4v4H5z"/></svg>')
+    center / contain no-repeat;
+  width: 24px;
+}
+
 .buoyvs-rules {
   display: flex;
   flex-direction: column;
@@ -1677,4 +1776,112 @@
 .toplevel_page_buoyvs .wrap > h1,
 .buoyvs_page_buoyvs_license .wrap > h1 {
   margin-bottom: 16px;
+}
+
+/* Pro upgrade banner */
+.wpby-upgrade-banner {
+  color: #fff;
+  margin: 0;
+  background: linear-gradient(135deg, #03142D, #02557C);
+}
+.wpby-upgrade-banner__wrap {
+  margin: 0 auto;
+  max-width: 1024px;
+}
+.wpby-upgrade-banner__grid {
+  display: grid;
+  grid-template-columns: 3fr 7fr;
+  gap: 40px;
+  padding: 64px 0;
+}
+
+.wpby-upgrade-value-prop {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wpby-upgrade-banner__heading {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  margin: 0 0 16px;
+}
+
+.wpby-upgrade-banner__desc {
+  font-size: 16px;
+  margin: 0 0 24px;
+}
+
+.wpby-upgrade-banner__ctas {
+  display: flex;
+  gap: 16px;
+  justify-content: start;
+}
+
+.wpby-upgrade-banner__ctas .button:first-child {
+  background: transparent;
+  border-color: #fff;
+  color: #fff;
+}
+
+.wpby-upgrade-banner__ctas .button:last-child {
+  background-color: #4F46E5;
+  border-color: #4F46E5;
+  color: #fff;
+}
+
+.wpby-upgrade-features {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wpby-upgrade-banner__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.wpby-upgrade-banner__features li {
+  font-size: 16px;
+  line-height: 24px;
+  margin-bottom: 16px;
+  padding: 0 0 0 32px;
+  position: relative;
+}
+.wpby-upgrade-banner__features li:last-child {
+  margin-bottom: 0;
+}
+
+.wpby-upgrade-banner__features li::before {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="%23e8eaed"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z"/></svg>');
+  background-size: 100%;
+  content: '';
+  height: 24px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 24px;
+}
+
+.wpby-upgrade-banner__footer {
+  border-top: 1px solid rgba(255,255,255,.25);
+  padding: 16px 0;
+}
+
+.wpby-upgrade-banner__footer p {
+  color: rgba(255, 255, 255, .5);
+  font-size: 14px;
+  margin: 0;
+}
+
+.wpby-upgrade-banner__footer a {
+  color: rgba(255, 255, 255, .5);
+  text-decoration: underline;
+}
+
+.wpby-upgrade-banner__footer a:hover {
+  color: #fff;
 }

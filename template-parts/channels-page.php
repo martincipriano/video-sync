@@ -38,6 +38,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php esc_html_e( 'Go to Settings', 'buoy-video-sync' ); ?>
 		</a>
 	</div>
+
+	<?php
+	buoyvs_get_template_part( 'upgrade-banner', null, array(
+		'heading'     => __( 'Sync more than one channel', 'buoy-video-sync' ),
+		'description' => __( 'Add unlimited YouTube channels, each with its own recurring schedule, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
+	) );
+	?>
+
 	<?php else : ?>
 
 	<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
@@ -69,6 +77,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php submit_button( __( 'Save Changes', 'buoy-video-sync' ) ); ?>
 	</form>
+
+	<?php
+	buoyvs_get_template_part( 'upgrade-banner', null, array(
+		'heading'     => __( 'Sync more than one channel', 'buoy-video-sync' ),
+		'description' => __( 'Add unlimited YouTube channels, each with its own recurring schedule, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
+	) );
+	?>
 
 	<?php endif; ?>
 </div>

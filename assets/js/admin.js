@@ -193,6 +193,25 @@ function applyRuleActionVisibility(rule) {
 delegationRoot.querySelectorAll('.buoyvs-rule').forEach(applyRuleActionVisibility)
 
 /**
+ * Show/hide a taxonomy-terms teaser based on whether the selected post type
+ * has any public taxonomies registered (mirrors the server-rendered PHP condition).
+ */
+function applyTaxonomyVisibility(wrapper, postTypeSelect) {
+	if (!wrapper || !postTypeSelect) return
+	const opt  = postTypeSelect.selectedOptions[0]
+	const show = !!opt?.value && opt.dataset.hasTaxonomy === '1'
+	wrapper.classList.toggle('buoyvs-hidden', !show)
+}
+
+// Initialize taxonomy visibility on load (rule cards + channel Settings tab).
+delegationRoot.querySelectorAll('.buoyvs-dest-post-type').forEach(function (select) {
+	applyTaxonomyVisibility(select.closest('.buoyvs-rule')?.querySelector('.buoyvs-taxonomy-terms-wrapper'), select)
+})
+delegationRoot.querySelectorAll('.buoyvs-channel-default-post-type').forEach(function (select) {
+	applyTaxonomyVisibility(select.closest('.buoyvs-channel-tab-panel')?.querySelector('.buoyvs-taxonomy-terms-wrapper'), select)
+})
+
+/**
  * Refresh action-dependent UI when a rule's action changes.
  */
 delegationRoot.addEventListener('change', function(e) {
@@ -227,6 +246,21 @@ delegationRoot.addEventListener('change', function(e) {
 		wizard.querySelector('.buoyvs-items-per-run-wrapper')?.classList.toggle('buoyvs-hidden', isChannelAction)
 		wizard.dataset.isChannelAction = isChannelAction ? '1' : ''
 		updateWizardProgressIndicators(wizard)
+	}
+
+	if (e.target.classList.contains('buoyvs-dest-post-type')) {
+		const syncRule = e.target.closest('.buoyvs-rule')
+		applyTaxonomyVisibility(syncRule?.querySelector('.buoyvs-taxonomy-terms-wrapper'), e.target)
+	}
+
+	if (e.target.classList.contains('buoyvs-wizard-post-type')) {
+		const wizard = e.target.closest('.buoyvs-wizard')
+		applyTaxonomyVisibility(wizard?.querySelector('.buoyvs-taxonomy-terms-wrapper'), e.target)
+	}
+
+	if (e.target.classList.contains('buoyvs-channel-default-post-type')) {
+		const panel = e.target.closest('.buoyvs-channel-tab-panel')
+		applyTaxonomyVisibility(panel?.querySelector('.buoyvs-taxonomy-terms-wrapper'), e.target)
 	}
 })
 
@@ -333,7 +367,7 @@ delegationRoot.addEventListener('change', function(e) {
 // ============================================================
 // Sync Rule Wizard (flat scope inside delegationRoot for function access)
 // ============================================================
-const TOTAL_STEPS    = 2
+const TOTAL_STEPS    = 3
 const SLIDE_DURATION = 220 // ms
 
 /**

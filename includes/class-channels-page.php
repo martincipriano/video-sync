@@ -28,8 +28,8 @@ class Channels_Page {
 		add_action( 'wp_ajax_buoyvs_add_rule', array( $this, 'ajax_add_rule' ) );
 		add_action( 'wp_ajax_buoyvs_sync_progress', array( $this, 'ajax_sync_progress' ) );
 		add_action( 'wp_ajax_buoyvs_mark_history_read', array( $this, 'ajax_mark_history_read' ) );
-		add_action( 'load-toplevel_page_buoy-video-sync',        array( $this, 'add_help_tabs' ) );
-		add_action( 'load-buoyvs_page_buoyvs_settings', array( $this, 'add_help_tabs' ) );
+		add_action( 'load-toplevel_page_buoy-video-sync',    array( $this, 'add_help_tabs' ) );
+		add_action( 'load-video-sync_page_buoyvs_settings', array( $this, 'add_help_tabs' ) );
 	}
 
 	/**
@@ -56,6 +56,7 @@ class Channels_Page {
 				'<h2>' . esc_html__( 'Getting Started', 'buoy-video-sync' ) . '</h2>' .
 				'<ul>' .
 					'<li><a href="' . esc_url( $kb . 'getting-started/#how-buoyvs-works' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How Buoy Video Sync works', 'buoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'getting-started/#whats-the-difference-between-free-and-pro' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "What's the difference between Free and Pro?", 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'getting-started/#sync-actions-explained' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync actions explained', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'getting-started/#minimum-requirements' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Minimum requirements', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'getting-started/#getting-your-google-api-key' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Getting your Google API key', 'buoy-video-sync' ) . '</a></li>' .
@@ -91,6 +92,7 @@ class Channels_Page {
 				'<ul>' .
 					'<li><a href="' . esc_url( $kb . 'features-usage/#choosing-what-to-import' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Choosing what to import', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'features-usage/#destination-post-type' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Destination post type', 'buoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'features-usage/#run-once-vs-recurring-schedules' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Run-once vs recurring schedules', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'features-usage/#thumbnails-and-featured-images' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Thumbnails and featured images', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'features-usage/#sync-history-and-error-logs' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Sync history and error logs', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'features-usage/#the-post-metabox-and-copy-buttons' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'The post metabox and copy buttons', 'buoy-video-sync' ) . '</a></li>' .
@@ -108,6 +110,7 @@ class Channels_Page {
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#api-key-or-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key or quota errors', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#the-channel-cant-be-found' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "The channel can't be found", 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#im-seeing-duplicate-posts' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I'm seeing duplicate posts", 'buoy-video-sync' ) . '</a></li>' .
+					'<li><a href="' . esc_url( $kb . 'troubleshooting/#i-cant-activate-my-license' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I can't activate my license", 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#how-to-get-support' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get support', 'buoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );

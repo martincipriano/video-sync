@@ -26,7 +26,8 @@ $action      = isset( $rule['action'] ) ? $rule['action'] : '';
 $max_videos            = isset( $rule['max_videos'] ) ? (int) $rule['max_videos'] : 50;
 $destination_post_type = $rule['destination_post_type'] ?? '';
 
-$post_types = get_post_types( array( 'public' => true ), 'objects' );
+$post_types         = get_post_types( array( 'public' => true ), 'objects' );
+$_public_taxonomies = get_taxonomies( array( 'public' => true ) );
 
 // Dual-mode: Use provided $index or fall back to the {{INDEX}} placeholder for JavaScript.
 $rule_index = isset( $index ) ? $index : '{{INDEX}}';
@@ -125,9 +126,21 @@ $_post_type_label = 'playlists_sync_new' === $action
 				</label>
 				<select class="buoyvs-select buoyvs-action" id="buoyvs-action-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][action]" required>
 					<option value=""><?php esc_html_e( '— Select action —', 'buoy-video-sync' ); ?></option>
-					<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'buoy-video-sync' ); ?></option>
-					<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'buoy-video-sync' ); ?></option>
-					<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'buoy-video-sync' ); ?></option>
+					<optgroup label="<?php esc_attr_e( 'Videos', 'buoy-video-sync' ); ?>">
+						<option data-resource="video" value="videos_sync_new" <?php selected( $action, 'videos_sync_new' ); ?>><?php esc_html_e( 'Sync new videos', 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( 'Update all video details (Pro)', 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( 'Update specific video details (Pro)', 'buoy-video-sync' ); ?></option>
+					</optgroup>
+					<optgroup label="<?php esc_attr_e( 'Playlists', 'buoy-video-sync' ); ?>">
+						<option data-resource="playlist" value="playlists_sync_new" <?php selected( $action, 'playlists_sync_new' ); ?>><?php esc_html_e( 'Sync new playlists', 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( 'Update all playlist details (Pro)', 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( 'Update specific playlist details (Pro)', 'buoy-video-sync' ); ?></option>
+					</optgroup>
+					<optgroup label="<?php esc_attr_e( 'Channel', 'buoy-video-sync' ); ?>">
+						<option data-resource="channel" value="channel_sync_new" <?php selected( $action, 'channel_sync_new' ); ?>><?php esc_html_e( 'Sync this channel', 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( "Update this channel's details (Pro)", 'buoy-video-sync' ); ?></option>
+						<option disabled><?php esc_html_e( 'Update specific details of this channel (Pro)', 'buoy-video-sync' ); ?></option>
+					</optgroup>
 				</select>
 				<p class="buoyvs-quota-estimate buoyvs-hidden"></p>
 			</div>
@@ -148,6 +161,19 @@ $_post_type_label = 'playlists_sync_new' === $action
 			</div>
 		</div>
 
+		<div class="buoyvs-2-columns buoyvs-cols-3-1">
+			<div class="buoyvs-form-group">
+				<label for="buoyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync schedule', 'buoy-video-sync' ); ?></label>
+				<select class="buoyvs-select" id="buoyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>">
+					<option selected><?php esc_html_e( 'Once (run immediately after saving)', 'buoy-video-sync' ); ?></option>
+					<option disabled><?php esc_html_e( 'Hourly (Pro)', 'buoy-video-sync' ); ?></option>
+					<option disabled><?php esc_html_e( 'Daily (Pro)', 'buoy-video-sync' ); ?></option>
+					<option disabled><?php esc_html_e( 'Weekly (Pro)', 'buoy-video-sync' ); ?></option>
+					<option disabled><?php esc_html_e( 'Monthly (Pro)', 'buoy-video-sync' ); ?></option>
+					<option disabled><?php esc_html_e( 'Custom (Pro)', 'buoy-video-sync' ); ?></option>
+				</select>
+			</div>
+		</div>
 
 		<?php $_show_post_type = in_array( $action, array( 'videos_sync_new', 'playlists_sync_new', 'channel_sync_new' ), true ); ?>
 		<div class="buoyvs-2-columns buoyvs-post-type-wrapper<?php echo $_show_post_type ? '' : ' buoyvs-hidden'; ?>">
@@ -159,13 +185,52 @@ $_post_type_label = 'playlists_sync_new' === $action
 						<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'The WordPress post type that synced items will be created as.', 'buoy-video-sync' ); ?></span>
 					</span>
 				</label>
-				<select class="buoyvs-select" id="buoyvs-dest-post-type-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][destination_post_type]" required>
+				<select class="buoyvs-select buoyvs-dest-post-type" id="buoyvs-dest-post-type-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][destination_post_type]" required>
 					<option value=""><?php esc_html_e( '— Select post type —', 'buoy-video-sync' ); ?></option>
 					<?php foreach ( $post_types as $pt ) : ?>
-					<option value="<?php echo esc_attr( $pt->name ); ?>" <?php selected( $destination_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
+					<option value="<?php echo esc_attr( $pt->name ); ?>" data-has-taxonomy="<?php echo array_intersect( get_object_taxonomies( $pt->name ), $_public_taxonomies ) ? '1' : '0'; ?>" <?php selected( $destination_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 					<?php endforeach; ?>
 				</select>
 			</div>
+		</div>
+
+		<?php
+		$_show_tax_terms = $destination_post_type && array_intersect( get_object_taxonomies( $destination_post_type ), $_public_taxonomies );
+		?>
+		<div class="buoyvs-form-group buoyvs-taxonomy-terms-wrapper<?php echo $_show_tax_terms ? '' : ' buoyvs-hidden'; ?>">
+			<label>
+				<?php esc_html_e( 'Assign to taxonomy terms', 'buoy-video-sync' ); ?>
+				<span class="buoyvs-help-wrap">
+					<button type="button" class="buoyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'buoy-video-sync' ); ?>">?</button>
+					<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Assign synced items to categories, tags, or other taxonomy terms. Available in Pro.', 'buoy-video-sync' ); ?></span>
+				</span> <span class="buoyvs-pro-badge" role="img" aria-label="Pro"></span>
+			</label>
+			<div class="buoyvs-taxonomy-terms"></div>
+			<button type="button" class="buoyvs-add-taxonomy-term-locked"><?php esc_html_e( 'Add taxonomy term', 'buoy-video-sync' ); ?></button>
+		</div>
+
+		<div class="buoyvs-form-group buoyvs-field-mapping-wrapper">
+			<label class="buoyvs-fm-mapping-label">
+				<?php esc_html_e( 'Map YouTube details to post metadata', 'buoy-video-sync' ); ?>
+				<span class="buoyvs-help-wrap">
+					<button type="button" class="buoyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'buoy-video-sync' ); ?>">?</button>
+					<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Copy YouTube details into your own post meta keys. Available in Pro.', 'buoy-video-sync' ); ?></span>
+				</span> <span class="buoyvs-pro-badge" role="img" aria-label="Pro"></span>
+			</label>
+			<div class="buoyvs-field-mapping-rows"></div>
+			<button type="button" class="buoyvs-add-field-mapping-row-locked"><?php esc_html_e( 'Add detail mapping', 'buoy-video-sync' ); ?></button>
+		</div>
+
+		<div class="buoyvs-form-group buoyvs-conditions-wrapper">
+			<label class="buoyvs-conditions-label">
+				<?php esc_html_e( 'Filter conditions', 'buoy-video-sync' ); ?>
+				<span class="buoyvs-help-wrap">
+					<button type="button" class="buoyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'buoy-video-sync' ); ?>">?</button>
+					<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Only sync items that match all of the following conditions. Available in Pro.', 'buoy-video-sync' ); ?></span>
+				</span> <span class="buoyvs-pro-badge" role="img" aria-label="Pro"></span>
+			</label>
+			<div class="buoyvs-conditions"></div>
+			<button type="button" class="buoyvs-add-condition-locked"><?php esc_html_e( 'Add condition', 'buoy-video-sync' ); ?></button>
 		</div>
 
 	<?php if ( ! empty( $rule_sync_errors ) ) : ?>

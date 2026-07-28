@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.0.3
+Stable tag: 3.1.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -32,6 +32,20 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 
 **Requires a Google API key** with the YouTube Data API v3 enabled. Requests are made directly from your server to Google using your own key; no data passes through any third-party service.
 
+= Go further with Pro =
+
+[Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing) adds power-user automation:
+
+* Sync from **unlimited** YouTube channels
+* **Recurring schedules** — hourly, daily, weekly, monthly, or a custom interval
+* **Update existing posts** — refresh all metadata, or only the fields you choose
+* **Taxonomy assignment** — file synced items into categories, tags, and custom taxonomy terms
+* **Field mapping** — map YouTube fields (including each thumbnail size) to your own custom meta keys
+* **Filter conditions** — sync only the items that match your rules
+* **Video protection** — stop syncs from overwriting your manual edits
+
+[Learn more about Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing)
+
 == Installation ==
 
 1. Upload the `buoy-video-sync` folder to the `/wp-content/plugins/` directory, or install it from **Plugins → Add New**.
@@ -59,7 +73,7 @@ You choose. Each sync rule has a destination post type, so videos, playlists, an
 
 = How often does it sync? =
 
-Every rule runs once, immediately after you save it. To import again later — for example after publishing new videos — re-enable the rule and save, and it picks up anything new.
+Every rule runs once, immediately after you save it. To import again later — for example after publishing new videos — re-enable the rule and save, and it picks up anything new. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing).
 
 = Why do I need a Google API key? =
 
@@ -187,6 +201,10 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 3.1.0 =
+* New: Added a "Go further with Pro" section to the plugin description, a Pro mention in the "How often does it sync?" FAQ, and Free-vs-Pro links in the Help tabs on the Channels and Settings screens.
+* New: Added disabled Pro feature previews (recurring schedules, taxonomy assignment, field mapping, and filter conditions) to the sync rule screen, the add-rule wizard, and the channel Settings tab, so Free users can see what Pro adds.
 
 = 3.0.3 =
 * Changed: the shortcode is now registered as `[buoy-video-sync]` instead of `[buoyvs_video_sync]`, and the unprefixed `[video-sync]` back-compat alias has been removed — WordPress.org plugin review requires every registered tag to use a unique, distinct name.

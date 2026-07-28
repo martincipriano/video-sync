@@ -23,4 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		submit_button();
 		?>
 	</form>
+
+	<?php
+	buoyvs_get_template_part( 'upgrade-banner', null, array(
+		'heading'     => __( 'Fine-tune how your syncs run', 'buoy-video-sync' ),
+		'description' => __( 'Map custom fields, filter which items sync, and protect manually edited posts from being overwritten.', 'buoy-video-sync' ),
+	) );
+	?>
 </div>

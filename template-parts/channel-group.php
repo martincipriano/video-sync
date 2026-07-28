@@ -29,8 +29,9 @@ $subscriber_count    = isset( $channel['subscriber_count'] ) ? $channel['subscri
 $sync_rules          = $channel['sync_rules'] ?? array();
 $video_count         = $channel['video_count'] ?? 0;
 
-$post_types        = get_post_types( array( 'public' => true ), 'objects' );
-$default_post_type = $channel['default_post_type'] ?? '';
+$post_types         = get_post_types( array( 'public' => true ), 'objects' );
+$default_post_type  = $channel['default_post_type'] ?? '';
+$_public_taxonomies = get_taxonomies( array( 'public' => true ) );
 
 $profile_picture  = $channel['profile_picture'] ?? array();
 $profile_src      = '';
@@ -189,10 +190,37 @@ $name_prefix = 'channel[sync_rules]';
 						>
 							<option value=""><?php esc_html_e( '— Select post type —', 'buoy-video-sync' ); ?></option>
 							<?php foreach ( $post_types as $pt ) : ?>
-							<option value="<?php echo esc_attr( $pt->name ); ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
+							<option value="<?php echo esc_attr( $pt->name ); ?>" data-has-taxonomy="<?php echo array_intersect( get_object_taxonomies( $pt->name ), $_public_taxonomies ) ? '1' : '0'; ?>"<?php selected( $default_post_type, $pt->name ); ?>><?php echo esc_html( $pt->labels->singular_name ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>
+				</div>
+
+				<?php
+				$_ch_show_tax = $default_post_type && array_intersect( get_object_taxonomies( $default_post_type ), $_public_taxonomies );
+				?>
+				<div class="buoyvs-form-group buoyvs-taxonomy-terms-wrapper<?php echo $_ch_show_tax ? '' : ' buoyvs-hidden'; ?>">
+					<label>
+						<?php esc_html_e( 'Default Taxonomy Terms', 'buoy-video-sync' ); ?>
+						<span class="buoyvs-help-wrap">
+							<button type="button" class="buoyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'buoy-video-sync' ); ?>">?</button>
+							<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Automatically apply these taxonomy terms to posts created by sync automations in this channel. Available in Pro.', 'buoy-video-sync' ); ?></span>
+						</span> <span class="buoyvs-pro-badge" role="img" aria-label="Pro"></span>
+					</label>
+					<div class="buoyvs-taxonomy-terms"></div>
+					<button type="button" class="buoyvs-add-taxonomy-term-locked"><?php esc_html_e( 'Add taxonomy term', 'buoy-video-sync' ); ?></button>
+				</div>
+
+				<div class="buoyvs-form-group buoyvs-field-mapping-wrapper">
+					<label class="buoyvs-fm-mapping-label">
+						<?php esc_html_e( 'Map video details to post metadata', 'buoy-video-sync' ); ?>
+						<span class="buoyvs-help-wrap">
+							<button type="button" class="buoyvs-help-btn" aria-label="<?php esc_attr_e( 'More info', 'buoy-video-sync' ); ?>">?</button>
+							<span class="buoyvs-help-tooltip" role="tooltip"><?php esc_html_e( 'Store YouTube video data in custom post meta fields for all automations in this channel. Available in Pro.', 'buoy-video-sync' ); ?></span>
+						</span> <span class="buoyvs-pro-badge" role="img" aria-label="Pro"></span>
+					</label>
+					<div class="buoyvs-field-mapping-rows"></div>
+					<button type="button" class="buoyvs-add-field-mapping-row-locked"><?php esc_html_e( 'Add video detail mapping', 'buoy-video-sync' ); ?></button>
 				</div>
 
 			</div>

@@ -19,11 +19,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Buoy_Video_Sync_Settings {
 
 	/**
+	 * Hook suffix of the settings submenu page, used to scope asset enqueuing.
+	 *
+	 * @var string
+	 */
+	private $hook_suffix;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_settings_submenu' ), 20 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -32,7 +40,7 @@ class Buoy_Video_Sync_Settings {
 	 * @return void
 	 */
 	public function add_settings_submenu() {
-		add_submenu_page(
+		$this->hook_suffix = add_submenu_page(
 			'buoy-video-sync',
 			__( 'Buoy Video Sync Settings', 'buoy-video-sync'),
 			__( 'Settings', 'buoy-video-sync'),
@@ -40,6 +48,20 @@ class Buoy_Video_Sync_Settings {
 			'buoyvs_settings',
 			array( $this, 'settings_html' )
 		);
+	}
+
+	/**
+	 * Enqueue assets on the Settings page.
+	 *
+	 * @param string $hook Current admin page hook suffix.
+	 * @return void
+	 */
+	public function enqueue_assets( $hook ) {
+		if ( $hook !== $this->hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_style( 'buoyvs-admin', BUOYVS_PLUGIN_URL . 'assets/css/admin.css', array(), BUOYVS_VERSION );
 	}
 
 	/**
