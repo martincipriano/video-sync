@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, video, sync, playlist, import
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -201,6 +201,9 @@ Example — add a tab only to the video metabox:
 4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
 
 == Changelog ==
+
+= 3.1.1 =
+* Fixed: Added horizontal padding to the Pro upgrade banner so its content no longer touches the edges on narrow screens.
 
 = 3.1.0 =
 * New: Added a "Go further with Pro" section to the plugin description, a Pro mention in the "How often does it sync?" FAQ, and Free-vs-Pro links in the Help tabs on the Channels and Settings screens.
