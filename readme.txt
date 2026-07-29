@@ -195,12 +195,17 @@ Example — add a tab only to the video metabox:
 
 == Screenshots ==
 
-1. Channels page — add a YouTube channel and configure its sync rules.
-2. Sync rule — choose an action, set an items-per-run limit, and pick a destination post type.
-3. Sync history — a per-channel log of what was synced and any errors.
-4. Synced post — a metabox showing the imported YouTube metadata and thumbnails.
+1. Channels page — add a YouTube channel and view its synced details.
+2. Sync rule — choose an action, items-per-run, and destination post type (Pro-only taxonomy, field mapping, and filter conditions previewed).
+3. Channel Settings — default post type (Pro-only field mapping previewed).
+4. Sync history — a per-channel log of what was synced and any errors.
+5. Gutenberg blocks — Video Sync Field, Image, and Embed blocks in the block inserter.
+6. Synced video metabox — metadata fields with Copy value and Copy shortcode buttons.
 
 == Changelog ==
+
+= 3.1.2 =
+* Fixed: Restored the "Copy shortcode" button on the video, playlist, and channel metaboxes — it was missing even though the `[buoy-video-sync]` shortcode itself has always been a Free feature.
 
 = 3.1.1 =
 * Fixed: Added horizontal padding to the Pro upgrade banner so its content no longer touches the edges on narrow screens.
