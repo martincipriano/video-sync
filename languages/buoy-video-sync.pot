@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Buoy Video Sync 3.1.1\n"
+"Project-Id-Version: Buoy Video Sync 3.1.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/buoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-29T06:09:35+00:00\n"
+"POT-Creation-Date: 2026-07-29T07:59:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: buoy-video-sync\n"
@@ -627,6 +627,25 @@ msgstr ""
 #: template-parts/metabox-video.php:180
 #: template-parts/metabox-video.php:212
 msgid "Copy value"
+msgstr ""
+
+#: template-parts/metabox-channel.php:48
+#: template-parts/metabox-channel.php:58
+#: template-parts/metabox-channel.php:68
+#: template-parts/metabox-channel.php:78
+#: template-parts/metabox-channel.php:137
+#: template-parts/metabox-channel.php:146
+#: template-parts/metabox-playlist.php:50
+#: template-parts/metabox-playlist.php:60
+#: template-parts/metabox-playlist.php:70
+#: template-parts/metabox-video.php:60
+#: template-parts/metabox-video.php:70
+#: template-parts/metabox-video.php:80
+#: template-parts/metabox-video.php:118
+#: template-parts/metabox-video.php:128
+#: template-parts/metabox-video.php:138
+#: template-parts/metabox-video.php:212
+msgid "Copy shortcode"
 msgstr ""
 
 #: template-parts/metabox-channel.php:87
