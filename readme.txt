@@ -1,6 +1,6 @@
-=== Buoy Video Sync ===
+=== Buoy Video Sync – Import YouTube Videos, Playlists & Channels as Posts ===
 Contributors: martincipriano
-Tags: youtube, video, sync, playlist, import
+Tags: youtube, youtube channel, import videos, video sync, youtube playlist
 Requires at least: 6.0
 Tested up to: 7.0
 Stable tag: 3.1.2
@@ -8,15 +8,15 @@ Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Sync new videos, playlists, and channel data from a YouTube channel into WordPress posts, with thumbnails and metadata.
+Import and sync YouTube videos, playlists, and channel data into WordPress posts — thumbnails, metadata, and Gutenberg blocks included.
 
 == Description ==
 
-Buoy Video Sync imports content from a YouTube channel into WordPress. Point it at a channel, choose what to sync and which post type to save it as, and Buoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata.
+Buoy Video Sync brings your YouTube channel to WordPress — import YouTube videos, playlists, and channel data as WordPress posts. Point it at a channel, choose what to sync and which post type to save it as, and Buoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata. Whether you want to embed a YouTube channel on your site, build a video gallery from synced posts, or mirror your uploads as blog content, the sync runs on your terms.
 
 Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
 
-**Features**
+= Features =
 
 * Sync from a YouTube channel
 * Three sync actions: import **new videos**, import **new playlists**, or import the **channel** itself
