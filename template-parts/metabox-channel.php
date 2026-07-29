@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Channel Title', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="channel_title"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="buoyvs-mb-input" value="<?php echo esc_attr( $channel_title ); ?>" readonly>
 				</div>
@@ -55,7 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Description', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="channel_description"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<textarea class="buoyvs-mb-textarea" rows="4" readonly><?php echo esc_textarea( $channel_description ); ?></textarea>
 				</div>
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Subscribers', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="subscriber_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="buoyvs-mb-input" value="<?php echo esc_attr( number_format( (int) $subscriber_count ) ); ?>" readonly>
 				</div>
@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Videos', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="video_count"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="buoyvs-mb-input" value="<?php echo esc_attr( number_format( (int) $video_count ) ); ?>" readonly>
 				</div>
@@ -134,7 +134,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Banner Image', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="banner_image"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="buoyvs-mb-input" value="<?php echo esc_attr( $banner_image ); ?>" readonly>
 				</div>
@@ -143,7 +143,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="buoyvs-mb-field">
 					<div class="buoyvs-mb-label-row">
 						<p class="buoyvs-mb-label"><?php esc_html_e( 'Profile Photo', 'buoy-video-sync' ); ?></p>
-						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button>
+						<button type="button" class="buoyvs-copy-val-btn"><?php esc_html_e( 'Copy value', 'buoy-video-sync' ); ?></button><button type="button" class="buoyvs-copy-sc-btn" data-shortcode="<?php echo esc_attr( '[buoy-video-sync id="' . $post_id . '" field="profile_photo"]' ); ?>"><?php esc_html_e( 'Copy shortcode', 'buoy-video-sync' ); ?></button>
 					</div>
 					<input type="text" class="buoyvs-mb-input" value="<?php echo esc_attr( $profile_picture ); ?>" readonly>
 				</div>
