@@ -5,14 +5,24 @@ const delegationRoot   = channelsContainer || singleSyncRules
 if (delegationRoot) {
 
 /**
- * Update the rule label span from the selected action. Rules run immediately
- * after saving, so the label suffix is fixed.
+ * Update the rule label span from the selected action + schedule.
  */
+const scheduleSuffixes = {
+	once:    'immediately after enabling and saving',
+	hourly:  'every hour',
+	daily:   'every day',
+	weekly:  'every week',
+	monthly: 'every month',
+}
+
 function updateRuleLabel(rule) {
 	const label = rule.querySelector('.buoyvs-rule-heading')
 	if (!label) return
 
 	const actionSelect   = rule.querySelector('.buoyvs-action')
+	const scheduleSelect = rule.querySelector('.buoyvs-sync-schedule')
+	const customInput    = rule.querySelector('.buoyvs-custom-sync-schedule')
+
 	const selectedAction = actionSelect?.selectedOptions[0]
 	const hasAction = selectedAction && selectedAction.value
 
@@ -25,7 +35,12 @@ function updateRuleLabel(rule) {
 	rule.classList.remove('buoyvs-rule--no-action')
 
 	const actionText = selectedAction.textContent.trim()
-	label.textContent = actionText + ' immediately after enabling and saving.'
+	const scheduleValue = scheduleSelect?.value || 'once'
+	const suffix = scheduleValue === 'custom'
+		? `every ${customInput?.value || 1} hours`
+		: (scheduleSuffixes[scheduleValue] || scheduleValue)
+
+	label.textContent = actionText + ' ' + suffix + '.'
 }
 
 // Init labels on load
@@ -134,6 +149,27 @@ delegationRoot.addEventListener('change', function(e) {
 	if (e.target.classList.contains('buoyvs-rule-toggle')) {
 		const notice = e.target.closest('.buoyvs-rule')?.querySelector('.buoyvs-rule-disabled-notice')
 		if (notice) notice.classList.toggle('buoyvs-hidden', e.target.checked)
+	}
+})
+
+/**
+ * Show/hide the custom sync schedule number input and update the rule label.
+ */
+delegationRoot.addEventListener('change', function(e) {
+	if (e.target.classList.contains('buoyvs-sync-schedule')) {
+		const schedule = e.target.value
+		const rule = e.target.closest('.buoyvs-rule')
+		const wrapper = rule.querySelector('.buoyvs-custom-schedule-wrapper')
+		if (wrapper) {
+			wrapper.classList.toggle('buoyvs-hidden', schedule !== 'custom')
+		}
+		updateRuleLabel(rule)
+	}
+})
+
+delegationRoot.addEventListener('input', function(e) {
+	if (e.target.classList.contains('buoyvs-custom-sync-schedule')) {
+		updateRuleLabel(e.target.closest('.buoyvs-rule'))
 	}
 })
 
@@ -262,6 +298,12 @@ delegationRoot.addEventListener('change', function(e) {
 		const panel = e.target.closest('.buoyvs-channel-tab-panel')
 		applyTaxonomyVisibility(panel?.querySelector('.buoyvs-taxonomy-terms-wrapper'), e.target)
 	}
+
+	if (e.target.classList.contains('buoyvs-wizard-schedule-select')) {
+		const wizard  = e.target.closest('.buoyvs-wizard')
+		const wrapper = wizard?.querySelector('.buoyvs-wizard-custom-schedule-wrapper')
+		if (wrapper) wrapper.classList.toggle('buoyvs-hidden', e.target.value !== 'custom')
+	}
 })
 
 /**
@@ -338,28 +380,48 @@ function updateQuotaEstimate(rule) {
 	const el = rule.querySelector('.buoyvs-quota-estimate')
 	if (!el) return
 
-	const action     = rule.querySelector('.buoyvs-action')?.value || ''
-	const videoCount = parseInt(rule.closest('.buoyvs-rules')?.dataset.videoCount) || 0
+	const action      = rule.querySelector('.buoyvs-action')?.value || ''
+	const schedule    = rule.querySelector('.buoyvs-sync-schedule')?.value || ''
+	const customHours = parseInt(rule.querySelector('.buoyvs-custom-sync-schedule')?.value) || 24
+	const videoCount  = parseInt(rule.closest('.buoyvs-rules')?.dataset.videoCount) || 0
+
+	let perRun = null
 
 	if (action === 'videos_sync_new') {
 		const batches = Math.ceil(Math.max(1, videoCount) / 50)
-		const perRun  = 1 + batches * 2
-		el.textContent = `Approx. ${perRun} unit${perRun !== 1 ? 's' : ''} per run`
-		el.classList.remove('buoyvs-hidden')
+		perRun = 1 + batches * 2
 	} else if (action === 'playlists_sync_new') {
 		el.textContent = 'Approx. 1 unit per 50 playlists'
 		el.classList.remove('buoyvs-hidden')
+		return
 	} else {
 		el.textContent = ''
 		el.classList.add('buoyvs-hidden')
+		return
 	}
+
+	let text = `Approx. ${perRun} unit${perRun !== 1 ? 's' : ''} per run`
+
+	const multipliers = { hourly: 24, daily: 1, weekly: 1/7, monthly: 1/30 }
+	const runsPerDay  = schedule === 'custom' ? 24 / customHours : (multipliers[schedule] ?? null)
+
+	if (runsPerDay && runsPerDay >= 1) {
+		text += ` · Approx. ${Math.round(perRun * runsPerDay)} units/day`
+	}
+
+	el.textContent = text
+	el.classList.remove('buoyvs-hidden')
 }
 
 delegationRoot.querySelectorAll('.buoyvs-rule').forEach(updateQuotaEstimate)
 
 
 delegationRoot.addEventListener('change', function(e) {
-	if (e.target.classList.contains('buoyvs-action')) {
+	if (
+		e.target.classList.contains('buoyvs-action') ||
+		e.target.classList.contains('buoyvs-sync-schedule') ||
+		e.target.classList.contains('buoyvs-custom-sync-schedule')
+	) {
 		updateQuotaEstimate(e.target.closest('.buoyvs-rule'))
 	}
 })
@@ -523,12 +585,16 @@ function wizardBack(wizard, fromStep) {
  * Build the rule object from wizard inputs.
  */
 function collectWizardRule(wizard) {
-	const action    = wizard.querySelector('.buoyvs-wizard-action-select')?.value ?? ''
-	const maxVideos = parseInt(wizard.querySelector('.buoyvs-wizard-max-videos')?.value) || 0
-	const postType  = wizard.querySelector('.buoyvs-wizard-post-type')?.value ?? ''
+	const action      = wizard.querySelector('.buoyvs-wizard-action-select')?.value ?? ''
+	const schedule    = wizard.querySelector('.buoyvs-wizard-schedule-select')?.value ?? 'daily'
+	const customSched = parseInt(wizard.querySelector('.buoyvs-wizard-custom-schedule')?.value) || 24
+	const maxVideos   = parseInt(wizard.querySelector('.buoyvs-wizard-max-videos')?.value) || 0
+	const postType    = wizard.querySelector('.buoyvs-wizard-post-type')?.value ?? ''
 
 	return {
 		action,
+		schedule,
+		custom_schedule:       customSched,
 		max_videos:            maxVideos,
 		destination_post_type: postType,
 	}

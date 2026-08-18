@@ -21,6 +21,15 @@ function buoyvs_valid_actions(): array {
 }
 
 /**
+ * Valid sync rule schedule values.
+ *
+ * @return string[]
+ */
+function buoyvs_valid_schedules(): array {
+	return array( 'once', 'hourly', 'daily', 'weekly', 'monthly', 'custom' );
+}
+
+/**
  * Get the configured channel as a single flat object.
  *
  * The channel is stored as a flat object in the buoyvs_channel_config option.
@@ -47,11 +56,18 @@ function buoyvs_sanitize_sync_rule( $rule ) {
 		$action = '';
 	}
 
+	$schedule = isset( $rule['schedule'] ) ? sanitize_text_field( $rule['schedule'] ) : 'once';
+	if ( ! in_array( $schedule, buoyvs_valid_schedules(), true ) ) {
+		$schedule = 'once';
+	}
+
 	$sanitized = array(
-		'enabled'    => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
-		'title'      => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
-		'max_videos' => isset( $rule['max_videos'] ) ? absint( $rule['max_videos'] ) : 50,
-		'action'     => $action,
+		'enabled'         => isset( $rule['enabled'] ) ? (bool) $rule['enabled'] : false,
+		'title'           => isset( $rule['title'] ) ? sanitize_text_field( $rule['title'] ) : '',
+		'max_videos'      => isset( $rule['max_videos'] ) ? absint( $rule['max_videos'] ) : 50,
+		'schedule'        => $schedule,
+		'custom_schedule' => isset( $rule['custom_schedule'] ) ? absint( $rule['custom_schedule'] ) : 24,
+		'action'          => $action,
 		'destination_post_type' => isset( $rule['destination_post_type'] ) ? sanitize_key( $rule['destination_post_type'] ) : '',
 	);
 

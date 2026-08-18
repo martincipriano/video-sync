@@ -228,7 +228,7 @@ class Channels_Page {
 				Sync_History::delete( $old_youtube_id );
 			}
 
-			do_action( 'buoyvs_queue_channel_rules' );
+			do_action( 'buoyvs_reschedule_channel_rules' );
 
 			wp_safe_redirect( add_query_arg( 'buoyvs-channel-deleted', '1', admin_url( 'admin.php?page=buoy-video-sync' ) ) );
 			exit;
@@ -330,8 +330,8 @@ class Channels_Page {
 		// Persist the single flat channel.
 		update_option( 'buoyvs_channel_config', $channel );
 
-		// Queue the background jobs for the channel's rules.
-		do_action( 'buoyvs_queue_channel_rules' );
+		// Reschedule the background jobs for the channel's rules.
+		do_action( 'buoyvs_reschedule_channel_rules' );
 
 		if ( ! empty( $save_errors ) ) {
 			set_transient( 'buoyvs_ch_errors_' . get_current_user_id(), $save_errors, 60 );
@@ -377,7 +377,7 @@ class Channels_Page {
 		$rule_index = array_key_last( $channel['sync_rules'] );
 
 		update_option( 'buoyvs_channel_config', $channel );
-		do_action( 'buoyvs_queue_channel_rules' );
+		do_action( 'buoyvs_reschedule_channel_rules' );
 
 		// Re-read so the rendered card reflects the queue's state — a newly
 		// added rule is marked 'syncing' and runs immediately after this save.

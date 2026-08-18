@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<div class="wpby-upgrade-features">
 				<ul class="wpby-upgrade-banner__features">
 					<li><?php esc_html_e( 'Multiple channels — sync unlimited YouTube channels, each with its own rules', 'buoy-video-sync' ); ?></li>
-					<li><?php esc_html_e( 'Recurring sync schedules — hourly, daily, weekly, monthly, or a custom interval', 'buoy-video-sync' ); ?></li>
+					<li><?php esc_html_e( 'Update existing posts — refresh metadata on synced items automatically as it changes on YouTube', 'buoy-video-sync' ); ?></li>
 					<li><?php esc_html_e( 'Taxonomy term assignment — file synced items into categories, tags, and custom taxonomies', 'buoy-video-sync' ); ?></li>
 					<li><?php esc_html_e( 'Filter conditions — sync only the items that match your rules', 'buoy-video-sync' ); ?></li>
 					<li><?php esc_html_e( 'Field mapping — map YouTube fields to your own custom post meta keys', 'buoy-video-sync' ); ?></li>

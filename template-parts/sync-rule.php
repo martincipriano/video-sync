@@ -20,7 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 $term_id     = isset( $term_id ) ? (int) $term_id : 0;
 $source_type = isset( $source_type ) ? $source_type : 'channel';
 $name_prefix = isset( $name_prefix ) ? $name_prefix : 'sync_rules';
-$enabled     = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
+$enabled         = isset( $rule['enabled'] ) ? $rule['enabled'] : true;
+$schedule        = isset( $rule['schedule'] ) ? $rule['schedule'] : 'once';
+$custom_schedule = isset( $rule['custom_schedule'] ) ? $rule['custom_schedule'] : 24;
 $action      = isset( $rule['action'] ) ? $rule['action'] : '';
 
 $max_videos            = isset( $rule['max_videos'] ) ? (int) $rule['max_videos'] : 50;
@@ -32,14 +34,23 @@ $_public_taxonomies = get_taxonomies( array( 'public' => true ) );
 // Dual-mode: Use provided $index or fall back to the {{INDEX}} placeholder for JavaScript.
 $rule_index = isset( $index ) ? $index : '{{INDEX}}';
 
-// Auto-generated rule label from the action. Rules run immediately after saving.
+// Auto-generated rule label from the action + schedule.
 $_action_labels = array(
 	'channel_sync_new'   => __( 'Sync this channel', 'buoy-video-sync' ),
 	'playlists_sync_new' => __( 'Sync new playlists', 'buoy-video-sync' ),
 	'videos_sync_new'    => __( 'Sync new videos', 'buoy-video-sync' ),
 );
+$_schedule_suffixes = array(
+	'once'    => __( 'immediately after enabling and saving', 'buoy-video-sync' ),
+	'hourly'  => __( 'every hour', 'buoy-video-sync' ),
+	'daily'   => __( 'every day', 'buoy-video-sync' ),
+	'weekly'  => __( 'every week', 'buoy-video-sync' ),
+	'monthly' => __( 'every month', 'buoy-video-sync' ),
+	/* translators: %d: number of hours */
+	'custom'  => sprintf( __( 'every %d hours', 'buoy-video-sync' ), $custom_schedule ),
+);
 $rule_action_label    = $action ? ( $_action_labels[ $action ] ?? $action ) : __( 'New rule', 'buoy-video-sync' );
-$rule_label_suffix = __( 'immediately after enabling and saving', 'buoy-video-sync' );
+$rule_label_suffix = $_schedule_suffixes[ $schedule ] ?? $schedule;
 
 $sync_started_at = isset( $rule['sync_started_at'] ) ? (int) $rule['sync_started_at'] : 0;
 $is_syncing      = 'syncing' === ( $rule['sync_status'] ?? '' )
@@ -164,14 +175,13 @@ $_post_type_label = 'playlists_sync_new' === $action
 		<div class="buoyvs-2-columns buoyvs-cols-3-1">
 			<div class="buoyvs-form-group">
 				<label for="buoyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Sync schedule', 'buoy-video-sync' ); ?></label>
-				<select class="buoyvs-select" id="buoyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>">
-					<option selected><?php esc_html_e( 'Once (run immediately after saving)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Hourly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Daily (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Weekly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Monthly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Custom (Pro)', 'buoy-video-sync' ); ?></option>
+				<select class="buoyvs-select buoyvs-sync-schedule" id="buoyvs-sync-schedule-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][schedule]" required>
+					<?php buoyvs_get_template_part( 'options', 'schedule', array( 'selected' => $schedule ) ); ?>
 				</select>
+			</div>
+			<div class="buoyvs-form-group buoyvs-custom-schedule-wrapper<?php echo 'custom' !== $schedule ? ' buoyvs-hidden' : ''; ?>">
+				<label for="buoyvs-custom-schedule-<?php echo esc_attr( $rule_index ); ?>"><?php esc_html_e( 'Custom (Hours)', 'buoy-video-sync' ); ?></label>
+				<input class="buoyvs-number buoyvs-custom-sync-schedule" id="buoyvs-custom-schedule-<?php echo esc_attr( $rule_index ); ?>" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][custom_schedule]" value="<?php echo esc_attr( $custom_schedule ); ?>" min="1" placeholder="<?php esc_attr_e( 'Eg. 24', 'buoy-video-sync' ); ?>" type="number">
 			</div>
 		</div>
 

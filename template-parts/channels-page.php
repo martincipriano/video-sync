@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php
 	buoyvs_get_template_part( 'upgrade-banner', null, array(
 		'heading'     => __( 'Sync more than one channel', 'buoy-video-sync' ),
-		'description' => __( 'Add unlimited YouTube channels, each with its own recurring schedule, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
+		'description' => __( 'Add unlimited YouTube channels, each with its own schedules, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
 	) );
 	?>
 
@@ -81,7 +81,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php
 	buoyvs_get_template_part( 'upgrade-banner', null, array(
 		'heading'     => __( 'Sync more than one channel', 'buoy-video-sync' ),
-		'description' => __( 'Add unlimited YouTube channels, each with its own recurring schedule, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
+		'description' => __( 'Add unlimited YouTube channels, each with its own schedules, taxonomy assignment, and sync rules.', 'buoy-video-sync' ),
 	) );
 	?>
 

@@ -2,7 +2,6 @@
 declare(strict_types=1);
 /**
  * Template part: 3-step sync rule wizard (Action → Schedule → Destination).
- * Step 2 (Schedule) is a static, disabled Pro teaser — see docs/roadmap.md Phase F2.
  *
  * Rendered once per channel group, hidden by default. JavaScript reveals it
  * when the user clicks "Add sync rule" and hides it on cancel/completion.
@@ -77,7 +76,7 @@ $_public_taxonomies = get_taxonomies( array( 'public' => true ) );
 		</div>
 	</div>
 
-	<?php /* Step 2 — Schedule (disabled Pro teaser) */ ?>
+	<?php /* Step 2 — Schedule */ ?>
 	<div class="buoyvs-wizard-panel buoyvs-hidden" data-step="2">
 		<div class="buoyvs-wizard-step-header">
 			<h3><?php esc_html_e( 'How often should this rule run?', 'buoy-video-sync' ); ?></h3>
@@ -85,14 +84,13 @@ $_public_taxonomies = get_taxonomies( array( 'public' => true ) );
 		<div class="buoyvs-2-columns buoyvs-cols-3-1">
 			<div class="buoyvs-form-group">
 				<label for="buoyvs-wizard-schedule"><?php esc_html_e( 'Sync schedule', 'buoy-video-sync' ); ?></label>
-				<select id="buoyvs-wizard-schedule" class="buoyvs-select">
-					<option selected><?php esc_html_e( 'Once (run immediately after saving)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Hourly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Daily (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Weekly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Monthly (Pro)', 'buoy-video-sync' ); ?></option>
-					<option disabled><?php esc_html_e( 'Custom (Pro)', 'buoy-video-sync' ); ?></option>
+				<select id="buoyvs-wizard-schedule" class="buoyvs-select buoyvs-wizard-schedule-select">
+					<?php buoyvs_get_template_part( 'options', 'schedule', array( 'selected' => 'daily' ) ); ?>
 				</select>
+			</div>
+			<div class="buoyvs-form-group buoyvs-wizard-custom-schedule-wrapper buoyvs-hidden">
+				<label for="buoyvs-wizard-custom-schedule"><?php esc_html_e( 'Custom (Hours)', 'buoy-video-sync' ); ?></label>
+				<input id="buoyvs-wizard-custom-schedule" class="buoyvs-number buoyvs-wizard-custom-schedule" type="number" value="24" min="1" placeholder="24">
 			</div>
 		</div>
 		<div class="buoyvs-wizard-nav">

@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, youtube channel, import videos, video sync, youtube playlist
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 3.1.2
+Stable tag: 3.2.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -14,15 +14,15 @@ Import and sync YouTube videos, playlists, and channel data into WordPress posts
 
 Buoy Video Sync brings your YouTube channel to WordPress — import YouTube videos, playlists, and channel data as WordPress posts. Point it at a channel, choose what to sync and which post type to save it as, and Buoy Video Sync creates posts complete with titles, descriptions, thumbnails, view counts, and other YouTube metadata. Whether you want to embed a YouTube channel on your site, build a video gallery from synced posts, or mirror your uploads as blog content, the sync runs on your terms.
 
-Every sync runs once, immediately after you save the rule — so you stay in control of when content is imported.
+Run a sync once, immediately after you save the rule, or set it to repeat automatically — hourly, daily, weekly, monthly, or on a custom interval — so new content keeps flowing in without you lifting a finger.
 
 = Features =
 
 * Sync from a YouTube channel
 * Three sync actions: import **new videos**, import **new playlists**, or import the **channel** itself
 * Save synced items as **any post type** you choose (Posts, or a custom post type)
-* **On-demand imports** — each rule runs immediately when you save it, so you decide exactly when content is imported
-* **Quota estimation** — see how many YouTube Data API units a sync will use before you run it
+* **Recurring schedules** — run a rule once on demand, or automatically hourly, daily, weekly, monthly, or on a custom interval via WP-Cron
+* **Quota estimation** — see how many YouTube Data API units a sync will use before you run it, including a per-day estimate for recurring schedules
 * **Thumbnails** shown as the featured image when none is set; channel profile pictures and banners are downloaded into your media library
 * **Sync history** with the last-synced time and a per-rule error log
 * Stores all YouTube data in standard post meta (`_buoyvs_*`) for easy use in your theme or queries
@@ -37,8 +37,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 [Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing) adds power-user automation:
 
 * Sync from **unlimited** YouTube channels
-* **Recurring schedules** — hourly, daily, weekly, monthly, or a custom interval
-* **Update existing posts** — refresh all metadata, or only the fields you choose
+* **Update existing posts** — refresh all metadata, or only the fields you choose, on the same schedule
 * **Taxonomy assignment** — file synced items into categories, tags, and custom taxonomy terms
 * **Field mapping** — map YouTube fields (including each thumbnail size) to your own custom meta keys
 * **Filter conditions** — sync only the items that match your rules
@@ -52,7 +51,7 @@ Every sync runs once, immediately after you save the rule — so you stay in con
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. Go to **Buoy Video Sync → Settings** and enter your Google API key.
 4. Go to **Buoy Video Sync → Channels** and add a YouTube channel.
-5. Add a sync rule to the channel — pick an action and a destination post type — then save to import.
+5. Add a sync rule to the channel — pick an action, a schedule, and a destination post type — then save to import.
 
 **Getting a Google API key**
 
@@ -73,7 +72,7 @@ You choose. Each sync rule has a destination post type, so videos, playlists, an
 
 = How often does it sync? =
 
-Every rule runs once, immediately after you save it. To import again later — for example after publishing new videos — re-enable the rule and save, and it picks up anything new. Recurring schedules (hourly, daily, weekly, monthly, or custom) are available in [Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing).
+You choose per rule. Run it once, immediately after saving, or set it to repeat automatically — hourly, daily, weekly, monthly, or on a custom interval — via WordPress's built-in cron system. A recurring rule keeps importing new videos, playlists, or channel data on its own; it does not go back and refresh posts already imported. Refreshing existing posts on a schedule is available in [Buoy Video Sync Pro](https://wpbuoy.com/product/video-sync/#pricing).
 
 = Why do I need a Google API key? =
 
@@ -203,6 +202,10 @@ Example — add a tab only to the video metabox:
 6. Synced video metabox — metadata fields with Copy value and Copy shortcode buttons.
 
 == Changelog ==
+
+= 3.2.0 =
+* New: Recurring sync schedules — hourly, daily, weekly, monthly, or a custom interval — are now available in the Free plugin. Previously every rule could only run once, on save.
+* Changed: "Go further with Pro" now highlights refreshing existing posts (metadata updates), taxonomy assignment, field mapping, and filter conditions instead of recurring schedules.
 
 = 3.1.2 =
 * Fixed: Restored the "Copy shortcode" button on the video, playlist, and channel metaboxes — it was missing even though the `[buoy-video-sync]` shortcode itself has always been a Free feature.

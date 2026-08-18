@@ -112,7 +112,7 @@ class Sync_Runner {
 	/**
 	 * Execute a sync rule.
 	 *
-	 * Called by Sync_Queue::dispatch_config_sync() when a WP Cron event fires.
+	 * Called by Sync_Scheduler::dispatch_config_sync() when a WP Cron event fires.
 	 *
 	 * @param string $source_type  'channel' or 'playlist'.
 	 * @param int    $term_id      WordPress term ID of the source.
@@ -142,15 +142,19 @@ class Sync_Runner {
 
 		$this->current_rule_index = $rule_index;
 
-		$action  = $rule['action'] ?? '';
+		$action   = $rule['action'] ?? '';
+		$schedule = $rule['schedule'] ?? 'once';
 
-		// A sync may import an entire channel back-catalog in a single execution —
-		// lift PHP limits so a large import completes instead of timing out
-		// mid-run. The imported set is unchanged; this only prevents truncation.
-		if ( function_exists( 'set_time_limit' ) ) {
-			@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required so a large back-catalog import completes in one run instead of timing out.
+		// "Once" runs may import an entire channel back-catalog in a single
+		// execution — lift PHP limits so a large import completes instead of
+		// timing out mid-run. Recurring runs stay within normal cron limits since
+		// each tick only needs to catch up on what's new since the last run.
+		if ( 'once' === $schedule ) {
+			if ( function_exists( 'set_time_limit' ) ) {
+				@set_time_limit( 0 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- Required so a large back-catalog import completes in one run instead of timing out.
+			}
+			wp_raise_memory_limit( 'admin' );
 		}
-		wp_raise_memory_limit( 'admin' );
 
 		$this->mark_syncing( $source_type, $term_id, $rule_index );
 		$this->write_progress( 0, 0 ); // Reset any stale progress from a previous run.
@@ -198,10 +202,13 @@ class Sync_Runner {
 		} finally {
 			$this->clear_syncing( $source_type, $term_id, $rule_index );
 
-			// Auto-disable the rule here (inside finally) so it runs even on
+			// Auto-disable "once" rules here (inside finally) so it runs even on
 			// fatal errors caught by the shutdown function — preventing the rule
 			// from firing a second time if the cron event somehow re-queues.
-			$this->disable_completed_rule( $source_type, $term_id, $rule_index );
+			// Recurring rules stay enabled so the next scheduled tick still fires.
+			if ( 'once' === ( $rule['schedule'] ?? 'once' ) ) {
+				$this->disable_once_rule( $source_type, $term_id, $rule_index );
+			}
 
 			if ( null !== $lock_key ) {
 				delete_transient( $lock_key );
@@ -218,7 +225,7 @@ class Sync_Runner {
 	 * save_source_data() transparently read/write wp_options instead of
 	 * term meta, then delegates to the standard run() method with term_id = 0.
 	 *
-	 * Called by Sync_Queue::dispatch_config_sync() when a
+	 * Called by Sync_Scheduler::dispatch_config_sync() when a
 	 * buoyvs_channel_config_sync_rule cron event fires.
 	 *
 	 * @param int $rule_index 0-based rule index within the channel's sync_rules.
@@ -826,17 +833,18 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Set a rule's enabled flag to false after it fires.
+	 * Set a "once" rule's enabled flag to false after it fires.
 	 *
-	 * Rules run once per save; the rule remains visible in the UI with the
-	 * toggle off so the user can see it ran and re-enable it to run again.
+	 * "Once" rules run a single time; the rule remains visible in the UI with
+	 * the toggle off so the user can see it ran and re-enable it to run again.
+	 * Recurring rules never reach this method — they stay enabled between ticks.
 	 *
 	 * @param string $source_type 'channel' or 'playlist'.
 	 * @param int    $term_id     Term ID.
 	 * @param int    $rule_index  Index of the rule to disable.
 	 * @return void
 	 */
-	private function disable_completed_rule( string $source_type, int $term_id, int $rule_index ): void {
+	private function disable_once_rule( string $source_type, int $term_id, int $rule_index ): void {
 		$data = $this->get_channel_data();
 		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
 			return;

@@ -4,7 +4,7 @@ declare(strict_types=1);
  * Plugin Name: Buoy Video Sync
  * Plugin URI: https://wpbuoy.com/product/video-sync
  * Description: Sync YouTube videos, playlists, and channels from a single channel into WordPress posts with metadata and thumbnails.
- * Version: 3.1.2
+ * Version: 3.2.0
  * Author: Martin Cipriano
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -28,7 +28,7 @@ if ( defined( 'BUOYVS_PRO' ) || in_array( 'buoy-video-sync-pro/buoy-video-sync-p
 }
 
 // Define plugin constants.
-define( 'BUOYVS_VERSION', '3.1.2' );
+define( 'BUOYVS_VERSION', '3.2.0' );
 define( 'BUOYVS_PLUGIN_FILE', __FILE__ );
 define( 'BUOYVS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BUOYVS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -111,7 +111,7 @@ register_activation_hook( BUOYVS_PLUGIN_FILE, function () {
 } );
 
 /**
- * Plugin deactivation — clear any queued sync jobs.
+ * Plugin deactivation — clear any scheduled sync jobs.
  */
 register_deactivation_hook( BUOYVS_PLUGIN_FILE, function () {
 	wp_unschedule_hook( 'buoyvs_channel_config_sync_rule' );
@@ -125,7 +125,7 @@ require_once BUOYVS_PLUGIN_DIR . 'includes/class-youtube-api.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-video-importer.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-runner.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-history.php';
-require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-queue.php';
+require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-channels-page.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-blocks.php';
 
@@ -133,7 +133,7 @@ require_once BUOYVS_PLUGIN_DIR . 'includes/class-blocks.php';
  * Instantiate the sync engine.
  *
  * Priority 5 — before other constructors which hook into 'init' at default
- * priority 10, so the queue's cron listener is registered before anything
+ * priority 10, so the scheduler's cron listener is registered before anything
  * that might fire it.
  */
 add_action(
@@ -142,7 +142,7 @@ add_action(
 		$api      = new \Buoy_Video_Sync\YouTube_API( get_option( 'buoyvs_api_key', '' ) );
 		$importer = new \Buoy_Video_Sync\Video_Importer();
 		$runner   = new \Buoy_Video_Sync\Sync_Runner( $api, $importer );
-		new \Buoy_Video_Sync\Sync_Queue( $runner );
+		new \Buoy_Video_Sync\Sync_Scheduler( $runner );
 	},
 	5
 );
