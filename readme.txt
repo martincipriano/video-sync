@@ -2,8 +2,8 @@
 Contributors: martincipriano
 Tags: youtube, youtube channel, import videos, video sync, youtube playlist
 Requires at least: 6.0
-Tested up to: 7.0
-Stable tag: 3.2.0
+Tested up to: 7.1
+Stable tag: 3.2.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -203,7 +203,7 @@ Example — add a tab only to the video metabox:
 
 == Changelog ==
 
-= 3.2.0 =
+= 3.2.1 =
 * New: Recurring sync schedules — hourly, daily, weekly, monthly, or a custom interval — are now available in the Free plugin. Previously every rule could only run once, on save.
 * Changed: "Go further with Pro" now highlights refreshing existing posts (metadata updates), taxonomy assignment, field mapping, and filter conditions instead of recurring schedules.
 
