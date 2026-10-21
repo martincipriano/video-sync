@@ -132,6 +132,7 @@ require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-runner.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-history.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-sync-scheduler.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-channels-page.php';
+require_once BUOYVS_PLUGIN_DIR . 'includes/class-import-export.php';
 require_once BUOYVS_PLUGIN_DIR . 'includes/class-blocks.php';
 
 /**

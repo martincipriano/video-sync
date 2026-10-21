@@ -6,9 +6,10 @@ declare(strict_types=1);
  * @package Buoy_Video_Sync
  *
  * Variables available in this template:
- * @var array $channel    The single channel configuration.
- * @var array $ch_errors  Keyed by youtube_id — error messages from last save.
- * @var bool  $has_api_key Whether a YouTube API key is configured.
+ * @var array $channel        The single channel configuration.
+ * @var array $ch_errors      Keyed by youtube_id — error messages from last save.
+ * @var array $import_notices Plain messages from the last import, if any.
+ * @var bool  $has_api_key    Whether a YouTube API key is configured.
  */
 
 // Exit if accessed directly.
@@ -62,6 +63,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 	<?php endif; ?>
 
+	<?php foreach ( $import_notices as $import_notice ) : ?>
+	<div class="notice notice-warning is-dismissible">
+		<p><?php echo esc_html( $import_notice ); ?></p>
+	</div>
+	<?php endforeach; ?>
+
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<?php wp_nonce_field( 'buoyvs_save_channels', 'buoyvs_channels_nonce' ); ?>
 		<input type="hidden" name="action" value="buoyvs_save_channels">
@@ -77,6 +84,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php submit_button( __( 'Save Changes', 'buoy-video-sync' ) ); ?>
 	</form>
+
+	<div class="buoyvs-import-export postbox">
+		<h2 class="buoyvs-import-export-heading"><?php esc_html_e( 'Import / Export', 'buoy-video-sync' ); ?></h2>
+		<p class="description">
+			<?php esc_html_e( 'Back up your channel and sync rules to a JSON file, or restore from one — importing replaces the current configuration.', 'buoy-video-sync' ); ?>
+		</p>
+		<p>
+			<a
+				class="button"
+				href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=buoyvs_export_channels' ), 'buoyvs_export_channels' ) ); ?>"
+			>
+				<?php esc_html_e( 'Export Sync Rules', 'buoy-video-sync' ); ?>
+			</a>
+		</p>
+		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<?php wp_nonce_field( 'buoyvs_import_channels', 'buoyvs_import_nonce' ); ?>
+			<input type="hidden" name="action" value="buoyvs_import_channels">
+			<input type="file" name="buoyvs_import_file" accept="application/json" required>
+			<button
+				type="submit"
+				class="button"
+				onclick="return confirm('<?php echo esc_js( __( 'Importing will replace your current channel and sync rules. Continue?', 'buoy-video-sync' ) ); ?>');"
+			>
+				<?php esc_html_e( 'Import Sync Rules', 'buoy-video-sync' ); ?>
+			</button>
+		</form>
+	</div>
 
 	<?php
 	buoyvs_get_template_part( 'upgrade-banner', null, array(
