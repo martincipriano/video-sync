@@ -1923,3 +1923,24 @@
 .wpby-upgrade-banner__footer a:hover {
   color: #fff;
 }
+
+// Featured image metabox — YouTube thumbnail fallback (a button so it is keyboard-operable).
+.buoyvs-featured-fallback {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+
+	img {
+		display: block;
+		max-width: 100%;
+		height: auto;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #2271b1;
+		outline-offset: 2px;
+	}
+}

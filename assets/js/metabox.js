@@ -76,3 +76,17 @@
 		document.querySelector('.buoyvs-developer-fields').classList.toggle('buoyvs-hidden')
 	})
 })()
+
+/**
+ * Featured image metabox — the YouTube thumbnail fallback opens the media
+ * picker via core's "Set featured image" link. Delegated, because core
+ * re-renders the metabox over AJAX when the image changes.
+ */
+;(function () {
+	document.addEventListener('click', function (e) {
+		if (!e.target.closest('.buoyvs-featured-fallback')) return
+		e.preventDefault()
+		var link = document.getElementById('set-post-thumbnail')
+		if (link) link.click()
+	})
+})()

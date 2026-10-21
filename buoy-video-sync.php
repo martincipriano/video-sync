@@ -296,13 +296,12 @@ function buoyvs_admin_post_thumbnail_html( string $content, int $post_id, $thumb
 		return $content;
 	}
 
-	$preview = '<img'
-		. ' src="' . esc_url( $thumb['url'] ) . '"'
-		. ' onclick="document.getElementById(\'set-post-thumbnail\').click()"'
-		. ' title="' . esc_attr__( 'Click to set a custom featured image', 'buoy-video-sync') . '"'
-		. ' alt=""'
-		. '>';
-	$label   = '<p class="hide-if-no-js howto" id="set-post-thumbnail-desc">'
+	// A real <button> so the preview is keyboard-operable; metabox.js forwards
+	// the click to core's "Set featured image" link (no inline handler).
+	$preview = '<button type="button" class="buoyvs-featured-fallback hide-if-no-js" aria-describedby="buoyvs-featured-fallback-desc">'
+		. '<img src="' . esc_url( $thumb['url'] ) . '" alt="' . esc_attr__( 'YouTube thumbnail (currently used as the featured image). Choose a custom featured image', 'buoy-video-sync' ) . '">'
+		. '</button>';
+	$label   = '<p class="hide-if-no-js howto" id="buoyvs-featured-fallback-desc">'
 		. esc_html__( 'Click the YouTube thumbnail to edit or update', 'buoy-video-sync')
 		. '</p>';
 
