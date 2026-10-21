@@ -1032,7 +1032,9 @@ delegationRoot.addEventListener('click', function(e) {
 	function updateBadge(ruleEl, current, total) {
 		const progress = ruleEl.querySelector('.buoyvs-syncing-progress')
 		if (!progress) return
-		progress.textContent = total > 0 ? (' ' + current + ' of ' + total) : ''
+		progress.textContent = total > 0
+			? ' ' + buoyvs.i18n.progress.replace('%1$s', current).replace('%2$s', total)
+			: ''
 	}
 
 	function onSyncDone(ruleEl, data) {
@@ -1057,7 +1059,7 @@ delegationRoot.addEventListener('click', function(e) {
 				if (headingWrap && !headingWrap.querySelector('.buoyvs-rule-disabled-notice')) {
 					const notice = document.createElement('p')
 					notice.className = 'buoyvs-rule-disabled-notice'
-					notice.textContent = "This rule is disabled and won't run until re-enabled."
+					notice.textContent = buoyvs.i18n.ruleDisabled
 					headingWrap.appendChild(notice)
 				}
 			}
@@ -1068,17 +1070,19 @@ delegationRoot.addEventListener('click', function(e) {
 			if (data.last_synced_label) {
 				const tooltip  = ruleEl.querySelector('.buoyvs-sync-info-tooltip')
 				if (tooltip) {
-					let lastSyncItem = Array.from(tooltip.querySelectorAll('.buoyvs-sync-info-item')).find(function (el) {
-						return el.textContent.indexOf('Last Sync') !== -1
-					})
+					const lastSyncItem = tooltip.querySelector('.buoyvs-sync-info-item--last-sync')
 					if (lastSyncItem) {
 						const spans = lastSyncItem.querySelectorAll('span')
 						if (spans[1]) spans[1].textContent = data.last_synced_label
 					} else {
 						// Insert "Last Sync" item before the first item.
-						const item = document.createElement('span')
-						item.className = 'buoyvs-sync-info-item'
-						item.innerHTML = '<span>Last Sync:</span><span>' + data.last_synced_label + '</span>'
+						const item  = document.createElement('span')
+						const label = document.createElement('span')
+						const value = document.createElement('span')
+						item.className    = 'buoyvs-sync-info-item buoyvs-sync-info-item--last-sync'
+						label.textContent = buoyvs.i18n.lastSync
+						value.textContent = data.last_synced_label
+						item.append(label, value)
 						tooltip.insertBefore(item, tooltip.firstChild)
 					}
 					// Make sure the sync-info button is visible.

@@ -121,7 +121,7 @@ $_post_type_label = 'playlists_sync_new' === $action
 				<button type="button" class="buoyvs-sync-info" aria-label="<?php esc_attr_e( 'Sync info', 'buoy-video-sync' ); ?>">
 					<div class="buoyvs-sync-info-tooltip" hidden>
 						<?php if ( ! empty( $rule['created_at'] ) && ! $rule_last_synced ) : ?><span class="buoyvs-sync-info-item"><span><?php esc_html_e( 'Created:', 'buoy-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_created ); ?></span></span><?php endif; ?>
-						<?php if ( $rule_last_synced ) : ?><span class="buoyvs-sync-info-item"><span><?php esc_html_e( 'Last Sync:', 'buoy-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
+						<?php if ( $rule_last_synced ) : ?><span class="buoyvs-sync-info-item buoyvs-sync-info-item--last-sync"><span><?php esc_html_e( 'Last Sync:', 'buoy-video-sync' ); ?></span><span><?php echo esc_html( $rule_stat_last_sync ); ?></span></span><?php endif; ?>
 					</div>
 				</button>
 			<?php endif; ?>

@@ -228,6 +228,12 @@ class Channels_Page {
 			'addRuleNonce'         => wp_create_nonce( 'buoyvs_add_rule' ),
 			'syncProgressNonce'    => wp_create_nonce( 'buoyvs_sync_progress' ),
 			'markHistoryReadNonce' => wp_create_nonce( 'buoyvs_mark_history_read' ),
+			'i18n'                 => array(
+				'lastSync'     => __( 'Last Sync:', 'buoy-video-sync' ),
+				'ruleDisabled' => __( 'This rule is disabled and won\'t run until re-enabled.', 'buoy-video-sync' ),
+				/* translators: 1: items processed so far, 2: total items */
+				'progress'     => __( '%1$s of %2$s', 'buoy-video-sync' ),
+			),
 		) );
 	}
 
