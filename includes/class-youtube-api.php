@@ -91,7 +91,11 @@ class YouTube_API {
 		}
 
 		if ( empty( $data['items'] ) ) {
-			return new \WP_Error( 'channel_not_found', "Channel not found. Please verify the Channel ID ({$channel_id}) in your channel settings." );
+			return new \WP_Error(
+				'channel_not_found',
+				/* translators: %s: YouTube channel ID */
+				sprintf( __( 'Channel not found. Please verify the Channel ID (%s) in your channel settings.', 'buoy-video-sync' ), $channel_id )
+			);
 		}
 
 		$item = $data['items'][0];
@@ -220,7 +224,13 @@ class YouTube_API {
 			$url = 'https://www.youtube.com/' . ltrim( $input, '/' );
 		}
 
-		$response = wp_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
+		// Only ever fetch YouTube itself — never an arbitrary user-supplied host.
+		$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		if ( ! in_array( $host, array( 'youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be' ), true ) ) {
+			return new \WP_Error( 'buoyvs_channel_not_found', __( 'No channel matched that link.', 'buoy-video-sync' ) );
+		}
+
+		$response = wp_safe_remote_get( $url, array( 'timeout' => 15, 'redirection' => 5 ) );
 		if ( is_wp_error( $response ) ) {
 			return new \WP_Error( 'buoyvs_channel_fetch_error', __( 'Could not reach YouTube to look up that channel.', 'buoy-video-sync' ) );
 		}
@@ -246,12 +256,16 @@ class YouTube_API {
 	}
 
 	/**
-	 * Get all items from a playlist (paginated).
+	 * Get items from a playlist (paginated).
 	 *
 	 * Uses playlistItems.list?part=snippet — 1 quota unit per page of 50.
-	 * Iterates nextPageToken until all items are collected.
+	 * Iterates nextPageToken until all items are collected, or — when
+	 * $stop_at_known is given — until a page contains only known video IDs.
+	 * A channel's uploads playlist is newest-first, so the first fully-known
+	 * page means everything after it has been imported already.
 	 *
-	 * @param string $playlist_id YouTube playlist ID.
+	 * @param string   $playlist_id   YouTube playlist ID.
+	 * @param string[] $stop_at_known Already-imported video IDs. Empty = fetch every page.
 	 * @return array|WP_Error Flat array of items, each: {
 	 *     @type string $video_id
 	 *     @type string $title
@@ -261,9 +275,10 @@ class YouTube_API {
 	 *     @type string $channel_title Channel that owns the video
 	 * }
 	 */
-	public function get_playlist_items( string $playlist_id ): array|\WP_Error {
+	public function get_playlist_items( string $playlist_id, array $stop_at_known = array() ): array|\WP_Error {
 		$items      = array();
 		$page_token = null;
+		$known      = array_flip( $stop_at_known );
 
 		do {
 			$params = array(
@@ -280,6 +295,8 @@ class YouTube_API {
 			if ( is_wp_error( $data ) ) {
 				return $data;
 			}
+
+			$page_has_new = false;
 
 			foreach ( $data['items'] ?? array() as $item ) {
 				$snippet  = $item['snippet'] ?? array();
@@ -298,9 +315,18 @@ class YouTube_API {
 					'position'      => (int) ( $snippet['position'] ?? 0 ),
 					'channel_title' => $snippet['videoOwnerChannelTitle'] ?? '',
 				);
+
+				if ( ! isset( $known[ $resource['videoId'] ?? '' ] ) ) {
+					$page_has_new = true;
+				}
 			}
 
 			$page_token = $data['nextPageToken'] ?? null;
+
+			// Everything on this page is already imported — stop paging.
+			if ( $known && ! $page_has_new ) {
+				break;
+			}
 
 		} while ( $page_token );
 
@@ -416,7 +442,11 @@ class YouTube_API {
 		}
 
 		if ( empty( $data['items'] ) ) {
-			return new \WP_Error( 'playlist_not_found', "Playlist not found. Please verify the Playlist ID ({$playlist_id}) in your playlist settings." );
+			return new \WP_Error(
+				'playlist_not_found',
+				/* translators: %s: YouTube playlist ID */
+				sprintf( __( 'Playlist not found. Please verify the Playlist ID (%s).', 'buoy-video-sync' ), $playlist_id )
+			);
 		}
 
 		$item    = $data['items'][0];
@@ -527,7 +557,8 @@ class YouTube_API {
 			if ( is_wp_error( $response ) ) {
 				$last_error = new \WP_Error(
 					'youtube_network_error',
-					'Could not reach YouTube. This is usually temporary — it will be retried the next time the sync runs. (' . $response->get_error_message() . ')'
+					/* translators: %s: network error detail */
+					sprintf( __( 'Could not reach YouTube. This is usually temporary — it will be retried the next time the sync runs. (%s)', 'buoy-video-sync' ), $response->get_error_message() )
 				);
 				continue; // Network errors are always transient — retry.
 			}
@@ -540,7 +571,7 @@ class YouTube_API {
 				if ( ! is_array( $decoded ) ) {
 					return new \WP_Error(
 						'youtube_api_json_error',
-						'YouTube returned an unexpected response. This is usually temporary — it will be retried the next time the sync runs.'
+						__( 'YouTube returned an unexpected response. This is usually temporary — it will be retried the next time the sync runs.', 'buoy-video-sync' )
 					);
 				}
 				return $decoded;
@@ -557,7 +588,7 @@ class YouTube_API {
 			}
 		}
 
-		return $last_error ?? new \WP_Error( 'youtube_api_error', 'YouTube API request failed after retrying.' );
+		return $last_error ?? new \WP_Error( 'youtube_api_error', __( 'YouTube API request failed after retrying.', 'buoy-video-sync' ) );
 	}
 
 	/**
@@ -574,56 +605,62 @@ class YouTube_API {
 	private function friendly_error_message( int $status, string $reason, string $api_message ): string {
 		// Quota exceeded — permanent until midnight Pacific, but not a config error.
 		if ( in_array( $reason, array( 'quotaExceeded', 'dailyLimitExceeded' ), true ) ) {
-			return 'YouTube API daily quota exceeded. The quota resets daily — run the sync again tomorrow.';
+			return __( 'YouTube API daily quota exceeded. The quota resets daily — run the sync again tomorrow.', 'buoy-video-sync' );
 		}
 
 		switch ( $status ) {
 			case 400:
-				return 'YouTube rejected the request. This may indicate an invalid Channel ID or Playlist ID — please double-check your settings.';
+				return __( 'YouTube rejected the request. This may indicate an invalid Channel ID or Playlist ID — please double-check your settings.', 'buoy-video-sync' );
 
 			case 401:
-				return 'YouTube API authentication failed. Please check your API key in Buoy Video Sync → Settings.';
+				return __( 'YouTube API authentication failed. Please check your API key in Video Sync → Settings.', 'buoy-video-sync' );
 
 			case 403:
 				if ( in_array( $reason, array( 'keyInvalid', 'accessNotConfigured', 'forbidden' ), true ) ) {
-					return 'YouTube API access denied. Your API key may be invalid or the YouTube Data API v3 may not be enabled for it. Check Buoy Video Sync → Settings.';
+					return __( 'YouTube API access denied. Your API key may be invalid or the YouTube Data API v3 may not be enabled for it. Check Video Sync → Settings.', 'buoy-video-sync' );
 				}
-				return 'YouTube API returned a "Forbidden" error. Check your API key in Buoy Video Sync → Settings.';
+				return __( 'YouTube API returned a "Forbidden" error. Check your API key in Video Sync → Settings.', 'buoy-video-sync' );
 
 			case 404:
-				return 'YouTube could not find the requested channel or playlist. Please verify your Channel ID or Playlist ID.';
+				return __( 'YouTube could not find the requested channel or playlist. Please verify your Channel ID or Playlist ID.', 'buoy-video-sync' );
 
 			case 429:
-				return 'Too many requests sent to YouTube. This is temporary — it will be retried the next time the sync runs.';
+				return __( 'Too many requests sent to YouTube. This is temporary — it will be retried the next time the sync runs.', 'buoy-video-sync' );
 
 			case 500:
 			case 502:
 			case 503:
 			case 504:
-				return "YouTube's servers are temporarily unavailable (HTTP {$status}). This is temporary — it will be retried the next time the sync runs.";
+				/* translators: %d: HTTP status code */
+				return sprintf( __( "YouTube's servers are temporarily unavailable (HTTP %d). This is temporary — it will be retried the next time the sync runs.", 'buoy-video-sync' ), $status );
 
 			default:
 				$detail = $api_message ?: "HTTP {$status}";
-				return "YouTube API returned an unexpected error ({$detail}). It will be retried the next time the sync runs.";
+				/* translators: %s: error detail from YouTube */
+				return sprintf( __( 'YouTube API returned an unexpected error (%s). It will be retried the next time the sync runs.', 'buoy-video-sync' ), $detail );
 		}
 	}
 
 	/**
 	 * Convert an ISO 8601 duration string to total seconds.
 	 *
-	 * Examples: PT3M33S → 213, PT1H2M3S → 3723, PT30S → 30.
+	 * Examples: PT3M33S → 213, PT1H2M3S → 3723, PT30S → 30, P1DT2H → 93600
+	 * (streams longer than a day carry a day component).
 	 *
 	 * @param string $duration ISO 8601 duration (e.g. PT1H2M3S).
 	 * @return int Total seconds.
 	 */
 	private function iso8601_to_seconds( string $duration ): int {
-		preg_match( '/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/', $duration, $matches );
+		if ( ! preg_match( '/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/', $duration, $matches ) ) {
+			return 0;
+		}
 
-		$hours   = isset( $matches[1] ) ? (int) $matches[1] : 0;
-		$minutes = isset( $matches[2] ) ? (int) $matches[2] : 0;
-		$seconds = isset( $matches[3] ) ? (int) $matches[3] : 0;
+		$days    = isset( $matches[1] ) ? (int) $matches[1] : 0;
+		$hours   = isset( $matches[2] ) ? (int) $matches[2] : 0;
+		$minutes = isset( $matches[3] ) ? (int) $matches[3] : 0;
+		$seconds = isset( $matches[4] ) ? (int) $matches[4] : 0;
 
-		return ( $hours * 3600 ) + ( $minutes * 60 ) + $seconds;
+		return ( $days * 86400 ) + ( $hours * 3600 ) + ( $minutes * 60 ) + $seconds;
 	}
 
 	/**
