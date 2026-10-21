@@ -27,6 +27,14 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 function buoyvs_run_uninstall(): void {
 	global $wpdb;
 
+	// Buoy Video Sync Pro shares this plugin's settings, channel config, sync
+	// history, cron hook, and synced posts. Deleting Free after upgrading to Pro
+	// must not wipe the Pro site's setup, so leave everything in place while
+	// Pro is installed (active or not) — Pro's own uninstaller cleans up.
+	if ( file_exists( WP_PLUGIN_DIR . '/buoy-video-sync-pro/buoy-video-sync-pro.php' ) ) {
+		return;
+	}
+
 	// Uninstall is a one-time teardown: direct, uncached deletes are required to
 	// remove data, and the IN() clauses bind generated %s/%d placeholders via
 	// $wpdb->prepare(). The WordPress.DB advisory rules do not apply here.
