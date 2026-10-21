@@ -11,6 +11,7 @@
     "postId": { "type": "number", "default": 0 },
     "isEditorPreview": { "type": "boolean", "default": false }
   },
+  "usesContext": ["postId", "postType"],
   "supports": { "html": false },
   "editorScript": "file:./index.js"
 }

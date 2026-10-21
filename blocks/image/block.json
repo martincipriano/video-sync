@@ -12,6 +12,7 @@
     "field":  { "type": "string", "default": "thumbnail" },
     "size":   { "type": "string", "default": "maxres" }
   },
+  "usesContext": ["postId", "postType"],
   "supports": { "html": false },
   "editorScript": "file:./index.js"
 }

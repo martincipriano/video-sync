@@ -68,8 +68,25 @@ class Blocks {
 	// Block render callbacks
 	// -------------------------------------------------------------------------
 
-	public function render_field_block( array $attributes ): string {
-		$post_id = (int) ( $attributes['postId'] ?? 0 ) ?: (int) get_queried_object_id();
+	/**
+	 * Resolve which post a block renders: an explicitly chosen post, else the
+	 * post from block context (e.g. each item of a Query Loop), else the
+	 * queried object.
+	 *
+	 * @param array          $attributes Block attributes.
+	 * @param \WP_Block|null $block      Block instance.
+	 * @return int
+	 */
+	private function block_post_id( array $attributes, $block ): int {
+		$post_id = (int) ( $attributes['postId'] ?? 0 );
+		if ( ! $post_id && $block instanceof \WP_Block && ! empty( $block->context['postId'] ) ) {
+			$post_id = (int) $block->context['postId'];
+		}
+		return $post_id ?: (int) get_queried_object_id();
+	}
+
+	public function render_field_block( array $attributes, string $content = '', $block = null ): string {
+		$post_id = $this->block_post_id( $attributes, $block );
 		$field   = sanitize_key( $attributes['field'] ?? '' );
 
 		if ( ! $post_id || ! $field ) {
@@ -85,8 +102,8 @@ class Blocks {
 		return sprintf( '<div %s>%s</div>', get_block_wrapper_attributes(), $value );
 	}
 
-	public function render_image_block( array $attributes ): string {
-		$post_id = (int) ( $attributes['postId'] ?? 0 ) ?: (int) get_queried_object_id();
+	public function render_image_block( array $attributes, string $content = '', $block = null ): string {
+		$post_id = $this->block_post_id( $attributes, $block );
 		$field   = sanitize_key( $attributes['field'] ?? 'thumbnail' );
 		$size    = sanitize_key( $attributes['size'] ?? 'maxres' );
 
@@ -103,8 +120,8 @@ class Blocks {
 		return sprintf( '<div %s>%s</div>', get_block_wrapper_attributes(), $html );
 	}
 
-	public function render_embed_block( array $attributes ): string {
-		$post_id = (int) ( $attributes['postId'] ?? 0 ) ?: (int) get_queried_object_id();
+	public function render_embed_block( array $attributes, string $content = '', $block = null ): string {
+		$post_id = $this->block_post_id( $attributes, $block );
 
 		if ( ! $post_id ) {
 			return '';
@@ -336,7 +353,7 @@ class Blocks {
 		}
 
 		if ( in_array( $field, array( 'view_count', 'like_count', 'comment_count', 'subscriber_count', 'video_count', 'playlist_video_count' ), true ) ) {
-			return esc_html( number_format( (int) $value ) );
+			return esc_html( number_format_i18n( (int) $value ) );
 		}
 
 		return esc_html( $value );
@@ -382,10 +399,15 @@ class Blocks {
 			return '';
 		}
 
+		$title = (string) get_post_meta( $post_id, '_buoyvs_original_title', true );
+		$title = '' !== $title ? $title : get_the_title( $post_id );
+
 		// Fill the parent width and scale height via a 16:9 aspect ratio.
 		return '<div class="buoyvs-embed" style="width:100%;">'
 			. '<iframe'
-			. ' src="' . esc_url( 'https://www.youtube.com/embed/' . $video_id ) . '"'
+			. ' src="' . esc_url( 'https://www.youtube.com/embed/' . rawurlencode( $video_id ) ) . '"'
+			/* translators: %s: video title */
+			. ' title="' . esc_attr( sprintf( __( 'YouTube video: %s', 'buoy-video-sync' ), $title ) ) . '"'
 			. ' style="display:block;width:100%;aspect-ratio:16/9;height:auto;border:0;"'
 			. ' allowfullscreen loading="lazy">'
 			. '</iframe>'
