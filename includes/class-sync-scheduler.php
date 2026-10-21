@@ -6,7 +6,9 @@ declare(strict_types=1);
  * Manages WP Cron events for Buoy Video Sync sync rules — one-time ('once')
  * and recurring (hourly/daily/weekly/monthly/custom) schedules alike.
  *
- * Uses the 'buoyvs_channel_config_sync_rule' hook with args [ $rule_index ].
+ * Uses the 'buoyvs_channel_config_sync_rule' hook with args [ $rule_id ]
+ * (the rule's permanent ID). Events queued before rule IDs existed carry
+ * [ $rule_index ] and are still honoured.
  *
  * @package Buoy_Video_Sync
  */
@@ -27,7 +29,7 @@ class Sync_Scheduler {
 
 	/**
 	 * Cron hook name used for the option-based channel's sync rules (Channels Page).
-	 * Args: [ $rule_index ] — single channel, no term ID needed.
+	 * Args: [ $rule_id ] — single channel, no term ID needed.
 	 */
 	private const CRON_HOOK_CONFIG = 'buoyvs_channel_config_sync_rule';
 
@@ -65,11 +67,17 @@ class Sync_Scheduler {
 	 *
 	 * Called by WP Cron via the 'buoyvs_channel_config_sync_rule' hook.
 	 *
-	 * @param int $rule_index Rule index within the channel's sync_rules.
+	 * @param int|string $rule_ref Permanent rule ID, or a legacy rule index.
 	 * @return void
 	 */
-	public function dispatch_config_sync( int $rule_index ): void {
-		$this->runner->run_config_channel( $rule_index );
+	public function dispatch_config_sync( $rule_ref ): void {
+		if ( is_string( $rule_ref ) && ctype_digit( $rule_ref ) ) {
+			$rule_ref = (int) $rule_ref;
+		}
+		if ( ! is_int( $rule_ref ) && ! buoyvs_is_valid_rule_id( $rule_ref ) ) {
+			return;
+		}
+		$this->runner->run_config_channel( $rule_ref );
 	}
 
 	// -------------------------------------------------------------------------
@@ -87,13 +95,24 @@ class Sync_Scheduler {
 	public function reschedule_channel_rules(): void {
 		$channel = buoyvs_get_channel_config();
 
-		// Capture existing scheduled events before clearing.
+		// Every rule needs a permanent ID before it can be scheduled by it.
+		$with_ids = buoyvs_ensure_rule_ids( $channel );
+		if ( $with_ids !== $channel ) {
+			$channel = $with_ids;
+			update_option( 'buoyvs_channel_config', $channel );
+		}
+
+		// Capture existing scheduled events before clearing, keyed by rule ID so
+		// a recurring rule keeps its own timing when other rules are deleted or
+		// reordered. Fall back to a legacy index-keyed event (queued before rule
+		// IDs existed) at the rule's current position.
 		$existing_events = array();
 		foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
-			$args  = array( (int) $rule_index );
-			$event = wp_get_scheduled_event( self::CRON_HOOK_CONFIG, $args );
+			$rule_id = (string) ( $rule['id'] ?? '' );
+			$event   = wp_get_scheduled_event( self::CRON_HOOK_CONFIG, array( $rule_id ) )
+				?: wp_get_scheduled_event( self::CRON_HOOK_CONFIG, array( (int) $rule_index ) );
 			if ( $event ) {
-				$existing_events[ (int) $rule_index ] = $event;
+				$existing_events[ $rule_id ] = $event;
 			}
 		}
 
@@ -104,21 +123,21 @@ class Sync_Scheduler {
 		// pre-mark them as syncing before the redirect — the overlay is
 		// server-rendered and needs sync_status = 'syncing' in stored data.
 		$immediate = array();
-		foreach ( $channel['sync_rules'] ?? array() as $rule_index => $rule ) {
+		foreach ( $channel['sync_rules'] ?? array() as $rule ) {
 			if ( empty( $rule['enabled'] ) ) {
 				continue;
 			}
-			$existing  = $existing_events[ (int) $rule_index ] ?? null;
-			$fires_now = $this->schedule_rule( (int) $rule_index, $rule, $existing );
+			$rule_id   = (string) $rule['id'];
+			$fires_now = $this->schedule_rule( $rule_id, $rule, $existing_events[ $rule_id ] ?? null );
 			if ( $fires_now ) {
-				$immediate[] = (int) $rule_index;
+				$immediate[] = $rule_id;
 			}
 		}
 
 		if ( ! empty( $immediate ) ) {
 			$channel_now = buoyvs_get_channel_config();
-			foreach ( $immediate as $rule_idx ) {
-				if ( isset( $channel_now['sync_rules'][ $rule_idx ] ) ) {
+			foreach ( $channel_now['sync_rules'] ?? array() as $rule_idx => $rule ) {
+				if ( in_array( $rule['id'] ?? '', $immediate, true ) ) {
 					$channel_now['sync_rules'][ $rule_idx ]['sync_status']     = 'syncing';
 					$channel_now['sync_rules'][ $rule_idx ]['sync_started_at'] = time();
 				}
@@ -216,7 +235,7 @@ class Sync_Scheduler {
 	 * Unschedule every existing buoyvs_channel_config_sync_rule event.
 	 *
 	 * Sweeps the live cron array and removes all events for this hook, whatever
-	 * their [ rule_index ] args — this also clears orphaned events left behind
+	 * their args (rule ID or legacy index) — this also clears orphaned events left behind
 	 * when a rule was deleted.
 	 *
 	 * @return void
@@ -240,13 +259,13 @@ class Sync_Scheduler {
 	/**
 	 * Schedule a single cron event for a rule.
 	 *
-	 * @param int         $rule_index     Rule index.
+	 * @param string      $rule_id        Permanent rule ID.
 	 * @param array       $rule           Rule data array.
 	 * @param object|null $existing_event Previously scheduled event, or null.
 	 * @return bool True if the rule fires immediately (schedule = 'once').
 	 */
-	private function schedule_rule( int $rule_index, array $rule, ?object $existing_event = null ): bool {
-		$args     = array( $rule_index );
+	private function schedule_rule( string $rule_id, array $rule, ?object $existing_event = null ): bool {
+		$args     = array( $rule_id );
 		$schedule = $rule['schedule'] ?? 'once';
 
 		if ( 'once' === $schedule ) {

@@ -104,10 +104,15 @@ function buoyvs_return_template_part( $slug, $name = null, $args = array() ) {
 }
 
 /**
- * Plugin activation.
+ * Plugin activation — flag that sync jobs need rescheduling.
+ *
+ * The scheduler is created on 'init', which has already run by the time the
+ * activation hook fires, so the reschedule happens on the next page load.
+ * Without this, rules saved earlier (or by Pro, which shares the config)
+ * would not run again until the Channels page is re-saved.
  */
 register_activation_hook( BUOYVS_PLUGIN_FILE, function () {
-	flush_rewrite_rules();
+	update_option( 'buoyvs_reschedule_pending', 1, false );
 } );
 
 /**
@@ -145,6 +150,27 @@ add_action(
 		new \Buoy_Video_Sync\Sync_Scheduler( $runner );
 	},
 	5
+);
+
+/**
+ * One-time maintenance once the scheduler is listening:
+ * - give rules saved before permanent rule IDs existed an ID and requeue them
+ *   under it;
+ * - requeue all rules after (re)activation.
+ */
+add_action(
+	'init',
+	function () {
+		$channel     = buoyvs_get_channel_config();
+		$needs_ids   = buoyvs_ensure_rule_ids( $channel ) !== $channel;
+		$was_flagged = (bool) get_option( 'buoyvs_reschedule_pending' );
+
+		if ( $needs_ids || $was_flagged ) {
+			delete_option( 'buoyvs_reschedule_pending' );
+			do_action( 'buoyvs_reschedule_channel_rules' );
+		}
+	},
+	20
 );
 
 /**

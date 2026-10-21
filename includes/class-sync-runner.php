@@ -25,15 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Runner {
 
 	/**
-	 * Seconds before a sync lock is considered stale and ignored.
-	 *
-	 * Matches the progress-transient TTL. A crashed run self-clears after this.
-	 */
-	private const STALE_LOCK_SECONDS = 1800;
-
-	/**
 	 * Index of the rule currently being executed.
-	 * Set at the start of run() so record_success/record_error can write to the correct rule.
+	 * Set at the start of run(); reported to hooks and the history log.
 	 *
 	 * @var int
 	 */
@@ -64,6 +57,45 @@ class Sync_Runner {
 	private int $current_run_count = 0;
 
 	/**
+	 * Permanent ID of the rule currently being executed.
+	 *
+	 * State is written back by ID (not position) so a rule deleted or
+	 * reordered on the Channels page mid-run is never confused with another.
+	 *
+	 * @var string
+	 */
+	private string $current_rule_id = '';
+
+	/**
+	 * YouTube ID of the channel the current run belongs to. If the channel is
+	 * replaced or deleted mid-run, state writes are skipped.
+	 *
+	 * @var string
+	 */
+	private string $current_youtube_id = '';
+
+	/**
+	 * Whether the current run hit a terminal error.
+	 *
+	 * @var bool
+	 */
+	private bool $run_failed = false;
+
+	/**
+	 * First terminal error message of the current run (for buoyvs_after_sync).
+	 *
+	 * @var string
+	 */
+	private string $terminal_error = '';
+
+	/**
+	 * Unix time the run lock was last extended.
+	 *
+	 * @var int
+	 */
+	private int $lock_refreshed_at = 0;
+
+	/**
 	 * Whether the current run is the single option-based channel (Channels page).
 	 *
 	 * @var bool
@@ -73,7 +105,7 @@ class Sync_Runner {
 	/**
 	 * In-memory copy of the source data when running an option-based channel.
 	 * Returned by get_channel_data(). Kept in sync after
-	 * every save_source_data() call so subsequent reads within the same run see
+	 * every state write (see mutate_channel()) so subsequent reads within the same run see
 	 * the latest state.
 	 *
 	 * @var array|null
@@ -123,27 +155,34 @@ class Sync_Runner {
 		$rule = $this->load_rule( $source_type, $term_id, $rule_index );
 
 		// Rule missing or disabled — nothing to do.
-		if ( null === $rule || empty( $rule['enabled'] ) ) {
+		if ( null === $rule || empty( $rule['enabled'] ) || '' === $this->current_rule_id ) {
 			return;
 		}
 
-		// Concurrency guard (option-based channel): stop a second cron tick or a
-		// manual trigger from running the same rule while it is already in flight.
-		// A dedicated transient is used rather than the sync_status field, which
-		// the Channels page pre-sets to 'syncing' before the cron fires.
-		$lock_key = null;
-		if ( $this->is_option_channel ) {
-			$lock_key = 'buoyvs_lock_' . $rule_index;
-			if ( get_transient( $lock_key ) ) {
-				return;
-			}
-			set_transient( $lock_key, time(), self::STALE_LOCK_SECONDS );
+		// Concurrency guard: stop a second cron tick or a manual trigger from
+		// running the same rule while it is already in flight. The lock is an
+		// option row taken with a single INSERT, so it is atomic.
+		if ( ! buoyvs_acquire_rule_lock( $this->current_rule_id ) ) {
+			return;
 		}
+		$this->lock_refreshed_at = time();
 
 		$this->current_rule_index = $rule_index;
+		$this->run_failed         = false;
+		$this->terminal_error     = '';
 
 		$action   = $rule['action'] ?? '';
 		$schedule = $rule['schedule'] ?? 'once';
+
+		/**
+		 * Fires right before a sync rule starts running.
+		 *
+		 * @param array  $rule        The sync rule about to run.
+		 * @param int    $rule_index  0-based index of the rule in sync_rules[].
+		 * @param string $source_type 'channel' or 'playlist'.
+		 * @param int    $source_id   WordPress term ID of the source.
+		 */
+		do_action( 'buoyvs_before_sync', $rule, $rule_index, $source_type, $term_id );
 
 		// "Once" runs may import an entire channel back-catalog in a single
 		// execution — lift PHP limits so a large import completes instead of
@@ -156,18 +195,22 @@ class Sync_Runner {
 			wp_raise_memory_limit( 'admin' );
 		}
 
-		$this->mark_syncing( $source_type, $term_id, $rule_index );
+		$this->mark_syncing();
 		$this->write_progress( 0, 0 ); // Reset any stale progress from a previous run.
 
-		$syncing_cleared = false;
+		// A PHP fatal skips the finally block below; finish the run from the
+		// shutdown handler instead so the rule is not left "syncing" and a
+		// "once" rule is still switched off.
+		$finished = false;
 		register_shutdown_function(
-			function () use ( $source_type, $term_id, $rule_index, &$syncing_cleared ) {
-				if ( $syncing_cleared ) {
+			function () use ( $schedule, &$finished ) {
+				if ( $finished ) {
 					return;
 				}
 				$error = error_get_last();
 				if ( $error && in_array( $error['type'], array( E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE ), true ) ) {
-					$this->clear_syncing( $source_type, $term_id, $rule_index );
+					$this->record_error( 'channel', 0, sprintf( 'PHP fatal error: %s', $error['message'] ), 'fatal' );
+					$this->finish_run( $schedule );
 				}
 			}
 		);
@@ -190,51 +233,72 @@ class Sync_Runner {
 					break;
 
 				default:
-					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					error_log( "Buoy Video Sync: unknown action '{$action}' (term {$term_id}, rule {$rule_index})." );
-					return;
+					$this->record_error(
+						$source_type,
+						$term_id,
+						/* translators: %s: sync action slug */
+						sprintf( __( 'This rule uses an action this plugin does not support (%s). Edit the rule and choose a different action.', 'buoy-video-sync' ), $action ),
+						'unknown_action'
+					);
 			}
-
-			$this->record_success( $source_type, $term_id );
-
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			$this->record_error( $source_type, $term_id, $e->getMessage(), 'exception' );
 		} finally {
-			$this->clear_syncing( $source_type, $term_id, $rule_index );
+			$this->finish_run( $schedule );
+			$finished = true;
 
-			// Auto-disable "once" rules here (inside finally) so it runs even on
-			// fatal errors caught by the shutdown function — preventing the rule
-			// from firing a second time if the cron event somehow re-queues.
-			// Recurring rules stay enabled so the next scheduled tick still fires.
-			if ( 'once' === ( $rule['schedule'] ?? 'once' ) ) {
-				$this->disable_once_rule( $source_type, $term_id, $rule_index );
-			}
-
-			if ( null !== $lock_key ) {
-				delete_transient( $lock_key );
-			}
-
-			$syncing_cleared = true;
+			/**
+			 * Fires after a sync rule finishes running, whether it succeeded or failed.
+			 *
+			 * @param array  $rule       The sync rule that ran.
+			 * @param int    $rule_index 0-based index of the rule in sync_rules[].
+			 * @param bool   $success    Whether the run completed without a terminal error.
+			 * @param array  $result     Run context: 'action', 'source_type', 'source_id', and 'error' (empty string on success).
+			 */
+			do_action(
+				'buoyvs_after_sync',
+				$rule,
+				$rule_index,
+				! $this->run_failed,
+				array(
+					'action'      => $action,
+					'source_type' => $source_type,
+					'source_id'   => $term_id,
+					'error'       => $this->terminal_error,
+				)
+			);
 		}
 	}
 
 	/**
 	 * Execute a sync rule for an option-based channel (Channels Page / buoyvs_channel_config).
 	 *
-	 * Sets up the source data override so that get_channel_data() and
-	 * save_source_data() transparently read/write wp_options instead of
-	 * term meta, then delegates to the standard run() method with term_id = 0.
+	 * Loads the channel from wp_options into the source data override, then
+	 * delegates to the standard run() method with term_id = 0.
 	 *
 	 * Called by Sync_Scheduler::dispatch_config_sync() when a
 	 * buoyvs_channel_config_sync_rule cron event fires.
 	 *
-	 * @param int $rule_index 0-based rule index within the channel's sync_rules.
+	 * @param int|string $rule_ref Permanent rule ID, or a 0-based rule index
+	 *                             (cron events queued before rule IDs existed).
 	 * @return void
 	 */
-	public function run_config_channel( int $rule_index ): void {
-		$ch_data = buoyvs_get_channel_config();
+	public function run_config_channel( int|string $rule_ref ): void {
+		$ch_data = buoyvs_get_channel_config_fresh();
 
 		if ( empty( $ch_data['youtube_id'] ) ) {
+			return;
+		}
+
+		// Rules saved before permanent IDs existed get one now.
+		$with_ids = buoyvs_ensure_rule_ids( $ch_data );
+		if ( $with_ids !== $ch_data ) {
+			$ch_data = $with_ids;
+			update_option( 'buoyvs_channel_config', $ch_data );
+		}
+
+		$rule_index = is_int( $rule_ref ) ? $rule_ref : buoyvs_find_rule_index( $ch_data, $rule_ref );
+		if ( null === $rule_index || ! isset( $ch_data['sync_rules'][ $rule_index ] ) ) {
 			return;
 		}
 
@@ -243,11 +307,15 @@ class Sync_Runner {
 
 		$this->is_option_channel    = true;
 		$this->source_data_override = $ch_data;
+		$this->current_rule_id      = (string) $ch_data['sync_rules'][ $rule_index ]['id'];
+		$this->current_youtube_id   = (string) $ch_data['youtube_id'];
 
 		$this->run( 'channel', 0, $rule_index );
 
 		$this->is_option_channel    = false;
 		$this->source_data_override = null;
+		$this->current_rule_id      = '';
+		$this->current_youtube_id   = '';
 	}
 
 	// -------------------------------------------------------------------------
@@ -306,8 +374,19 @@ class Sync_Runner {
 			$playlist_id = $meta['playlist_id'];
 		}
 
-		// Fetch all video IDs from the playlist (paginated inside the API wrapper).
-		$items = $this->api->get_playlist_items( $playlist_id );
+		// Already-imported IDs. Dedup is scoped to the destination post type so
+		// the same video can be imported into more than one post type.
+		$existing_ids = $this->importer->get_imported_video_ids( $destination_post_type );
+
+		// Recurring runs only need what's new since the last tick: stop paging
+		// the (newest-first) uploads playlist at the first page made entirely
+		// of already-imported videos instead of re-reading the whole catalog
+		// and spending quota on every tick. "Once" runs always scan everything
+		// so they can backfill gaps.
+		$stop_at_known = 'once' !== ( $rule['schedule'] ?? 'once' ) ? $existing_ids : array();
+
+		// Fetch video IDs from the playlist (paginated inside the API wrapper).
+		$items = $this->api->get_playlist_items( $playlist_id, $stop_at_known );
 		if ( is_wp_error( $items ) ) {
 			$this->record_error( $source_type, $term_id, $items->get_error_message(), $items->get_error_code() );
 			return;
@@ -317,13 +396,9 @@ class Sync_Runner {
 			return; // Nothing to sync.
 		}
 
-		// Extract video IDs from the playlist items.
+		// Extract video IDs from the playlist items, then keep only new ones.
 		$all_ids = array_filter( array_column( $items, 'video_id' ) );
-
-		// Split into new vs already-imported. Dedup is scoped to the destination
-		// post type so the same video can be imported into more than one post type.
-		$existing_ids = $this->importer->get_imported_video_ids( $destination_post_type );
-		$new_ids      = array_values( array_diff( $all_ids, $existing_ids ) );
+		$new_ids = array_values( array_diff( $all_ids, $existing_ids ) );
 
 		if ( empty( $new_ids ) ) {
 			return; // All videos already imported.
@@ -332,7 +407,7 @@ class Sync_Runner {
 		$max = (int) ( $rule['max_videos'] ?? 0 );
 
 		// Batch-fetch full video details and import.
-		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $max, $post_status );
+		$imported                = $this->batch_fetch_and_import( $new_ids, $source_type, $term_id, $destination_post_type, $max, $post_status, $rule );
 		$this->current_run_count = $imported;
 
 		// Warn when candidates were available but nothing could be saved.
@@ -397,7 +472,7 @@ class Sync_Runner {
 		}
 
 		$this->write_progress( 0, 1 );
-		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $post_status );
+		$result = $this->importer->import_channel( $fresh, $channel_id, $destination_post_type, $post_status, $this->rule_author( $rule ) );
 
 		if ( is_wp_error( $result ) ) {
 			$this->accumulate_error( 'channel', $term_id, $result->get_error_message(), $result->get_error_code() );
@@ -460,8 +535,12 @@ class Sync_Runner {
 			// Create if missing in this post type.
 			$existing_post_id = $this->importer->find_post_by_playlist_id( $playlist_data['playlist_id'], $destination_post_type );
 			if ( ! $existing_post_id ) {
-				$this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $post_status );
-				++$processed;
+				$result = $this->importer->import_playlist( $playlist_data, $channel_id, $destination_post_type, $post_status, $this->rule_author( $rule ) );
+				if ( is_wp_error( $result ) ) {
+					$this->accumulate_error( 'channel', $term_id, $result->get_error_message(), $result->get_error_code() );
+				} else {
+					++$processed;
+				}
 			}
 			++$scanned_pl;
 			$this->write_progress( min( $scanned_pl, $total_pl ), $total_pl );
@@ -488,7 +567,8 @@ class Sync_Runner {
 		int $term_id,
 		string $destination_post_type = '',
 		int $max = 0,
-		string $post_status = 'publish'
+		string $post_status = 'publish',
+		array $rule = array()
 	): int {
 		$cap     = $max > 0 ? $max : PHP_INT_MAX;
 		$chunks  = array_chunk( $video_ids, 50 );
@@ -513,7 +593,21 @@ class Sync_Runner {
 					return $imported;
 				}
 
-				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $post_status );
+				/**
+				 * Filters whether a video should be imported.
+				 *
+				 * @param bool   $should_import Whether to import this item. Default true.
+				 * @param array  $item_data     Video data from the YouTube API.
+				 * @param string $source_type   'channel' or 'playlist'.
+				 * @param array  $rule          The sync rule currently running.
+				 */
+				if ( ! apply_filters( 'buoyvs_import_item', true, $video_data, $source_type, $rule ) ) {
+					++$scanned;
+					$this->write_progress( min( $scanned, $total ), $total );
+					continue;
+				}
+
+				$result = $this->importer->import( $video_data, $source_type, $term_id, $destination_post_type, $post_status, $this->rule_author( $rule ) );
 
 				if ( is_wp_error( $result ) ) {
 					$this->accumulate_error( $source_type, $term_id, $result->get_error_message(), $result->get_error_code() );
@@ -531,6 +625,18 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 	// Lookup helpers
 	// -------------------------------------------------------------------------
+
+	/**
+	 * The user synced posts are attributed to: whoever created the rule, if
+	 * that account still exists. Cron runs have no logged-in user.
+	 *
+	 * @param array $rule Sync rule.
+	 * @return int User ID, or 0.
+	 */
+	private function rule_author( array $rule ): int {
+		$user_id = (int) ( $rule['created_by'] ?? 0 );
+		return ( $user_id && get_userdata( $user_id ) ) ? $user_id : 0;
+	}
 
 	/**
 	 * Whether a rule's destination post type is unusable (empty or not registered).
@@ -585,39 +691,31 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Merge fresh channel API data into the channel's term meta.
+	 * Merge fresh channel API data into the stored channel config.
 	 *
 	 * Called as a side effect of handle_videos_sync_new() so that channel
 	 * metadata (title, subscribers, profile picture, banner) stays up to date
 	 * even when no explicit channel_update rule has been configured.
 	 *
-	 * @param int   $term_id      Channel term ID.
+	 * @param int   $term_id      Unused; retained for the call signature.
 	 * @param array $channel_data Data returned by YouTube_API::get_channel_data().
 	 * @return void
 	 */
 	private function refresh_channel_meta( int $term_id, array $channel_data ): void {
-		$data = $this->get_channel_data();
-		if ( ! $data ) {
-			return;
-		}
-
-		$fields = array( 'channel_title', 'channel_description', 'subscriber_count', 'video_count', 'profile_picture', 'banner_image' );
-		foreach ( $fields as $field ) {
+		$fields = array();
+		foreach ( array( 'channel_title', 'channel_description', 'subscriber_count', 'video_count', 'profile_picture', 'banner_image', 'etag' ) as $field ) {
 			if ( isset( $channel_data[ $field ] ) ) {
-				$data[ $field ] = $channel_data[ $field ];
+				$fields[ $field ] = $channel_data[ $field ];
 			}
 		}
-
-		$data['etag'] = $channel_data['etag'] ?? ( $data['etag'] ?? '' );
-		$this->save_source_data( 'channel', $term_id, $data );
+		$this->patch_channel( $fields );
 	}
 
 	/**
 	 * Return the current channel's source data.
 	 *
-	 * The runner syncs the single option-based channel, so this returns the
-	 * in-memory source_data_override that run_config_channel() loaded from
-	 * buoyvs_channel_config. (Params retained for the call signature.)
+	 * The in-memory copy run_config_channel() loaded, refreshed after every
+	 * write this runner makes.
 	 *
 	 * @return array|null Channel data array, or null if not set.
 	 */
@@ -626,34 +724,87 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Persist the channel's source data to buoyvs_channel_config and refresh the
-	 * in-memory override so later reads in the same run see the update.
+	 * Apply changes to the stored channel config without clobbering edits made
+	 * elsewhere while this run was in progress.
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID (unused; retained for the call signature).
-	 * @param array  $data        Decoded data to persist.
+	 * Re-reads the option from the database, applies $mutator to that fresh
+	 * copy, and saves it. Skipped entirely if the channel was replaced or
+	 * deleted since the run started.
+	 *
+	 * @param callable $mutator Receives the fresh channel array; returns the modified array, or null to skip saving.
 	 * @return void
 	 */
-	private function save_source_data( string $source_type, int $term_id, array $data ): void {
-		$this->update_option_channel( $data );
-		$this->source_data_override = $data;
+	private function mutate_channel( callable $mutator ): void {
+		if ( ! $this->is_option_channel || '' === $this->current_youtube_id ) {
+			return;
+		}
+
+		$channel = buoyvs_get_channel_config_fresh();
+		if ( ( $channel['youtube_id'] ?? '' ) !== $this->current_youtube_id ) {
+			return;
+		}
+
+		$updated = $mutator( $channel );
+		if ( ! is_array( $updated ) ) {
+			return;
+		}
+
+		update_option( 'buoyvs_channel_config', $updated );
+
+		$updated['channel_id']      = $updated['youtube_id'];
+		$this->source_data_override = $updated;
 	}
 
 	/**
-	 * Write the updated single channel back to buoyvs_channel_config (flat).
+	 * Update channel-level fields (title, counts, images…).
 	 *
-	 * Preserves the youtube_id key (the option stores youtube_id; the runner
-	 * temporarily adds channel_id as an alias — we don't store it).
-	 *
-	 * @param array $data Updated channel data.
+	 * @param array $fields Field => value.
 	 * @return void
 	 */
-	private function update_option_channel( array $data ): void {
-		if ( ! isset( $data['youtube_id'] ) && isset( $data['channel_id'] ) ) {
-			$data['youtube_id'] = $data['channel_id'];
+	private function patch_channel( array $fields ): void {
+		if ( empty( $fields ) ) {
+			return;
 		}
+		$this->mutate_channel(
+			static function ( array $channel ) use ( $fields ): array {
+				return array_merge( $channel, $fields );
+			}
+		);
+	}
 
-		update_option( 'buoyvs_channel_config', $data );
+	/**
+	 * Update the current rule's fields, located by its permanent ID.
+	 *
+	 * @param array    $fields Field => value to set.
+	 * @param string[] $unset  Fields to remove.
+	 * @return void
+	 */
+	private function patch_rule( array $fields, array $unset = array() ): void {
+		$rule_id = $this->current_rule_id;
+		$this->mutate_channel(
+			static function ( array $channel ) use ( $rule_id, $fields, $unset ): ?array {
+				$index = buoyvs_find_rule_index( $channel, $rule_id );
+				if ( null === $index ) {
+					return null; // Rule was deleted mid-run.
+				}
+				foreach ( $unset as $key ) {
+					unset( $channel['sync_rules'][ $index ][ $key ] );
+				}
+				$channel['sync_rules'][ $index ] = array_merge( $channel['sync_rules'][ $index ], $fields );
+				return $channel;
+			}
+		);
+	}
+
+	/**
+	 * The current rule as last read from the database.
+	 *
+	 * @return array
+	 */
+	private function current_rule(): array {
+		$data  = $this->get_channel_data() ?? array();
+		$index = buoyvs_find_rule_index( $data, $this->current_rule_id );
+		return null === $index ? array() : $data['sync_rules'][ $index ];
 	}
 
 	// -------------------------------------------------------------------------
@@ -661,33 +812,23 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Append a run entry to the channel's per-channel sync history.
+	 * Append this run's single entry to the channel's sync history.
 	 *
-	 * Writes ONE entry per run — called only from record_success() and terminal
-	 * record_error() calls. All mid-run errors are already in $this->run_errors.
-	 * Only runs for option-based channels (source_data_override is set).
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param bool   $has_error   Whether the run produced any error (terminal or accumulated).
+	 * @param bool $has_error Whether the run produced any error (terminal or accumulated).
 	 * @return void
 	 */
-	private function append_history( string $source_type, int $term_id, bool $has_error ): void {
-		if ( null === $this->source_data_override ) {
-			return;
-		}
-		$youtube_id = $this->source_data_override['youtube_id'] ?? '';
-		if ( ! $youtube_id ) {
+	private function append_history( bool $has_error ): void {
+		if ( '' === $this->current_youtube_id ) {
 			return;
 		}
 
-		$data = $this->get_channel_data();
-		$rule = $data['sync_rules'][ $this->current_rule_index ] ?? array();
+		$rule = $this->current_rule();
 
-		Sync_History::append( $youtube_id, array(
+		Sync_History::append( $this->current_youtube_id, array(
 			'timestamp'             => time(),
 			'rule_action'           => $rule['action'] ?? '',
 			'rule_index'            => $this->current_rule_index,
+			'rule_id'               => $this->current_rule_id,
 			'duration'              => max( 0, time() - $this->run_started_at ),
 			'has_error'             => $has_error,
 			'errors'                => $this->run_errors,
@@ -697,15 +838,15 @@ class Sync_Runner {
 	}
 
 	/**
-	 * Accumulate a non-terminal error during the current sync run.
+	 * Record a non-terminal error during the current sync run.
 	 *
-	 * Pushes the error to $run_errors (flushed into one history entry at the end)
-	 * and updates the rule's sync_errors meta for quick UI display.
-	 * Use this for errors inside batch loops where the run continues after the error.
+	 * Pushes the error to $run_errors (flushed into the history entry at the
+	 * end) and mirrors the latest errors onto the rule for the UI.
+	 * Use this for errors inside batch loops where the run continues.
 	 * For terminal errors where the run stops, use record_error() instead.
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
+	 * @param string $source_type Unused; retained for the call signature.
+	 * @param int    $term_id     Unused; retained for the call signature.
 	 * @param string $error       Human-readable error message.
 	 * @param string $code        Error code string.
 	 * @return void
@@ -714,148 +855,84 @@ class Sync_Runner {
 		$this->run_errors[] = array(
 			'timestamp' => time(),
 			'error'     => $error,
-			'code'      => $code,
+			'code'      => (string) $code,
 		);
 
-		$data = $this->get_channel_data();
-		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
-			return;
-		}
-
-		$rule                = &$data['sync_rules'][ $this->current_rule_index ];
-		$errors              = $rule['sync_errors'] ?? array();
-		$errors[]            = array( 'timestamp' => time(), 'error' => $error, 'code' => $code );
-		$rule['sync_errors'] = array_slice( $errors, -5 );
-		$rule['sync_status'] = 'failed';
-		unset( $rule );
-
-		$this->save_source_data( $source_type, $term_id, $data );
+		$this->patch_rule( array( 'sync_errors' => array_slice( $this->run_errors, -5 ) ) );
 	}
 
 	/**
-	 * Record a successful sync run in term meta.
+	 * Record a terminal sync error — the run stops and is reported as failed.
 	 *
-	 * Updates last_synced, increments sync_count, sets sync_status = 'success',
-	 * and clears sync_errors.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @return void
-	 */
-	private function record_success( string $source_type, int $term_id ): void {
-		$data = $this->get_channel_data();
-		if ( ! $data || ! isset( $data['sync_rules'][ $this->current_rule_index ] ) ) {
-			return;
-		}
-
-		$rule                = &$data['sync_rules'][ $this->current_rule_index ];
-		$rule['last_synced'] = time();
-		$rule['sync_count']  = (int) ( $rule['sync_count'] ?? 0 ) + 1;
-		$rule['sync_status'] = 'success';
-		$rule['sync_errors'] = array();
-		unset( $rule );
-
-		$this->save_source_data( $source_type, $term_id, $data );
-		$this->append_history( $source_type, $term_id, ! empty( $this->run_errors ) );
-	}
-
-	/**
-	 * Record a terminal sync error — the run stops here.
-	 *
-	 * Accumulates the error (updates rule meta + run_errors buffer), then
-	 * writes the single history entry for this run.
-	 * For non-terminal errors inside batch loops, use accumulate_error() instead.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
+	 * @param string $source_type Unused; retained for the call signature.
+	 * @param int    $term_id     Unused; retained for the call signature.
 	 * @param string $error       Human-readable error message.
 	 * @param string $code        Error code string.
 	 * @return void
 	 */
 	private function record_error( string $source_type, int $term_id, string $error, string $code = '' ): void {
-		$this->accumulate_error( $source_type, $term_id, $error, $code );
-		$this->append_history( $source_type, $term_id, true );
+		if ( ! $this->run_failed ) {
+			$this->terminal_error = $error;
+		}
+		$this->run_failed = true;
+		$this->accumulate_error( $source_type, $term_id, $error, (string) $code );
 	}
 
 	/**
-	 * Mark a sync rule as actively syncing.
+	 * Mark the current rule as actively syncing and reset per-run state.
 	 *
-	 * Sets sync_status = 'syncing' and records sync_started_at timestamp.
-	 * The timestamp is used to detect stale locks if the process is killed
-	 * at the OS level (beyond PHP's shutdown handler reach).
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param int    $rule_index  Index of the rule being executed.
 	 * @return void
 	 */
-	private function mark_syncing( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_channel_data();
-		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
-			return;
-		}
-
-		$rule                    = &$data['sync_rules'][ $rule_index ];
-		$rule['sync_status']     = 'syncing';
-		$rule['sync_started_at'] = time();
-		unset( $rule );
-
+	private function mark_syncing(): void {
 		$this->run_started_at    = time();
 		$this->run_errors        = array();
 		$this->current_run_count = 0;
 
-		$this->save_source_data( $source_type, $term_id, $data );
+		$this->patch_rule(
+			array(
+				'sync_status'     => 'syncing',
+				'sync_started_at' => time(),
+				'sync_errors'     => array(),
+			)
+		);
 	}
 
 	/**
-	 * Clear the syncing lock from a sync rule.
+	 * Write the run's outcome — exactly once per run.
 	 *
-	 * Called in the finally block of run() and by the register_shutdown_function
-	 * callback on PHP fatal errors. Unsets sync_started_at and resets
-	 * sync_status to '' if it is still 'syncing' (i.e. neither record_success()
-	 * nor record_error() ran to completion).
+	 * Sets the final status ('success' only when nothing went wrong), updates
+	 * last_synced/sync_count when the run was not stopped by a terminal error,
+	 * switches off a "once" rule, writes the history entry, and releases the
+	 * lock. A "once" rule runs a single time; it stays visible with its toggle
+	 * off so the user can re-enable it. Recurring rules stay enabled.
 	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param int    $rule_index  Index of the rule being executed.
+	 * @param string $schedule Rule schedule.
 	 * @return void
 	 */
-	private function clear_syncing( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_channel_data();
-		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
+	private function finish_run( string $schedule ): void {
+		if ( '' === $this->current_rule_id ) {
 			return;
 		}
 
-		$rule = &$data['sync_rules'][ $rule_index ];
-		unset( $rule['sync_started_at'] );
-		if ( 'syncing' === ( $rule['sync_status'] ?? '' ) ) {
-			$rule['sync_status'] = '';
-		}
-		unset( $rule );
+		$rule   = $this->current_rule();
+		$fields = array(
+			'sync_status' => empty( $this->run_errors ) ? 'success' : 'failed',
+			'sync_errors' => array_slice( $this->run_errors, -5 ),
+		);
 
-		$this->save_source_data( $source_type, $term_id, $data );
-	}
-
-	/**
-	 * Set a "once" rule's enabled flag to false after it fires.
-	 *
-	 * "Once" rules run a single time; the rule remains visible in the UI with
-	 * the toggle off so the user can see it ran and re-enable it to run again.
-	 * Recurring rules never reach this method — they stay enabled between ticks.
-	 *
-	 * @param string $source_type 'channel' or 'playlist'.
-	 * @param int    $term_id     Term ID.
-	 * @param int    $rule_index  Index of the rule to disable.
-	 * @return void
-	 */
-	private function disable_once_rule( string $source_type, int $term_id, int $rule_index ): void {
-		$data = $this->get_channel_data();
-		if ( ! $data || ! isset( $data['sync_rules'][ $rule_index ] ) ) {
-			return;
+		if ( ! $this->run_failed ) {
+			$fields['last_synced'] = time();
+			$fields['sync_count']  = (int) ( $rule['sync_count'] ?? 0 ) + 1;
 		}
 
-		$data['sync_rules'][ $rule_index ]['enabled'] = false;
-		$this->save_source_data( $source_type, $term_id, $data );
+		if ( 'once' === $schedule ) {
+			$fields['enabled'] = false;
+		}
+
+		$this->patch_rule( $fields, array( 'sync_started_at' ) );
+		$this->append_history( ! empty( $this->run_errors ) );
+
+		buoyvs_release_rule_lock( $this->current_rule_id );
 		// Progress transient is intentionally left to expire — the UI reads it
 		// in the onSyncDone response to briefly show the final count.
 	}
@@ -865,24 +942,27 @@ class Sync_Runner {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Write sync progress to a transient for UI polling.
-	 *
-	 * Only tracked for the option-based channel (is_option_channel is true).
-	 * The transient expires after 30 minutes — a stale lock guard.
+	 * Write sync progress to a transient for UI polling, and keep the run lock
+	 * fresh so a long run is never mistaken for an abandoned one.
 	 *
 	 * @param int $current Items scanned so far.
 	 * @param int $total   Total items to scan.
 	 * @return void
 	 */
 	private function write_progress( int $current, int $total ): void {
-		if ( ! $this->is_option_channel ) {
+		if ( ! $this->is_option_channel || '' === $this->current_rule_id ) {
 			return;
 		}
 		set_transient(
-			'buoyvs_prog_' . $this->current_rule_index,
+			buoyvs_rule_progress_key( $this->current_rule_id ),
 			array( 'current' => $current, 'total' => $total ),
-			1800
+			buoyvs_lock_ttl()
 		);
+
+		if ( time() - $this->lock_refreshed_at >= 60 ) {
+			buoyvs_refresh_rule_lock( $this->current_rule_id );
+			$this->lock_refreshed_at = time();
+		}
 	}
 
 }

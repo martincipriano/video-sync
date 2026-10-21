@@ -82,6 +82,7 @@ function buoyvs_run_uninstall(): void {
 		'buoyvs_channel_config',
 		'buoyvs_youtube_image_as_featured',
 		'buoyvs_delete_on_uninstall',
+		'buoyvs_reschedule_pending',
 	);
 
 	foreach ( $options as $option ) {
@@ -89,7 +90,7 @@ function buoyvs_run_uninstall(): void {
 	}
 
 	$history_keys = $wpdb->get_col(
-		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'buoyvs\\_sync\\_history\\_%' OR option_name LIKE 'buoyvs\\_history\\_read\\_%'"
+		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'buoyvs\\_sync\\_history\\_%' OR option_name LIKE 'buoyvs\\_history\\_read\\_%' OR option_name LIKE 'buoyvs\\_lock\\_%'"
 	);
 	foreach ( $history_keys as $history_key ) {
 		delete_option( $history_key );

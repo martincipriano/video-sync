@@ -94,6 +94,10 @@ $_post_type_label = 'playlists_sync_new' === $action
 
 <div class="buoyvs-rule<?php echo $is_syncing ? ' buoyvs-rule--syncing' : ''; ?>" data-rule-index="<?php echo esc_attr( $rule_index ); ?>">
 
+	<?php if ( ! empty( $rule['id'] ) ) : ?>
+	<input type="hidden" name="<?php echo esc_attr( $name_prefix ); ?>[<?php echo esc_attr( $rule_index ); ?>][id]" value="<?php echo esc_attr( $rule['id'] ); ?>">
+	<?php endif; ?>
+
 	<?php if ( $is_syncing ) : ?>
 	<div class="buoyvs-syncing-overlay" aria-hidden="true">
 		<span class="buoyvs-syncing-badge"><?php esc_html_e( 'Syncing...', 'buoy-video-sync' ); ?><span class="buoyvs-syncing-progress"></span></span>

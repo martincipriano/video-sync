@@ -173,7 +173,7 @@ class Channels_Page {
 	 * @return void
 	 */
 	public function render_page() {
-		$channel = buoyvs_get_channel_config();
+		$channel = $this->reset_stuck_rules();
 
 		$ch_errors = get_transient( 'buoyvs_ch_errors_' . get_current_user_id() );
 		if ( $ch_errors ) {
@@ -184,6 +184,20 @@ class Channels_Page {
 		$has_api_key = ! empty( get_option( 'buoyvs_api_key', '' ) );
 
 		buoyvs_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'has_api_key' ) );
+	}
+
+	/**
+	 * Clear rules stuck on "syncing" (see buoyvs_reset_stuck_rules()) and
+	 * return the up-to-date channel config.
+	 *
+	 * @return array
+	 */
+	private function reset_stuck_rules(): array {
+		[ $channel, $changed ] = buoyvs_reset_stuck_rules( buoyvs_get_channel_config() );
+		if ( $changed ) {
+			update_option( 'buoyvs_channel_config', $channel );
+		}
+		return $channel;
 	}
 
 	/**
@@ -257,10 +271,10 @@ class Channels_Page {
 
 		// Read the posted channel object.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$ch_data = ( isset( $_POST['channel'] ) && is_array( $_POST['channel'] ) ) ? $_POST['channel'] : array();
+		$ch_data = ( isset( $_POST['channel'] ) && is_array( $_POST['channel'] ) ) ? wp_unslash( $_POST['channel'] ) : array();
 
 		$old_youtube_id = $old_ch['youtube_id'] ?? '';
-		$new_youtube_id = isset( $ch_data['youtube_id'] ) ? sanitize_text_field( wp_unslash( $ch_data['youtube_id'] ) ) : '';
+		$new_youtube_id = isset( $ch_data['youtube_id'] ) ? sanitize_text_field( $ch_data['youtube_id'] ) : '';
 
 		// Accept a channel URL or @handle: resolve anything that isn't already a
 		// channel ID. On failure, keep the previous ID and surface the error.
@@ -273,54 +287,9 @@ class Channels_Page {
 				$new_youtube_id = $resolved;
 			}
 		}
+		$ch_data['youtube_id'] = $new_youtube_id;
 
-		$channel = array(
-			'youtube_id'    => $new_youtube_id,
-			'channel_title' => $old_ch['channel_title'] ?? '',
-		);
-
-		// Preserve existing API-fetched data.
-		foreach ( array( 'channel_description', 'subscriber_count', 'video_count', 'profile_picture', 'banner_image', 'etag' ) as $key ) {
-			if ( isset( $old_ch[ $key ] ) ) {
-				$channel[ $key ] = $old_ch[ $key ];
-			}
-		}
-
-		// Sync rules — sanitize the posted rules, carrying per-rule runtime
-		// state (status, counts, errors, created_at) from the matching stored rule.
-		$old_rules = array_values( $old_ch['sync_rules'] ?? array() );
-		if ( isset( $ch_data['sync_rules'] ) && is_array( $ch_data['sync_rules'] ) ) {
-			$new_rules = array_values( array_map( 'buoyvs_sanitize_sync_rule', $ch_data['sync_rules'] ) );
-
-			foreach ( $new_rules as $i => &$new_rule ) {
-				if ( isset( $old_rules[ $i ] ) ) {
-					$new_rule['sync_status'] = $old_rules[ $i ]['sync_status'] ?? '';
-					$new_rule['last_synced'] = $old_rules[ $i ]['last_synced'] ?? 0;
-					$new_rule['sync_count']  = $old_rules[ $i ]['sync_count'] ?? 0;
-					$new_rule['sync_errors'] = $old_rules[ $i ]['sync_errors'] ?? array();
-					$new_rule['created_at'] = ! empty( $old_rules[ $i ]['created_at'] ) ? $old_rules[ $i ]['created_at'] : time();
-				} else {
-					$new_rule['created_at'] = time();
-				}
-			}
-			unset( $new_rule );
-			$channel['sync_rules'] = $new_rules;
-		} else {
-			$channel['sync_rules'] = array();
-		}
-
-		// Per-channel default destination post type.
-		$channel['default_post_type'] = isset( $ch_data['default_post_type'] )
-			? sanitize_key( wp_unslash( $ch_data['default_post_type'] ) )
-			: '';
-
-		// Per-channel default post status — pre-selected when adding new sync rules.
-		$default_post_status = isset( $ch_data['default_post_status'] )
-			? sanitize_text_field( wp_unslash( $ch_data['default_post_status'] ) )
-			: 'publish';
-		$channel['default_post_status'] = in_array( $default_post_status, buoyvs_valid_post_statuses(), true )
-			? $default_post_status
-			: 'publish';
+		$channel = buoyvs_sanitize_channel( $ch_data, $old_ch );
 
 		// Auto-fetch channel data via YouTube API if channel ID changed or data is missing.
 		if (
@@ -383,8 +352,10 @@ class Channels_Page {
 			: array();
 
 		$rule                  = buoyvs_sanitize_sync_rule( $raw_rule );
+		$rule['id']            = buoyvs_generate_rule_id();
 		$rule['enabled']       = true; // A rule created via the wizard is active and runs on save.
-		$rule['created_at']  = time();
+		$rule['created_at']    = time();
+		$rule['created_by']    = get_current_user_id();
 		$rule['sync_status']   = '';
 		$rule['last_synced']   = 0;
 		$rule['sync_count']    = 0;
@@ -440,19 +411,20 @@ class Channels_Page {
 			wp_send_json_error( 'forbidden', 403 );
 		}
 
-		$rule_index = absint( $_POST['rule_index'] ?? 0 );
+		$rule_index = absint( $_POST['rule_index'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified by check_ajax_referer() above.
 
-		$channel = buoyvs_get_channel_config();
+		$channel = $this->reset_stuck_rules();
 		$rule    = $channel['sync_rules'][ $rule_index ] ?? null;
 
 		if ( ! $rule ) {
 			wp_send_json_error( 'not_found', 404 );
 		}
 
-		$sync_status = $rule['sync_status'] ?? '';
+		$sync_status  = $rule['sync_status'] ?? '';
+		$progress_key = buoyvs_rule_progress_key( (string) ( $rule['id'] ?? '' ) );
 
 		if ( 'syncing' === $sync_status ) {
-			$progress = get_transient( 'buoyvs_prog_' . $rule_index );
+			$progress = get_transient( $progress_key );
 			wp_send_json_success( array(
 				'status'  => 'syncing',
 				'current' => $progress ? (int) $progress['current'] : 0,
@@ -460,7 +432,7 @@ class Channels_Page {
 			) );
 		} else {
 			$last_synced  = (int) ( $rule['last_synced'] ?? 0 );
-			$progress     = get_transient( 'buoyvs_prog_' . $rule_index );
+			$progress     = get_transient( $progress_key );
 			wp_send_json_success( array(
 				'status'            => $sync_status ?: 'idle',
 				'last_synced'       => $last_synced,
