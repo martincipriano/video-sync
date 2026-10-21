@@ -49,6 +49,30 @@ function buoyvs_valid_post_statuses(): array {
 }
 
 /**
+ * Valid stored sync_status values.
+ *
+ * @return string[]
+ */
+function buoyvs_valid_sync_statuses(): array {
+	return array( '', 'syncing', 'success', 'failed' );
+}
+
+/**
+ * Post statuses that count as "already imported" for deduplication.
+ *
+ * Every non-internal status a rule can create posts with (publish, draft,
+ * pending, private, and any custom status), plus 'trash' so a deliberately
+ * trashed item is not silently re-imported.
+ *
+ * @return string[]
+ */
+function buoyvs_dedup_post_statuses(): array {
+	$statuses   = array_keys( get_post_stati( array( 'internal' => false ) ) );
+	$statuses[] = 'trash';
+	return array_values( array_unique( $statuses ) );
+}
+
+/**
  * Get the configured channel as a single flat object.
  *
  * The channel is stored as a flat object in the buoyvs_channel_config option.

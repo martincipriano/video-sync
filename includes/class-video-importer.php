@@ -73,9 +73,10 @@ class Video_Importer {
 	 * Return the YouTube video IDs already imported into a given post type.
 	 *
 	 * Used by videos_sync_new dedup. Scoping by post type lets the same video
-	 * be imported into more than one post type by separate rules. Includes
-	 * 'trash' so a deliberately trashed video is not silently re-imported into
-	 * the same post type.
+	 * be imported into more than one post type by separate rules. Covers every
+	 * status a rule can create posts with (see buoyvs_dedup_post_statuses()),
+	 * including 'trash' so a deliberately trashed video is not silently
+	 * re-imported into the same post type.
 	 *
 	 * One indexed SQL query — no per-post meta reads.
 	 *
@@ -84,11 +85,11 @@ class Video_Importer {
 	 */
 	public function get_imported_video_ids( string $post_type = '' ): array {
 		global $wpdb;
-		$statuses     = array( 'publish', 'draft', 'private', 'trash' );
+		$statuses     = buoyvs_dedup_post_statuses();
 		$placeholders = implode( ',', array_fill( 0, count( $statuses ), '%s' ) );
 
 		// $placeholders is a generated list of %s tokens (one per status) bound through
-		// $wpdb->prepare() below; the values are a fixed, non-user list.
+		// $wpdb->prepare() below; the values are registered post status names.
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		if ( '' !== $post_type ) {
 			$sql = $wpdb->prepare(
@@ -191,7 +192,7 @@ class Video_Importer {
 		$query = new \WP_Query(
 			array(
 				'post_type'      => $post_type ?: 'any',
-				'post_status'    => array( 'publish', 'draft', 'private' ),
+				'post_status'    => buoyvs_dedup_post_statuses(),
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
@@ -283,7 +284,7 @@ class Video_Importer {
 		$query = new \WP_Query(
 			array(
 				'post_type'      => $post_type ?: 'any',
-				'post_status'    => array( 'publish', 'draft', 'private' ),
+				'post_status'    => buoyvs_dedup_post_statuses(),
 				'fields'         => 'ids',
 				'posts_per_page' => 1,
 				'no_found_rows'  => true,
