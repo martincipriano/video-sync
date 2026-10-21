@@ -46,18 +46,30 @@ class Video_Importer {
 	 * @param int    $source_term_id              WordPress term ID of the source channel/playlist.
 	 * @param string $post_type                   Destination post type. Required and validated by the caller (Sync_Runner); an empty/invalid value is rejected before reaching here.
 	 * @param string $post_status                 Post status to create the post as. Defaults to 'publish'.
+	 * @param int    $post_author                 User to attribute the post to. 0 = none.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '', string $post_status = 'publish' ): int|\WP_Error {
+	public function import( array $video_data, string $source_type, int $source_term_id, string $post_type = '', string $post_status = 'publish', int $post_author = 0 ): int|\WP_Error {
 		// 1. Create the post.
-		$post_id = wp_insert_post(
+		$postarr = $this->with_author(
 			array(
 				'post_title'  => sanitize_text_field( $video_data['title'] ?? '' ),
 				'post_type'   => $post_type,
 				'post_status' => $post_status,
 			),
-			true
+			$post_author
 		);
+
+		/**
+		 * Filters a video's post data before it is created.
+		 *
+		 * @param array  $postarr     Arguments that will be passed to wp_insert_post().
+		 * @param array  $video_data  Video data from the YouTube API.
+		 * @param string $source_type 'channel' or 'playlist'.
+		 */
+		$postarr = apply_filters( 'buoyvs_before_post_insert', $postarr, $video_data, $source_type );
+
+		$post_id = wp_insert_post( $postarr, true );
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
@@ -125,6 +137,20 @@ class Video_Importer {
 	// -------------------------------------------------------------------------
 
 	/**
+	 * Add post_author to a wp_insert_post() array when a user is known.
+	 *
+	 * @param array $postarr     Post array.
+	 * @param int   $post_author User ID, or 0.
+	 * @return array
+	 */
+	private function with_author( array $postarr, int $post_author ): array {
+		if ( $post_author > 0 ) {
+			$postarr['post_author'] = $post_author;
+		}
+		return $postarr;
+	}
+
+	/**
 	 * Save all video data as individual post meta keys.
 	 *
 	 * Each field is stored as its own meta key for direct WP_Query filtering.
@@ -145,24 +171,41 @@ class Video_Importer {
 			);
 		}
 
-		update_post_meta( $post_id, '_buoyvs_video_id',             $video_data['video_id'] );
-		update_post_meta( $post_id, '_buoyvs_video_url',            'https://www.youtube.com/watch?v=' . $video_data['video_id'] );
-		update_post_meta( $post_id, '_buoyvs_channel_id',           $video_data['channel_id'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_channel_title',        $video_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_etag',                 $video_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_source_type',          $source_type );
-		update_post_meta( $post_id, '_buoyvs_source_id',            $source_id );
-		update_post_meta( $post_id, '_buoyvs_original_title',       $video_data['title'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_original_description', $video_data['description'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_published_at',         $video_data['published_at'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_duration_seconds',     (int) ( $video_data['duration_seconds'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_view_count',           (int) ( $video_data['view_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_like_count',           (int) ( $video_data['like_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_comment_count',        (int) ( $video_data['comment_count'] ?? 0 ) );
 		$best_thumb = static::get_best_thumbnail( $thumbnails );
-		update_post_meta( $post_id, '_buoyvs_thumbnails',           $thumbnails );
-		update_post_meta( $post_id, '_buoyvs_thumbnail_url',        $best_thumb['url'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_last_synced',          time() );
+
+		$meta = array(
+			'_buoyvs_video_id'             => $video_data['video_id'],
+			'_buoyvs_video_url'            => 'https://www.youtube.com/watch?v=' . $video_data['video_id'],
+			'_buoyvs_channel_id'           => $video_data['channel_id'] ?? '',
+			'_buoyvs_channel_title'        => $video_data['channel_title'] ?? '',
+			'_buoyvs_etag'                 => $video_data['etag'] ?? '',
+			'_buoyvs_source_type'          => $source_type,
+			'_buoyvs_source_id'            => $source_id,
+			'_buoyvs_original_title'       => $video_data['title'] ?? '',
+			'_buoyvs_original_description' => $video_data['description'] ?? '',
+			'_buoyvs_published_at'         => $video_data['published_at'] ?? '',
+			'_buoyvs_duration_seconds'     => (int) ( $video_data['duration_seconds'] ?? 0 ),
+			'_buoyvs_view_count'           => (int) ( $video_data['view_count'] ?? 0 ),
+			'_buoyvs_like_count'           => (int) ( $video_data['like_count'] ?? 0 ),
+			'_buoyvs_comment_count'        => (int) ( $video_data['comment_count'] ?? 0 ),
+			'_buoyvs_thumbnails'           => $thumbnails,
+			'_buoyvs_thumbnail_url'        => $best_thumb['url'] ?? '',
+			'_buoyvs_last_synced'          => time(),
+		);
+
+		/**
+		 * Filters a video's post meta before it is saved.
+		 *
+		 * @param array  $meta        Meta key/value pairs keyed by meta key.
+		 * @param int    $post_id     Video post ID.
+		 * @param array  $video_data  Video data from the YouTube API.
+		 * @param string $source_type 'channel' or 'playlist'.
+		 */
+		$meta = apply_filters( 'buoyvs_post_meta', $meta, $post_id, $video_data, $source_type );
+
+		foreach ( $meta as $meta_key => $meta_value ) {
+			update_post_meta( $post_id, $meta_key, $meta_value );
+		}
 
 		/**
 		 * Fires after a video's metadata has been written during sync.
@@ -216,17 +259,23 @@ class Video_Importer {
 	 * @param string $channel_id                YouTube channel ID.
 	 * @param string $post_type                 Destination post type.
 	 * @param string $post_status               Post status to create the post as. Defaults to 'publish'.
+	 * @param int    $post_author               User to attribute the post to. 0 = none.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import_playlist( array $playlist_data, string $channel_id, string $post_type, string $post_status = 'publish' ): int|\WP_Error {
-		$post_id = wp_insert_post(
+	public function import_playlist( array $playlist_data, string $channel_id, string $post_type, string $post_status = 'publish', int $post_author = 0 ): int|\WP_Error {
+		$postarr = $this->with_author(
 			array(
 				'post_title'  => sanitize_text_field( $playlist_data['playlist_title'] ?: $playlist_data['playlist_id'] ),
 				'post_type'   => $post_type,
 				'post_status' => $post_status,
 			),
-			true
+			$post_author
 		);
+
+		/** This filter is documented in includes/class-video-importer.php (import()). */
+		$postarr = apply_filters( 'buoyvs_before_post_insert', $postarr, $playlist_data, 'playlist' );
+
+		$post_id = wp_insert_post( $postarr, true );
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
@@ -246,14 +295,23 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_playlist_meta( int $post_id, array $playlist_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_buoyvs_playlist_id',          $playlist_data['playlist_id'] );
-		update_post_meta( $post_id, '_buoyvs_channel_id',           $channel_id );
-		update_post_meta( $post_id, '_buoyvs_playlist_title',       $playlist_data['playlist_title'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_playlist_description', $playlist_data['playlist_description'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_playlist_video_count', (int) ( $playlist_data['playlist_video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_playlist_thumbnail',   $playlist_data['thumbnail_url'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_etag',                 $playlist_data['etag'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_last_synced',          time() );
+		$meta = array(
+			'_buoyvs_playlist_id'          => $playlist_data['playlist_id'],
+			'_buoyvs_channel_id'           => $channel_id,
+			'_buoyvs_playlist_title'       => $playlist_data['playlist_title'] ?? '',
+			'_buoyvs_playlist_description' => $playlist_data['playlist_description'] ?? '',
+			'_buoyvs_playlist_video_count' => (int) ( $playlist_data['playlist_video_count'] ?? 0 ),
+			'_buoyvs_playlist_thumbnail'   => $playlist_data['thumbnail_url'] ?? '',
+			'_buoyvs_etag'                 => $playlist_data['etag'] ?? '',
+			'_buoyvs_last_synced'          => time(),
+		);
+
+		/** This filter is documented in includes/class-video-importer.php (save_all_meta()). */
+		$meta = apply_filters( 'buoyvs_post_meta', $meta, $post_id, $playlist_data, 'playlist' );
+
+		foreach ( $meta as $meta_key => $meta_value ) {
+			update_post_meta( $post_id, $meta_key, $meta_value );
+		}
 
 		/**
 		 * Fires after a playlist's metadata has been written during sync.
@@ -314,17 +372,23 @@ class Video_Importer {
 	 * @param string $channel_id                YouTube channel ID.
 	 * @param string $post_type                 Destination post type.
 	 * @param string $post_status               Post status to create the post as. Defaults to 'publish'.
+	 * @param int    $post_author               User to attribute the post to. 0 = none.
 	 * @return int|\WP_Error Post ID on success, WP_Error on failure.
 	 */
-	public function import_channel( array $channel_data, string $channel_id, string $post_type, string $post_status = 'publish' ): int|\WP_Error {
-		$post_id = wp_insert_post(
+	public function import_channel( array $channel_data, string $channel_id, string $post_type, string $post_status = 'publish', int $post_author = 0 ): int|\WP_Error {
+		$postarr = $this->with_author(
 			array(
 				'post_title'  => sanitize_text_field( $channel_data['channel_title'] ?? $channel_id ),
 				'post_type'   => $post_type,
 				'post_status' => $post_status,
 			),
-			true
+			$post_author
 		);
+
+		/** This filter is documented in includes/class-video-importer.php (import()). */
+		$postarr = apply_filters( 'buoyvs_before_post_insert', $postarr, $channel_data, 'channel' );
+
+		$post_id = wp_insert_post( $postarr, true );
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
@@ -344,14 +408,6 @@ class Video_Importer {
 	 * @return void
 	 */
 	private function save_channel_meta( int $post_id, array $channel_data, string $channel_id ): void {
-		update_post_meta( $post_id, '_buoyvs_channel_post',        $channel_id );
-		update_post_meta( $post_id, '_buoyvs_channel_id',          $channel_id );
-		update_post_meta( $post_id, '_buoyvs_channel_title',       $channel_data['channel_title'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_channel_description', $channel_data['channel_description'] ?? '' );
-		update_post_meta( $post_id, '_buoyvs_subscriber_count',    (int) ( $channel_data['subscriber_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_channel_video_count', (int) ( $channel_data['video_count'] ?? 0 ) );
-		update_post_meta( $post_id, '_buoyvs_etag',                $channel_data['etag'] ?? '' );
-
 		// Download the channel images into the media library and store their
 		// local URLs. The channel post is created once per post type (deduped
 		// upstream), so this runs a single time per channel post.
@@ -368,12 +424,28 @@ class Video_Importer {
 			sprintf( __( '%s banner', 'buoy-video-sync' ), $channel_data['channel_title'] ?? $channel_id )
 		);
 
-		update_post_meta( $post_id, '_buoyvs_profile_picture',    $profile['url'] );
-		update_post_meta( $post_id, '_buoyvs_profile_picture_id', $profile['id'] );
-		update_post_meta( $post_id, '_buoyvs_banner_image',       $banner['url'] );
-		update_post_meta( $post_id, '_buoyvs_banner_image_id',    $banner['id'] );
-		update_post_meta( $post_id, '_buoyvs_source_type',         'channel' );
-		update_post_meta( $post_id, '_buoyvs_last_synced',         time() );
+		$meta = array(
+			'_buoyvs_channel_post'        => $channel_id,
+			'_buoyvs_channel_id'          => $channel_id,
+			'_buoyvs_channel_title'       => $channel_data['channel_title'] ?? '',
+			'_buoyvs_channel_description' => $channel_data['channel_description'] ?? '',
+			'_buoyvs_subscriber_count'    => (int) ( $channel_data['subscriber_count'] ?? 0 ),
+			'_buoyvs_channel_video_count' => (int) ( $channel_data['video_count'] ?? 0 ),
+			'_buoyvs_etag'                => $channel_data['etag'] ?? '',
+			'_buoyvs_profile_picture'     => $profile['url'],
+			'_buoyvs_profile_picture_id'  => $profile['id'],
+			'_buoyvs_banner_image'        => $banner['url'],
+			'_buoyvs_banner_image_id'     => $banner['id'],
+			'_buoyvs_source_type'         => 'channel',
+			'_buoyvs_last_synced'         => time(),
+		);
+
+		/** This filter is documented in includes/class-video-importer.php (save_all_meta()). */
+		$meta = apply_filters( 'buoyvs_post_meta', $meta, $post_id, $channel_data, 'channel' );
+
+		foreach ( $meta as $meta_key => $meta_value ) {
+			update_post_meta( $post_id, $meta_key, $meta_value );
+		}
 
 		/**
 		 * Fires after a channel's metadata has been written during sync.
