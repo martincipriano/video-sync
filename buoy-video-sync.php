@@ -152,8 +152,9 @@ add_action(
  *
  * @return void
  */
-add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): void {
-	if ( ! get_post_meta( $post->ID, '_buoyvs_video_id', true ) ) {
+add_action( 'add_meta_boxes', function ( $post_type, $post ): void {
+	// Also fires on the comment and link edit screens with non-post objects.
+	if ( ! $post instanceof \WP_Post || ! get_post_meta( $post->ID, '_buoyvs_video_id', true ) ) {
 		return;
 	}
 	add_meta_box(
@@ -372,8 +373,9 @@ add_action( 'manage_pages_custom_column', 'buoyvs_render_type_column', 10, 2 );
  *
  * @return void
  */
-add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): void {
-	if ( ! get_post_meta( $post->ID, '_buoyvs_playlist_id', true ) ) {
+add_action( 'add_meta_boxes', function ( $post_type, $post ): void {
+	// Also fires on the comment and link edit screens with non-post objects.
+	if ( ! $post instanceof \WP_Post || ! get_post_meta( $post->ID, '_buoyvs_playlist_id', true ) ) {
 		return;
 	}
 	add_meta_box(
@@ -413,8 +415,9 @@ function buoyvs_render_playlist_metabox( $post ) {
  *
  * @return void
  */
-add_action( 'add_meta_boxes', function ( string $post_type, \WP_Post $post ): void {
-	if ( ! get_post_meta( $post->ID, '_buoyvs_channel_post', true ) ) {
+add_action( 'add_meta_boxes', function ( $post_type, $post ): void {
+	// Also fires on the comment and link edit screens with non-post objects.
+	if ( ! $post instanceof \WP_Post || ! get_post_meta( $post->ID, '_buoyvs_channel_post', true ) ) {
 		return;
 	}
 	add_meta_box(
