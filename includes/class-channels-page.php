@@ -28,8 +28,26 @@ class Channels_Page {
 		add_action( 'wp_ajax_buoyvs_add_rule', array( $this, 'ajax_add_rule' ) );
 		add_action( 'wp_ajax_buoyvs_sync_progress', array( $this, 'ajax_sync_progress' ) );
 		add_action( 'wp_ajax_buoyvs_mark_history_read', array( $this, 'ajax_mark_history_read' ) );
-		add_action( 'load-toplevel_page_buoy-video-sync',    array( $this, 'add_help_tabs' ) );
-		add_action( 'load-video-sync_page_buoyvs_settings', array( $this, 'add_help_tabs' ) );
+		add_action( 'current_screen', array( $this, 'maybe_add_help_tabs' ) );
+	}
+
+	/**
+	 * Add Help tabs on the Channels and Settings screens.
+	 *
+	 * Matched by screen ID suffix rather than a hard-coded load-{hook}: a
+	 * submenu's hook name is built from the parent's *translated* menu title,
+	 * so a fixed name breaks on non-English sites.
+	 *
+	 * @param \WP_Screen $screen Current screen.
+	 * @return void
+	 */
+	public function maybe_add_help_tabs( $screen ): void {
+		if ( ! $screen instanceof \WP_Screen ) {
+			return;
+		}
+		if ( 'toplevel_page_buoy-video-sync' === $screen->id || str_ends_with( $screen->id, '_page_buoyvs_settings' ) ) {
+			$this->add_help_tabs();
+		}
 	}
 
 	/**
@@ -110,7 +128,6 @@ class Channels_Page {
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#api-key-or-quota-errors' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'API key or quota errors', 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#the-channel-cant-be-found' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "The channel can't be found", 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#im-seeing-duplicate-posts' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I'm seeing duplicate posts", 'buoy-video-sync' ) . '</a></li>' .
-					'<li><a href="' . esc_url( $kb . 'troubleshooting/#i-cant-activate-my-license' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( "I can't activate my license", 'buoy-video-sync' ) . '</a></li>' .
 					'<li><a href="' . esc_url( $kb . 'troubleshooting/#how-to-get-support' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'How to get support', 'buoy-video-sync' ) . '</a></li>' .
 				'</ul>',
 		) );
