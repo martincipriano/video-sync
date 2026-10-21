@@ -3,7 +3,7 @@ declare(strict_types=1);
 /**
  * Sync history — per-channel run log.
  *
- * Stores the last 50 sync run entries (max 90 days) for each channel
+ * Stores the last 30 sync run entries (max 30 days) for each channel
  * in a non-autoloaded wp_options entry keyed by YouTube channel ID.
  *
  * @package Buoy_Video_Sync
