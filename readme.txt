@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, youtube channel, import videos, video sync, youtube playlist
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 3.2.1
+Stable tag: 3.3.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,26 @@ Example — add a tab only to the video metabox:
 6. Synced video metabox — metadata fields with Copy value and Copy shortcode buttons.
 
 == Changelog ==
+
+= 3.3.0 =
+* New: Import and export your channel and sync rules as a JSON file from the Channels page.
+* New: Choose the post status (published, draft, pending, private) for each sync rule, with a default in the channel settings.
+* New: Synced posts are labelled YouTube Video, Playlist, or Channel in post lists, with a Sync Type column.
+* New: Synced posts are attributed to the user who created the sync rule.
+* New: Developer hooks — `buoyvs_before_sync`, `buoyvs_after_sync`, `buoyvs_import_item`, `buoyvs_before_post_insert`, and `buoyvs_post_meta`.
+* Fixed: Deleting, reordering, or editing rules no longer mixes up their status, schedule, or history — every rule now has a permanent ID.
+* Fixed: Changes saved while a sync is running are no longer overwritten when it finishes.
+* Fixed: A sync with errors now shows "Failed" with its error messages instead of "Success".
+* Fixed: Rules stuck on "Syncing" (for example when WP-Cron isn't running) are reset with an explanation.
+* Fixed: Rules that create Pending or custom-status posts no longer re-import the same playlists and channel on every run, and trashed items are no longer re-imported.
+* Fixed: Deleting the Free plugin after upgrading to Pro no longer erases your settings and channel setup.
+* Fixed: A fatal error on the comment edit screen.
+* Fixed: Videos longer than a day now get the correct duration.
+* Fixed: Blocks now work inside a Query Loop.
+* Improved: Recurring syncs use less API quota by stopping once they reach already-imported videos.
+* Improved: Accessibility — the video embed has a title, and the featured-image preview is a keyboard-usable button.
+* Improved: Help tabs and admin messages now work on translated sites.
+* Improved: Channel lookup only contacts YouTube addresses.
 
 = 3.2.1 =
 * New: Recurring sync schedules — hourly, daily, weekly, monthly, or a custom interval — are now available in the Free plugin. Previously every rule could only run once, on save.
