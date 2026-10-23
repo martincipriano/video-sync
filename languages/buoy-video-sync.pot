@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Buoy Video Sync 3.3.0\n"
+"Project-Id-Version: Buoy Video Sync 3.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/buoy-video-sync\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T05:54:59+00:00\n"
+"POT-Creation-Date: 2026-10-23T12:54:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: buoy-video-sync\n"
@@ -61,7 +61,7 @@ msgstr ""
 
 #: buoy-video-sync.php:383
 #: template-parts/channel-group.php:65
-#: template-parts/channels-page.php:22
+#: template-parts/channels-page.php:21
 #: template-parts/metabox-video.php:79
 #: template-parts/sync-rule-wizard.php:60
 #: template-parts/sync-rule.php:155
@@ -246,53 +246,79 @@ msgstr ""
 msgid "Channels"
 msgstr ""
 
-#: includes/class-channels-page.php:238
+#: includes/class-channels-page.php:232
 #: template-parts/sync-rule.php:124
 msgid "Last Sync:"
 msgstr ""
 
-#: includes/class-channels-page.php:239
+#: includes/class-channels-page.php:233
 #: template-parts/sync-rule.php:111
 msgid "This rule is disabled and won't run until re-enabled."
 msgstr ""
 
 #. translators: 1: items processed so far, 2: total items
-#: includes/class-channels-page.php:241
+#: includes/class-channels-page.php:235
 #, php-format
 msgid "%1$s of %2$s"
 msgstr ""
 
-#: includes/class-channels-page.php:254
-#: includes/class-import-export.php:40
-#: includes/class-import-export.php:70
+#: includes/class-channels-page.php:248
+#: includes/class-import-export.php:118
+#: includes/class-import-export.php:148
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-channels-page.php:258
-#: includes/class-import-export.php:44
-#: includes/class-import-export.php:74
+#: includes/class-channels-page.php:252
+#: includes/class-import-export.php:122
+#: includes/class-import-export.php:152
 msgid "You do not have permission to do this."
 msgstr ""
 
-#: includes/class-import-export.php:81
+#: includes/class-import-export.php:47
+#: includes/class-import-export.php:50
+#: template-parts/settings-page.php:19
+msgid "Export/Import"
+msgstr ""
+
+#: includes/class-import-export.php:51
+msgid "Export downloads your channel and its sync rules as a JSON file. Use it as a backup, or to copy your setup to another site."
+msgstr ""
+
+#: includes/class-import-export.php:52
+msgid "Import replaces your current channel and all of its sync rules with the ones in the file. Posts that were already synced are not changed or deleted. Enabled rules start running on their schedules after the import."
+msgstr ""
+
+#: includes/class-import-export.php:53
+msgid "Your YouTube API key and plugin settings are not included in the file."
+msgstr ""
+
+#: includes/class-import-export.php:159
 msgid "No file was uploaded, or the upload failed."
 msgstr ""
 
-#: includes/class-import-export.php:83
+#: includes/class-import-export.php:161
 msgid "The uploaded file is too large."
 msgstr ""
 
-#: includes/class-import-export.php:99
+#: includes/class-import-export.php:177
 msgid "That file is not a valid Buoy Video Sync export."
 msgstr ""
 
-#: includes/class-import-export.php:102
+#: includes/class-import-export.php:180
 msgid "That file does not contain any channels, so nothing was imported. Your current channel was left unchanged."
 msgstr ""
 
-#: includes/class-import-export.php:107
-msgid "This file contains multiple channels — only the first was imported. Multiple channels require Buoy Video Sync Pro."
+#: includes/class-import-export.php:187
+msgid "This file contains more than one channel. Only the first channel was imported."
 msgstr ""
+
+#. translators: 1: channel title, 2: number of sync rules
+#: includes/class-import-export.php:199
+#, php-format
+msgid "Imported %1$s with %2$s sync rule."
+msgid_plural "Imported %1$s with %2$s sync rules."
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %s: sync action slug
 #: includes/class-sync-runner.php:240
@@ -434,7 +460,7 @@ msgid "This sync was queued but never finished. WordPress scheduled tasks (WP-Cr
 msgstr ""
 
 #: includes/settings.php:45
-#: template-parts/settings-page.php:15
+#: template-parts/settings-page.php:31
 msgid "Buoy Video Sync Settings"
 msgstr ""
 
@@ -443,61 +469,54 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: includes/settings.php:101
-msgid "API Settings"
+#: includes/settings.php:102
+#: template-parts/settings-page.php:18
+msgid "General"
 msgstr ""
 
-#: includes/settings.php:108
+#: includes/settings.php:109
 msgid "Google API Key"
 msgstr ""
 
-#: includes/settings.php:116
-msgid "Content"
-msgstr ""
-
-#: includes/settings.php:123
+#: includes/settings.php:117
 msgid "Featured Images"
 msgstr ""
 
-#: includes/settings.php:131
-msgid "Advanced"
-msgstr ""
-
-#: includes/settings.php:138
+#: includes/settings.php:125
 msgid "Uninstall Data"
 msgstr ""
 
-#: includes/settings.php:173
+#: includes/settings.php:160
 msgid "API key cannot be empty."
 msgstr ""
 
-#: includes/settings.php:189
+#: includes/settings.php:176
 msgid "Could not connect to YouTube API."
 msgstr ""
 
 #. translators: %s: Error message from YouTube API
-#: includes/settings.php:202
+#: includes/settings.php:189
 #, php-format
 msgid "YouTube API error: %s"
 msgstr ""
 
-#: includes/settings.php:220
+#: includes/settings.php:207
 msgid "Settings saved."
 msgstr ""
 
-#: includes/settings.php:234
+#: includes/settings.php:221
 msgid "Use the YouTube image as the featured image when none is set"
 msgstr ""
 
-#: includes/settings.php:237
+#: includes/settings.php:224
 msgid "When enabled, synced videos, playlists, and channels show their YouTube thumbnail (or channel picture) as the featured image unless you set your own. Disable to leave synced posts without a featured image."
 msgstr ""
 
-#: includes/settings.php:252
+#: includes/settings.php:239
 msgid "Remove all Buoy Video Sync data when the plugin is deleted"
 msgstr ""
 
-#: includes/settings.php:255
+#: includes/settings.php:242
 msgid "When checked, deleting this plugin will permanently remove all videos, channels, playlists, and settings. Leave unchecked to keep your data if you reinstall later."
 msgstr ""
 
@@ -690,68 +709,48 @@ msgstr ""
 msgid "Delete channel"
 msgstr ""
 
-#: template-parts/channels-page.php:27
+#: template-parts/channels-page.php:26
 msgid "API key required"
 msgstr ""
 
 #. translators: 1: Google Cloud Console link, 2: YouTube Data API overview link
-#: template-parts/channels-page.php:32
+#: template-parts/channels-page.php:31
 #, php-format
 msgid "Add a YouTube Data API key before setting up channels. You can create one in the %1$s by following the guide in the %2$s."
 msgstr ""
 
-#: template-parts/channels-page.php:33
+#: template-parts/channels-page.php:32
 msgid "Google Cloud Console"
 msgstr ""
 
-#: template-parts/channels-page.php:34
+#: template-parts/channels-page.php:33
 msgid "YouTube Data API overview"
 msgstr ""
 
-#: template-parts/channels-page.php:39
+#: template-parts/channels-page.php:38
 msgid "Go to Settings"
 msgstr ""
 
-#: template-parts/channels-page.php:45
-#: template-parts/channels-page.php:117
+#: template-parts/channels-page.php:44
+#: template-parts/channels-page.php:83
 msgid "Sync more than one channel"
 msgstr ""
 
-#: template-parts/channels-page.php:46
-#: template-parts/channels-page.php:118
+#: template-parts/channels-page.php:45
+#: template-parts/channels-page.php:84
 msgid "Add unlimited YouTube channels, each with its own schedules, taxonomy assignment, and sync rules."
 msgstr ""
 
-#: template-parts/channels-page.php:55
+#: template-parts/channels-page.php:54
 msgid "Channel configuration saved."
 msgstr ""
 
-#: template-parts/channels-page.php:62
+#: template-parts/channels-page.php:61
 msgid "Channel deleted."
 msgstr ""
 
-#: template-parts/channels-page.php:85
+#: template-parts/channels-page.php:78
 msgid "Save Changes"
-msgstr ""
-
-#: template-parts/channels-page.php:89
-msgid "Import / Export"
-msgstr ""
-
-#: template-parts/channels-page.php:91
-msgid "Back up your channel and sync rules to a JSON file, or restore from one — importing replaces the current configuration."
-msgstr ""
-
-#: template-parts/channels-page.php:98
-msgid "Export Sync Rules"
-msgstr ""
-
-#: template-parts/channels-page.php:108
-msgid "Importing will replace your current channel and sync rules. Continue?"
-msgstr ""
-
-#: template-parts/channels-page.php:110
-msgid "Import Sync Rules"
 msgstr ""
 
 #: template-parts/metabox-channel.php:26
@@ -978,12 +977,62 @@ msgstr ""
 msgid "YouTube Data API Overview"
 msgstr ""
 
-#: template-parts/settings-page.php:29
+#: template-parts/settings-page.php:36
+msgid "Settings sections"
+msgstr ""
+
+#: template-parts/settings-page.php:97
 msgid "Fine-tune how your syncs run"
 msgstr ""
 
-#: template-parts/settings-page.php:30
+#: template-parts/settings-page.php:98
 msgid "Map custom fields, filter which items sync, and protect manually edited posts from being overwritten."
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:19
+msgid "Export Sync Rules"
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:20
+msgid "Download your channel and its sync rules as a JSON file — use it as a backup, or to copy your setup to another site. Your YouTube API key and plugin settings are not included."
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:24
+msgid "Current setup:"
+msgstr ""
+
+#. translators: %s: number of sync rules
+#: template-parts/settings-tab-export-import.php:30
+#, php-format
+msgid "%s sync rule"
+msgid_plural "%s sync rules"
+msgstr[0] ""
+msgstr[1] ""
+
+#: template-parts/settings-tab-export-import.php:37
+#: template-parts/settings-tab-export-import.php:43
+msgid "Export Sync Rules (JSON)"
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:41
+msgid "No channel is set up yet, so there is nothing to export."
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:49
+#: template-parts/settings-tab-export-import.php:66
+msgid "Import Sync Rules"
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:50
+msgid "Upload a previously exported JSON file. This replaces your current channel and all of its sync rules with the contents of the file. Posts that were already synced are not changed."
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:57
+msgid "Importing will replace your current channel and all of its sync rules. Continue?"
+msgstr ""
+
+#: template-parts/settings-tab-export-import.php:62
+msgid "Export file (.json, max 1 MB)"
 msgstr ""
 
 #: template-parts/sync-rule-wizard.php:30

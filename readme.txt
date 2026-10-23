@@ -3,7 +3,7 @@ Contributors: martincipriano
 Tags: youtube, youtube channel, import videos, video sync, youtube playlist
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 3.3.0
+Stable tag: 3.4.0
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,10 @@ Example — add a tab only to the video metabox:
 6. Synced video metabox — metadata fields with Copy value and Copy shortcode buttons.
 
 == Changelog ==
+
+= 3.4.0 =
+* Changed: Export and import now live on their own Export/Import tab on the Settings page, instead of the Channels page.
+* Changed: The API, Content and Advanced settings are combined into one General tab.
 
 = 3.3.0 =
 * New: Import and export your channel and sync rules as a JSON file from the Channels page.
