@@ -97,8 +97,8 @@ class Buoy_Video_Sync_Settings {
 		);
 
 		add_settings_section(
-			'buoyvs_api_settings',
-			__( 'API Settings', 'buoy-video-sync'),
+			'buoyvs_general_settings',
+			__( 'General', 'buoy-video-sync' ),
 			null,
 			'buoyvs_settings'
 		);
@@ -108,14 +108,7 @@ class Buoy_Video_Sync_Settings {
 			__( 'Google API Key', 'buoy-video-sync'),
 			array( $this, 'api_key_html' ),
 			'buoyvs_settings',
-			'buoyvs_api_settings'
-		);
-
-		add_settings_section(
-			'buoyvs_content_settings',
-			__( 'Content', 'buoy-video-sync'),
-			null,
-			'buoyvs_settings'
+			'buoyvs_general_settings'
 		);
 
 		add_settings_field(
@@ -123,14 +116,7 @@ class Buoy_Video_Sync_Settings {
 			__( 'Featured Images', 'buoy-video-sync'),
 			array( $this, 'youtube_image_as_featured_html' ),
 			'buoyvs_settings',
-			'buoyvs_content_settings'
-		);
-
-		add_settings_section(
-			'buoyvs_advanced_settings',
-			__( 'Advanced', 'buoy-video-sync'),
-			null,
-			'buoyvs_settings'
+			'buoyvs_general_settings'
 		);
 
 		add_settings_field(
@@ -138,7 +124,7 @@ class Buoy_Video_Sync_Settings {
 			__( 'Uninstall Data', 'buoy-video-sync'),
 			array( $this, 'delete_on_uninstall_html' ),
 			'buoyvs_settings',
-			'buoyvs_advanced_settings'
+			'buoyvs_general_settings'
 		);
 	}
 
