@@ -1944,3 +1944,109 @@
 		outline-offset: 2px;
 	}
 }
+
+/* Settings screen tabs */
+.buoyvs-settings-tabs {
+  border-bottom: 1px solid #c3c4c7;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.buoyvs-tab-button {
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  color: #50575e;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: -1px;
+  padding: 15px 20px;
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #1d2327;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: -2px;
+  }
+
+  &.active {
+    background: #fafafa;
+    border-color: #c3c4c7;
+    border-bottom-color: #fafafa;
+    color: #1d2327;
+  }
+}
+
+.buoyvs-tab-panel {
+  background: #fafafa;
+  border: 1px solid #c3c4c7;
+  border-top: none;
+  padding: 20px;
+
+  .form-table {
+    margin-top: 0;
+  }
+
+  > h2:first-child {
+    margin-top: 0.5em;
+  }
+
+  hr {
+    margin: 24px 0;
+  }
+
+  .buoyvs-eim-submit {
+    margin: 0;
+  }
+
+  .buoyvs-export-channels {
+    margin-bottom: 16px;
+
+    p {
+      margin: 0 0 8px;
+    }
+  }
+
+  .buoyvs-export-channels__meta {
+    color: #646970;
+  }
+
+  .buoyvs-import-mode {
+    margin-bottom: 16px;
+
+    p {
+      margin: 0 0 8px;
+    }
+  }
+}
+
+.buoyvs-settings-footer {
+  background: #f0f0f1;
+  bottom: 0;
+  padding: 16px 0;
+  position: sticky;
+  z-index: 20;
+
+  .submit {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.buoyvs-import-form.is-enhanced .buoyvs-import-file-wrap {
+  display: none;
+}
+
+.buoyvs-tab-panel + .wpby-upgrade-banner {
+  margin-top: 20px;
+}

@@ -181,15 +181,9 @@ class Channels_Page {
 		}
 		$ch_errors = is_array( $ch_errors ) ? $ch_errors : array();
 
-		$import_notices = get_transient( 'buoyvs_import_notice_' . get_current_user_id() );
-		if ( $import_notices ) {
-			delete_transient( 'buoyvs_import_notice_' . get_current_user_id() );
-		}
-		$import_notices = is_array( $import_notices ) ? $import_notices : array();
-
 		$has_api_key = ! empty( get_option( 'buoyvs_api_key', '' ) );
 
-		buoyvs_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'import_notices', 'has_api_key' ) );
+		buoyvs_get_template_part( 'channels', 'page', compact( 'channel', 'ch_errors', 'has_api_key' ) );
 	}
 
 	/**

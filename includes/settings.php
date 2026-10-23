@@ -62,6 +62,7 @@ class Buoy_Video_Sync_Settings {
 		}
 
 		wp_enqueue_style( 'buoyvs-admin', BUOYVS_PLUGIN_URL . 'assets/css/admin.css', array(), BUOYVS_VERSION );
+		wp_enqueue_script( 'buoyvs-settings', BUOYVS_PLUGIN_URL . 'assets/js/settings.js', array(), BUOYVS_VERSION, true );
 	}
 
 	/**
